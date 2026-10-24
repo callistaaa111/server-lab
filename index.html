@@ -12,7 +12,7 @@
   <div class="tb-main">
     <div class="eyebrow">A hands-on networking, data center &amp; cloud course</div>
     <h1>Server Lab</h1>
-    <p class="lede">Learn networking and cloud from zero by following one real game server (a Palworld server on Oracle Cloud) from the internet to the rack. Twenty-one hands-on lessons, from what an IP address is to locking down a Cisco router and getting hired.</p>
+    <p class="lede">Learn networking and cloud from zero, one step at a time. Twenty-one hands-on lessons take you from what an IP address is to subnetting, routing, data centers, AWS and securing a Cisco router, with quizzes, simulators and labs on every page.</p>
   </div>
   <div class="tb-cells">
     <div><b>Lessons</b>21 · about 35–75 min each</div>
@@ -26,7 +26,7 @@
 <div class="callout">
   <span class="label">How to use this course</span>
   <p>One lesson per study night is plenty. Every lesson starts with a warm-up on earlier lessons, because recalling something days later is what makes it stick. Each page is a stack of numbered sheets with an XP bar at the top: quizzes, simulators, drills, sorting games and break/fix tickets all earn XP. Practise in the page first, then do it for real.</p>
-  <p>Nothing on these pages can touch the real server. Lab steps say <span class="tag look">look only</span> or <span class="tag change">changes the server</span> so you always know.</p>
+  <p>The practice terminals and simulators are safe to experiment with: nothing you type there runs anywhere. Lab steps say <span class="tag look">look only</span> or <span class="tag change">changes the server</span> so you always know.</p>
 </div>
 
 <details class="recall">
@@ -38,13 +38,13 @@
 <ol class="lessons">
   <li><a class="card" href="lessons/0001-decode-your-join-address.html" data-quizzes="0001b-check 0001b-decode"><span class="num">01</span><span><span class="t">Decode your join address</span><span class="d">Server, cloud, IP address, port, firewall, SSH</span></span><span class="st">not started</span></a></li>
   <li><a class="card" href="lessons/0002-two-addresses.html" data-quizzes="02-warm 02-check"><span class="num">02</span><span><span class="t">Your server has two addresses</span><span class="d">Public vs private IPs, your home network, the receptionist (NAT)</span></span><span class="st">not started</span></a></li>
-  <li><a class="card" href="lessons/0003-tcp-and-udp.html" data-quizzes="03-warm 03-check"><span class="num">03</span><span><span class="t">Two ways to send data: TCP and UDP</span><span class="d">Why Palworld uses UDP, SSH uses TCP, and what “localhost” means</span></span><span class="st">not started</span></a></li>
+  <li><a class="card" href="lessons/0003-tcp-and-udp.html" data-quizzes="03-warm 03-check"><span class="num">03</span><span><span class="t">Two ways to send data: TCP and UDP</span><span class="d">Why games use UDP, SSH uses TCP, and what “localhost” means</span></span><span class="st">not started</span></a></li>
 </ol>
 
 <p class="part-label">Part 2 · Inside the server</p>
 <ol class="lessons">
   <li><a class="card" href="lessons/0004-linux-basics.html" data-quizzes="04-warm 04-check"><span class="num">04</span><span><span class="t">Finding your way around Linux</span><span class="d">The terminal, folders, sudo, reading files and logs</span></span><span class="st">not started</span></a></li>
-  <li><a class="card" href="lessons/0005-docker.html" data-quizzes="05-warm 05-check"><span class="num">05</span><span><span class="t">Docker: the sealed room Palworld lives in</span><span class="d">Images, containers, the compose file, volumes</span></span><span class="st">not started</span></a></li>
+  <li><a class="card" href="lessons/0005-docker.html" data-quizzes="05-warm 05-check"><span class="num">05</span><span><span class="t">Docker: the sealed room your app lives in</span><span class="d">Images, containers, the compose file, volumes</span></span><span class="st">not started</span></a></li>
   <li><a class="card" href="lessons/0006-follow-a-packet.html" data-quizzes="06-warm 06-gates"><span class="num">06</span><span><span class="t">Follow a packet: the five checkpoints</span><span class="d">Troubleshoot “I can’t connect” like an engineer</span></span><span class="st">not started</span></a></li>
 </ol>
 
@@ -52,7 +52,7 @@
 <ol class="lessons">
   <li><a class="card" href="lessons/0007-monitoring-and-backups.html" data-quizzes="07-warm 07-check"><span class="num">07</span><span><span class="t">How you know it’s healthy: monitoring &amp; backups</span><span class="d">Your monitor explained: metrics, alerts, auto-restart, backups</span></span><span class="st">not started</span></a></li>
   <li><a class="card" href="lessons/0008-oracle-to-aws.html" data-quizzes="08-warm 08-check"><span class="num">08</span><span><span class="t">Same ideas, AWS names</span><span class="d">Regions, EC2, VPC, security groups, IAM, shared responsibility, pricing</span></span><span class="st">not started</span></a></li>
-  <li><a class="card" href="lessons/0009-tell-the-story.html" data-quizzes="09-warm 09-check"><span class="num">09</span><span><span class="t">Tell the story: portfolio &amp; interview</span><span class="d">Turn Palhaven into a project write-up and interview answers</span></span><span class="st">not started</span></a></li>
+  <li><a class="card" href="lessons/0009-tell-the-story.html" data-quizzes="09-warm 09-check"><span class="num">09</span><span><span class="t">Tell the story: portfolio &amp; interview</span><span class="d">Turn a project into a write-up and interview answers</span></span><span class="st">not started</span></a></li>
 </ol>
 
 <p class="part-label">Part 4 · Networking core (CCNA)</p>
@@ -116,7 +116,7 @@
   <p>Stuck on something? Paste the lesson into an AI tutor and ask: “explain lesson 13 differently”, “quiz me on lessons 10–13 mixed”, “I don’t get wildcard masks”.</p>
 </div>
 <p class="small">Progress and XP are saved in this browser only. Clearing site data resets them. Use <a href="#move">Move my progress</a> to carry them to another device.</p>
-<p class="small">The real server’s public and Tailscale addresses are replaced with example addresses (203.0.113.84 and 100.64.0.10), and the server’s name is changed to Palhaven. Passwords in the compose file are hidden.</p>
+<p class="small">Addresses, names and passwords in the lessons are examples.</p>
 </main>
 <script src="assets/progress.js"></script>
 <script src="assets/sync.js"></script>
