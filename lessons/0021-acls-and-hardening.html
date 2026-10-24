@@ -372,7 +372,7 @@ footer { padding-block: 0 40px; color: var(--muted); font-size: .85rem; }
 <!-- 5 -->
 <section class="sheet" id="harden" data-title="Harden">
   <div class="sheet-head"><span class="sheet-no">SHEET 5</span><h2>Lock the guard's own office</h2><span class="meta">8 weak lines × 15 XP · SSH build 40 XP</span></div>
-  <p class="lede">The ACL protects the streets. But whoever logs into the router can delete the ACL, so the router needs protecting too. That's <b>hardening</b>: closing the easy ways in. Your electrical side knows this already: it's LOTO and locked panel boards. Live parts stay behind a lock, and only named people hold a key.</p>
+  <p class="lede">The ACL protects the streets. But whoever logs into the router can delete the ACL, so the router needs protecting too. That's <b>hardening</b>: closing the easy ways in. Electricians know this idea already: it's LOTO and locked panel boards. Live parts stay behind a lock, and only named people hold a key.</p>
   <div class="two">
     <div class="cfg" id="cfgR1"></div>
     <div class="cfg" id="cfgSW"></div>
@@ -479,7 +479,7 @@ show access-lists</pre></div>
     </tbody>
   </table></div>
   <p>Also PASS: match counters above 0 on lines 1–4 · <code>ssh -l admin 10.20.0.1</code> from PC1 logs in · <code>telnet 10.20.0.1</code> from PC1 is refused · <code>ssh -l admin 10.20.0.129</code> from PC5 is refused · Fa0/7–24 and Gi0/2 show disabled in VLAN 999 · you rebuild the ACL from memory in under 10 minutes.</p>
-  <div class="codebox"><div class="bar"><span>Readiness Checks row</span><button class="btn sm" data-copy="codeRow">Copy</button></div><pre class="code" id="codeRow">L21 ACL + hardening: ping matrix 8/8, SSH/Telnet tests 3/3, rebuilt in __ min.</pre></div>
+  <div class="codebox"><div class="bar"><span>Progress notes line</span><button class="btn sm" data-copy="codeRow">Copy</button></div><pre class="code" id="codeRow">L21 ACL + hardening: ping matrix 8/8, SSH/Telnet tests 3/3, rebuilt in __ min.</pre></div>
   <div class="note"><b>Real world, look only (10 min).</b> In the Oracle console, open your VCN's security list and read the ingress rules as ACL lines: source CIDR, protocol, port. Find the UDP 8211 rule and the “Stateless: No” column. On the server, <code>sudo ss -tulpn</code> lists every listener. For each, ask: internet, Tailscale only, or localhost only? Don't change any real rule today. Write anything you'd tighten as a planned change (Lesson 15).</div>
   <h3>New words · tap to flip</h3>
   <div class="gloss" id="gloss"></div>
@@ -494,7 +494,7 @@ show access-lists</pre></div>
 
 <nav style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font:600 .9rem var(--f-mono);border-top:2px solid var(--ink);padding-top:16px"><span>← <a style="color:var(--ink)" href="0020-getting-hired.html">20 · Getting hired</a></span><span><a style="color:var(--ink)" href="../index.html">Course home</a></span></nav>
 </main>
-<footer class="wrap"><p>Server Lab · Lesson 21 · Packet Tracer topology from Lessons 12–13. Why this lesson: the remote NOC ad (Job Ads #39) lists firewalls, NAT and VLANs together, and CCNA is the most-named cert in the evidence sheet. <button class="btn sm" id="wipe">Reset my progress</button> <span id="wipeConfirm" hidden><button class="btn sm" id="wipeYes">Yes, clear XP and ticks</button></span></p></footer>
+<footer class="wrap"><p>Server Lab · Lesson 21 · Packet Tracer topology from Lessons 12–13. Why this lesson: NOC job ads often list firewalls, NAT and VLANs together, and the CCNA is the certificate they name most. <button class="btn sm" id="wipe">Reset my progress</button> <span id="wipeConfirm" hidden><button class="btn sm" id="wipeYes">Yes, clear XP and ticks</button></span></p></footer>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
@@ -1062,7 +1062,7 @@ function renderCases() {
 }
 
 /* ---------- lab + glossary ---------- */
-const LAB = ['Prove the hole: PC5 → PC1 ping succeeds before any ACL', 'Build GUEST-IN and apply it inbound on g0/0.30', 'Run the 8-row ping matrix; check match counters in show access-lists', 'Harden R1: enable secret, local user, SSH v2, access-class 10 on VTY', 'Test: SSH from PC1 works, Telnet from PC1 refused, SSH from PC5 refused', 'Park SW1 unused ports in VLAN 999 and shut them', 'Stretch: add the echo-reply line, re-test PC1 → PC5', 'Rebuild GUEST-IN from memory in under 10 minutes', 'Record the result in the Readiness Checks tab'];
+const LAB = ['Prove the hole: PC5 → PC1 ping succeeds before any ACL', 'Build GUEST-IN and apply it inbound on g0/0.30', 'Run the 8-row ping matrix; check match counters in show access-lists', 'Harden R1: enable secret, local user, SSH v2, access-class 10 on VTY', 'Test: SSH from PC1 works, Telnet from PC1 refused, SSH from PC5 refused', 'Park SW1 unused ports in VLAN 999 and shut them', 'Stretch: add the echo-reply line, re-test PC1 → PC5', 'Rebuild GUEST-IN from memory in under 10 minutes', 'Record the result in your progress notes'];
 function renderLab() {
   LAB.forEach((t, i) => {
     const id = 'lab' + i, row = el('label', { class: 'check', for: id });

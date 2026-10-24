@@ -17,7 +17,7 @@
 <div class="meta"><span data-k="Time">≈ 90 min, can be split</span><span data-k="Needs">AWS account (card required)</span><span data-k="Exam">CLF Domains 2, 3, 4</span><span data-k="Real server">Part 4 installs one program</span></div>
 
 
-<div class="callout "><span class="label">Why this lesson</span><p>Cloud ads expect hands-on AWS (Job Ads #50, #51, #57). Cost: a few pesos a month for a few GB of backups. Check the size first with <code>du -sh /opt/palworld/data/backups</code>.</p></div>
+<div class="callout "><span class="label">Why this lesson</span><p>Cloud ads expect hands-on AWS. Cost: a few pesos a month for a few GB of backups. Check the size first with <code>du -sh /opt/palworld/data/backups</code>.</p></div>
 
 <h2>Warm-up</h2>
 <div class="quiz" data-quiz="16-warm"><script type="application/json">
@@ -103,7 +103,7 @@
   <li><b>Create an everyday admin login</b> for yourself (IAM Identity Center is AWS's recommended way; an IAM user with MFA is fine for learning). Stop using root for daily work.</li>
 </ol>
 <h2>Part 2 · The backup design</h2>
-<p>Palhaven (Oracle, Singapore) → every morning after the 4:45 backup → copy new backup files → S3 bucket in ap-southeast-1 → a <b>lifecycle rule</b> deletes copies older than 30 days.</p>
+<p>Palhaven (Oracle, Singapore) → every morning after the 3:45 backup → copy new backup files → S3 bucket in ap-southeast-1 → a <b>lifecycle rule</b> deletes copies older than 30 days.</p>
 <p><b>Least privilege:</b> the server gets its own IAM user that can ONLY list, upload and download in this ONE bucket. If its key ever leaks, the damage is one bucket of game saves, not your whole account. (Inside AWS you'd use an IAM role instead of keys. Your server is on Oracle, so a tightly limited key is the practical choice here. Say this in interviews: it shows you know the difference.)</p>
 <h2>Part 3 · Build it (console)</h2>
 <ul class="steps">
@@ -209,8 +209,8 @@ curl &quot;https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip&quot; -o aws
   <li><input type="checkbox" aria-label="done"><div><span class="tag change">changes the server</span><code>unzip awscliv2.zip</code> (if unzip is missing: <code>sudo apt install unzip</code>), then <code>sudo ./aws/install</code>, then <code>aws --version</code>.</div></li>
   <li><input type="checkbox" aria-label="done"><div><span class="tag change">changes the server</span><code>aws configure</code>: paste the key and secret, region ap-southeast-1, output json.</div></li>
   <li><input type="checkbox" aria-label="done"><div><span class="tag look">look only</span><code>aws sts get-caller-identity</code>: it must show the palhaven-backup user, NOT root.</div></li>
-  <li><input type="checkbox" aria-label="done"><div><span class="tag change">changes the server</span>First upload: <code>aws s3 sync /opt/palworld/data/backups s3://BUCKET/backups/</code>. If you see “Permission denied” on the backup files, stop and ask me. Don't change permissions blindly.</div></li>
-  <li><input type="checkbox" aria-label="done"><div><span class="tag change">changes the server</span>Schedule it: <code>crontab -e</code> and add this line (5:15 AM, after the 4:45 backup and 5:00 restart):<pre>15 5 * * * /usr/local/bin/aws s3 sync /opt/palworld/data/backups s3://BUCKET/backups/ &gt;&gt; /home/ubuntu/s3sync.log 2&gt;&amp;1</pre>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag change">changes the server</span>First upload: <code>aws s3 sync /opt/palworld/data/backups s3://BUCKET/backups/</code>. If you see “Permission denied” on the backup files, stop and ask for help. Don't change permissions blindly.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag change">changes the server</span>Schedule it: <code>crontab -e</code> and add this line (4:15 AM, after the 3:45 backup and 4:00 restart):<pre>15 4 * * * /usr/local/bin/aws s3 sync /opt/palworld/data/backups s3://BUCKET/backups/ &gt;&gt; /home/ubuntu/s3sync.log 2&gt;&amp;1</pre>
 </div></li>
 </ul>
 
@@ -353,7 +353,7 @@ The two long codes must be identical. Then <code>rm -r /tmp/restore-test</code>.
 </script></div>
 
 <h2>Read next (15 min)</h2>
-<p><a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html">AWS docs: “Security best practices in IAM”</a>. Then start the free AWS Skill Builder course “AWS Cloud Practitioner Essentials” (tracker Week 7).</p>
+<p><a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html">AWS docs: “Security best practices in IAM”</a>. Then start the free AWS Skill Builder course “AWS Cloud Practitioner Essentials” (study week 7).</p>
 
 <nav class="course">
   <span>← <a href="0015-noc-work.html">15 · NOC work</a></span>

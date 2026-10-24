@@ -157,7 +157,7 @@
 
   /* ---------- PoE budget ---------- */
   function poe(root) {
-    head(root, "Calculator · PoE budget, the estimator way", "Add up the loads, compare with the switch's PoE budget, keep at least 20% headroom.");
+    head(root, "Calculator · PoE budget", "Add up the loads, compare with the switch's PoE budget, keep at least 20% headroom.");
     const types = [["Cameras (7 W)", 7, 30], ["Wi-Fi APs (25.5 W)", 25.5, 8], ["IP phones (6.5 W)", 6.5, 0]];
     const f = el("div", "s2-fields"); root.append(f);
     const ins = types.map(([t, w, c]) => { const i = num(c, 0, 500); f.append(field(t, i)); i.addEventListener("input", paint); return i; });
@@ -376,7 +376,7 @@
 
   /* ---------- callbacks ---------- */
   function callbacks(root) {
-    head(root, "Diagnosis · what is your job search telling you?", "Fill in your Application Tracker numbers. The rule from Part 4 tells you what to change.");
+    head(root, "Diagnosis · what is your job search telling you?", "Fill in your application numbers. The rule from Part 4 tells you what to change.");
     const f = el("div", "s2-fields"); root.append(f);
     const I = { apps: num(30, 0), calls: num(2, 0), ints: num(1, 0), offers: num(0, 0) };
     [["Applications sent", "apps"], ["Callbacks", "calls"], ["Interviews", "ints"], ["Offers", "offers"]].forEach(([t, k]) => { f.append(field(t, I[k])); I[k].addEventListener("input", paint); });
@@ -389,7 +389,7 @@
       else if (v("ints") === 0) say = "Callbacks but no interviews: the phone screen is the issue. Practise the 20-second pitch.";
       else if (v("offers") === 0) say = "Interviews but no offers: mock interviews on the 10 questions until 8 are smooth.";
       else say = "You have an offer. Compare it with your target list before you accept.";
-      out.replaceChildren(el("div", "s2-big", `Callback rate ${rate.toFixed(0)}%`), el("p", null, say), el("p", "small", "Callback rate = (callbacks + interviews + offers) ÷ applications, as in your Readiness Checks tab."));
+      out.replaceChildren(el("div", "s2-big", `Callback rate ${rate.toFixed(0)}%`), el("p", null, say), el("p", "small", "Callback rate = (callbacks + interviews + offers) ÷ applications."));
     }
     paint();
   }

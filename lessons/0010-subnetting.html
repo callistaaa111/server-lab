@@ -17,7 +17,7 @@
 <div class="meta"><span data-k="Time">≈ 45 min</span><span data-k="Builds on">Lesson 02</span><span data-k="Exam">CCNA 1.6 · Network+ 1.0 · SAA 1</span><span data-k="Real server">look only</span></div>
 
 
-<div class="callout "><span class="label">Why this lesson</span><p>NOC ads list subnetting directly (Job Ads #39), every AWS VPC design needs it (Lesson 17), and you'll use it for the capstone IP plan (Lesson 19).</p></div>
+<div class="callout "><span class="label">Why this lesson</span><p>NOC ads list subnetting directly, every AWS VPC design needs it (Lesson 17), and you'll use it for the capstone IP plan (Lesson 19).</p></div>
 
 <h2>Warm-up · from Lessons 01–02</h2>
 <div class="quiz" data-quiz="10-warm"><script type="application/json">
@@ -152,7 +152,7 @@
 </script></div>
 
 <h2>Part 4 · Planning addresses for a real building</h2>
-<p>You estimate buildings, so let's plan one. A small office needs staff PCs: 100 devices · CCTV cameras: 40 · guest Wi-Fi: 50. You have 10.20.0.0/24.</p>
+<p>Let's plan one building. A small office needs staff PCs: 100 devices · CCTV cameras: 40 · guest Wi-Fi: 50. You have 10.20.0.0/24.</p>
 <p>Rule: give the <b>biggest group its street first</b>, then go down in size.</p>
 <div class="table-wrap"><table class=""><thead><tr><th>Group</th><th>Needs</th><th>Street</th><th>Range</th><th>Gateway</th></tr></thead><tbody><tr><td>Staff</td><td>100</td><td>10.20.0.0/25</td><td>.0 – .127</td><td>10.20.0.1</td></tr><tr><td>Guest</td><td>50</td><td>10.20.0.128/26</td><td>.128 – .191</td><td>10.20.0.129</td></tr><tr><td>CCTV</td><td>40</td><td>10.20.0.192/26</td><td>.192 – .255</td><td>10.20.0.193</td></tr></tbody></table></div>
 
@@ -244,7 +244,7 @@ It prints <code>10.0.0.0/24 256 255.255.255.0 10.0.0.255</code>. Each value shou
 
 <h2>PASS/FAIL CHECK</h2>
 <p>Go to <a href="https://subnettingpractice.com/">subnettingpractice.com</a> (free). Do 10 questions with a timer, no calculator.</p>
-<div class="callout good"><span class="label">PASS</span><p>At least 9 correct in under 15 minutes. Record it in the Readiness Checks tab (“Subnetting speed”). Not there yet? Do 10 a day. Most people pass within a week of daily practice.</p></div>
+<div class="callout good"><span class="label">PASS</span><p>At least 9 correct in under 15 minutes. Record it in your progress notes (“Subnetting speed”). Not there yet? Do 10 a day. Most people pass within a week of daily practice.</p></div>
 
 <h2>Break/fix drill</h2>
 <div class="lab-cases" data-id="bf"><script type="application/json">
@@ -312,7 +312,7 @@ It prints <code>10.0.0.0/24 256 255.255.255.0 10.0.0.255</code>. Each value shou
 </script></div>
 
 <h2>Read next (15 min)</h2>
-<p>Jeremy's IT Lab (already in your tracker): Day 13 “Subnetting (Part 1)”. Then practise at subnettingpractice.com.</p>
+<p>Jeremy's IT Lab: Day 13 “Subnetting (Part 1)”. Then practise at subnettingpractice.com.</p>
 
 <nav class="course">
   <span>← <a href="0009-tell-the-story.html">09 · Tell the story</a></span>

@@ -144,7 +144,7 @@ ol.term-tasklist li.done > span::after { content: " ✓"; font-weight: 700; }
 
 @media print { .terminal, .sim, .match { display: none; } }
 
-/* ---- drafting-sheet overrides (2026-10-24): square corners, ink borders, amber actions ---- */
+/* ---- drafting-sheet overrides: square corners, ink borders, amber actions ---- */
 .sim, .match { border: 1.5px solid var(--ink); background: var(--code-bg); }
 .sim, .match, .sim-btn, .sim-chip, .sim-tab, .sim-check, .sim-input, .sim select, .guard-cell, .addr-num, .addr-port, .addr-kind, .addr-bad,
 .proto-cell, .explain-code, .explain-note, .jr-step, .jr-ticket, .bld-field textarea, .match-item, .term-tasks, .term-ask input, .term-ask button { border-radius: 0; }

@@ -76,8 +76,8 @@ keeps them running. Yours is set to start automatically when the server boots, a
 crash. That’s what <code>active (running)</code> meant in Lesson 04.</p>
 <p>Scheduled jobs use the <b>cron</b> format you saw in the compose file. Your daily routine (Manila time):</p>
 <div class="table-wrap"><table><tbody>
-  <tr><td><code>45 4 * * *</code></td><td><b>4:45 AM</b></td><td>back up the world, keep 7 days of backups</td></tr>
-  <tr><td><code>55 4 * * *</code></td><td><b>4:55 AM</b></td><td>warn players, then restart at 5:00 (clears memory build-up and installs game updates)</td></tr>
+  <tr><td><code>45 3 * * *</code></td><td><b>3:45 AM</b></td><td>back up the world, keep 7 days of backups</td></tr>
+  <tr><td><code>55 3 * * *</code></td><td><b>3:55 AM</b></td><td>warn players, then restart at 4:00 (clears memory build-up and installs game updates)</td></tr>
 </tbody></table></div>
 
 <h2>Part 4 · Backups: the only thing that saves you from mistakes</h2>
@@ -142,7 +142,7 @@ know it works before they need it.</p>
   <summary>Say it yourself first, then open this</summary>
   <p>“My monitor collects metrics every 5 seconds, covering traffic (players), saturation (memory and CPU) and errors
   (crashes), and keeps 180 days of history. It alerts my phone only for real problems, and it auto-remediates by restarting
-  when memory runs low. It runs as a systemd service that restarts itself. Backups run daily at 4:45 and are kept 7 days, so
+  when memory runs low. It runs as a systemd service that restarts itself. Backups run daily at 3:45 and are kept 7 days, so
   my RPO is about a day. To follow 3-2-1 I should also keep copies off the server.”</p>
 </details>
 
@@ -155,7 +155,7 @@ know it works before they need it.</p>
  {"q": "Why shouldn't your phone get an alert every time a player joins?", "options": ["Too many alerts get ignored; real ones missed", "Phone alerts cost money for every message sent", "Players would see the alert and get annoyed", "The monitor can only send five daily alerts"], "answer": 0, "why": "Alerts should mean 'act now'. Noisy alerts train you to ignore them."},
  {"q": "The monitor restarts Palworld by itself when memory runs low. What is that called?", "options": ["A backup", "Self-healing (auto-remediation)", "A healthcheck", "Port mapping"], "answer": 1, "why": "Auto-remediation (self-healing): the system fixes a known problem without waiting for a human."},
  {"q": "`docker ps` shows `Up 2 hours (healthy)`. What does 'healthy' add beyond 'Up'?", "options": ["The container uses under half the memory", "The backup ran successfully this morning, too", "The program actually answers its health check", "The firewall allows UDP port 8211 now"], "answer": 2, "why": "'Up' means the program exists; 'healthy' means it responded to Docker's regular 'are you OK?' check."},
- {"q": "Backups run once a day. What is your RPO, roughly?", "options": ["About five seconds of progress", "About one hour of progress", "About one day of progress", "About one week of progress"], "answer": 2, "why": "RPO = the most data you could lose. If disaster strikes just before 4:45 AM, you lose up to a day."},
+ {"q": "Backups run once a day. What is your RPO, roughly?", "options": ["About five seconds of progress", "About one hour of progress", "About one day of progress", "About one week of progress"], "answer": 2, "why": "RPO = the most data you could lose. If disaster strikes just before 3:45 AM, you lose up to a day."},
  {"q": "All backups are on the same disk as the world save. What does the 3-2-1 rule say is missing?", "options": ["A third daily backup copy", "A copy kept somewhere else", "A faster disk for it", "A second Palworld container running"], "answer": 1, "why": "3-2-1: three copies, two kinds of storage, one off-site. A copy on your laptop fixes the off-site part."}
 ]
 </script></div>
@@ -206,7 +206,7 @@ know it works before they need it.</p>
 <h2>Practice 2 · Read your own monitoring (15 min)</h2>
 <ul class="steps">
   <li><input type="checkbox" aria-label="done"><span>Open your monitor dashboard (on your phone through Tailscale, or with <code>Palworld Monitor.bat</code> on your laptop). Find one chart for each golden signal: traffic, saturation, errors.</span></li>
-  <li><input type="checkbox" aria-label="done"><span>In the History tab, find the restarts list. Can you tell the daily 5:00 AM restarts from any unexpected ones?</span></li>
+  <li><input type="checkbox" aria-label="done"><span>In the History tab, find the restarts list. Can you tell the daily 4:00 AM restarts from any unexpected ones?</span></li>
   <li><input type="checkbox" aria-label="done"><span><code>ssh gameserver</code>, then <code>systemctl status palworld-monitor</code>: find <code>enabled</code> (starts at boot) and <code>active (running)</code>. Press <kbd>q</kbd>.</span></li>
   <li><input type="checkbox" aria-label="done"><span><code>sudo ls -lh /opt/palworld/data/backups</code>: count the backups and check the dates. That’s your retention. <code>exit</code>.</span></li>
   <li><input type="checkbox" aria-label="done"><span><b>Off-site copy (optional, safe):</b> on your laptop, run the <code>scp</code> line from your server cheat sheet (section 6) to copy the backups to your Desktop. Now you follow 3-2-1.</span></li>
@@ -233,8 +233,8 @@ A chapter from Google’s free book on running reliable systems. Read up to the 
 are advanced; skim those. Being able to mention this book in an interview shows you’ve gone beyond tutorials.</p>
 
 <div class="callout good">
-  <span class="label">Ask your teacher</span>
-  <p>Ask me anything: “how would I test restoring a backup safely?”, “what do companies use instead of my monitor?”,
+  <span class="label">Ask an AI tutor</span>
+  <p>Ask an AI tutor: “how would I test restoring a backup safely?”, “what do companies use instead of my monitor?”,
   “what’s the difference between monitoring and logging?”.</p>
 </div>
 

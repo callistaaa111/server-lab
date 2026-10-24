@@ -1,5 +1,5 @@
 /* Practice terminal: a safe, fake copy of the Palhaven server (and your laptop's PowerShell).
-   Outputs are real ones captured from the server on 18 Oct 2026 (secrets and player data removed).
+   Outputs are real ones captured from the server one day (secrets and player data removed).
    Usage:
      <div class="terminal" data-term="lesson-04"><script type="application/json">
        { "start": "server" | "laptop",
@@ -32,11 +32,11 @@
       RCON_PORT: 25575
       UPDATE_ON_BOOT: "true"
       BACKUP_ENABLED: "true"
-      BACKUP_CRON_EXPRESSION: "45 4 * * *"
+      BACKUP_CRON_EXPRESSION: "45 3 * * *"
       DELETE_OLD_BACKUPS: "true"
       OLD_BACKUP_DAYS: 7
       AUTO_REBOOT_ENABLED: "true"
-      AUTO_REBOOT_CRON_EXPRESSION: "55 4 * * *"
+      AUTO_REBOOT_CRON_EXPRESSION: "55 3 * * *"
       AUTO_REBOOT_WARN_MINUTES: 5
     volumes:
       - ./data:/palworld
@@ -56,33 +56,33 @@ HOME_URL="https://www.ubuntu.com/"`;
     "/": { ls: "bin  boot  dev  etc  home  lib  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var" },
     "/home": { ls: "opc  ubuntu" },
     "/home/ubuntu": { ls: "backups", la: `total 48
-drwxr-x--- 6 ubuntu ubuntu 4096 Oct 17 06:25 .
-drwxr-xr-x 4 root   root   4096 Oct 17 01:55 ..
--rw------- 1 ubuntu ubuntu 6426 Oct 17 06:14 .bash_history
+drwxr-x--- 6 ubuntu ubuntu 4096 Mar  7 06:25 .
+drwxr-xr-x 4 root   root   4096 Mar  7 01:55 ..
+-rw------- 1 ubuntu ubuntu 6426 Mar  7 06:14 .bash_history
 -rw-r--r-- 1 ubuntu ubuntu 3771 Mar 31  2024 .bashrc
 -rw-r--r-- 1 ubuntu ubuntu  807 Mar 31  2024 .profile
 drwx------ 2 ubuntu ubuntu 4096 Oct 16 04:03 .ssh
-drwxr-xr-x 2 root   root   4096 Oct 18 06:25 backups`, ll: `total 4
-drwxr-xr-x 2 root root 4096 Oct 18 06:25 backups` },
+drwxr-xr-x 2 root   root   4096 Mar  8 06:25 backups`, ll: `total 4
+drwxr-xr-x 2 root root 4096 Mar  8 06:25 backups` },
     "/home/ubuntu/backups": { ls: "" },
     "/etc": { ls: "apt  cron.d  default  hostname  hosts  iptables  os-release  passwd  ssh  systemd  ...(and many more)" },
     "/opt": { ls: "containerd  palworld  palworld-monitor  unified-monitoring-agent", ll: `total 16
 drwx--x--x 4 root   root   4096 Oct 16 05:10 containerd
-drwxr-xr-x 3 root   root   4096 Oct 17 03:16 palworld
-drwxr-xr-x 5 ubuntu ubuntu 4096 Oct 17 05:47 palworld-monitor
+drwxr-xr-x 3 root   root   4096 Mar  7 03:16 palworld
+drwxr-xr-x 5 ubuntu ubuntu 4096 Mar  7 05:47 palworld-monitor
 drwxr-xr-x 3 root   root   4096 Oct 16 04:00 unified-monitoring-agent` },
     "/opt/palworld": { ls: "apply-when-empty.sh  data  docker-compose.yml  docker-compose.yml.bak", ll: `total 16
--rwx------ 1 root root  510 Oct 17 03:16 apply-when-empty.sh
-drwxr-xr-x 9 opc  opc  4096 Oct 18 10:14 data
--rw------- 1 root root 1051 Oct 17 03:16 docker-compose.yml
--rw------- 1 root root  923 Oct 17 02:59 docker-compose.yml.bak` },
+-rwx------ 1 root root  510 Mar  7 03:16 apply-when-empty.sh
+drwxr-xr-x 9 opc  opc  4096 Mar  8 10:14 data
+-rw------- 1 root root 1051 Mar  7 03:16 docker-compose.yml
+-rw------- 1 root root  923 Mar  7 02:59 docker-compose.yml.bak` },
     "/opt/palworld/data": { ls: `DefaultPalWorldSettings.ini  Engine  Pal  PalServer-arm64.sh  PalServer.sh  backups
 libsteamwebrtc.so  linux64  steamapps  steamclient.so` },
-    "/opt/palworld/data/backups": { ls: `palworld-save-2026-10-17_10-25-43.tar.gz  palworld-save-2026-10-17_12-35-46.tar.gz
-palworld-save-2026-10-18_04-45-00.tar.gz`, ll: `total 252K
--rw-r--r-- 1 opc opc  19K Oct 17 02:25 palworld-save-2026-10-17_10-25-43.tar.gz
--rw-r--r-- 1 opc opc  57K Oct 17 04:35 palworld-save-2026-10-17_12-35-46.tar.gz
--rw-r--r-- 1 opc opc 170K Oct 17 20:45 palworld-save-2026-10-18_04-45-00.tar.gz` },
+    "/opt/palworld/data/backups": { ls: `palworld-save-2025-03-07_10-25-43.tar.gz  palworld-save-2025-03-07_12-35-46.tar.gz
+palworld-save-2025-03-08_03-45-00.tar.gz`, ll: `total 252K
+-rw-r--r-- 1 opc opc  19K Mar  7 02:25 palworld-save-2025-03-07_10-25-43.tar.gz
+-rw-r--r-- 1 opc opc  57K Mar  7 04:35 palworld-save-2025-03-07_12-35-46.tar.gz
+-rw-r--r-- 1 opc opc 170K Mar  7 20:45 palworld-save-2025-03-08_03-45-00.tar.gz` },
     "/opt/palworld-monitor": { ls: "data  server.py  static  venv" },
     "/var": { ls: "backups  cache  lib  local  lock  log  mail  opt  run  spool  tmp" },
     "/var/log": { ls: "apt  auth.log  dpkg.log  journal  kern.log  syslog  ...(and more)" },
@@ -138,17 +138,17 @@ e8b09ee80643   palworld   43.36%    2.416GiB / 23.41GiB   10.32%    299kB / 519k
 #(practice copy: on the real server this lists whoever is online right now)`,
     "systemctl status palworld-monitor": `● palworld-monitor.service - Palworld server monitor (dashboard on 127.0.0.1:8797)
      Loaded: loaded (/etc/systemd/system/palworld-monitor.service; enabled; preset: enabled)
-     Active: active (running) since Sun 2026-10-18 10:14:38 UTC; 1h 39min ago
+     Active: active (running) since Sat 2025-03-08 10:14:38 UTC; 1h 39min ago
    Main PID: 1839 (python)
      Memory: 158.7M
      CGroup: /system.slice/palworld-monitor.service
              └─1839 /opt/palworld-monitor/venv/bin/python -u /opt/palworld-monitor/server.py`,
   };
-  const LOGS = `[2026-10-18 19:53:59] [LOG] REST accessed endpoint /v1/api/players OK
-[2026-10-18 19:54:04] [LOG] REST accessed endpoint /v1/api/metrics OK
-[2026-10-18 19:54:04] [LOG] REST accessed endpoint /v1/api/players OK
-[2026-10-18 19:54:09] [LOG] REST accessed endpoint /v1/api/metrics OK
-[2026-10-18 19:54:09] [LOG] REST accessed endpoint /v1/api/players OK
+  const LOGS = `[2025-03-08 19:53:59] [LOG] REST accessed endpoint /v1/api/players OK
+[2025-03-08 19:54:04] [LOG] REST accessed endpoint /v1/api/metrics OK
+[2025-03-08 19:54:04] [LOG] REST accessed endpoint /v1/api/players OK
+[2025-03-08 19:54:09] [LOG] REST accessed endpoint /v1/api/metrics OK
+[2025-03-08 19:54:09] [LOG] REST accessed endpoint /v1/api/players OK
 #(these lines are your monitor asking Palworld "who's online?" every 5 seconds)`;
   const SS_ROWS = [
     ["udp", "UNCONN", "0.0.0.0:8211", 'users:(("docker-proxy",pid=1805))'],

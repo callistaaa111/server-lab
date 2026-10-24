@@ -13,11 +13,11 @@
 
 <div class="eyebrow">Server Lab · Lesson 12 · Part 2 · Networking core</div>
 <h1>Switches and VLANs: hallways and locked doors</h1>
-<p class="lede">Every office, mall and data center network is built from switches and VLANs. You'll split one switch into three locked hallways, then size the PoE budget the way an estimator would.</p>
+<p class="lede">Every office, mall and data center network is built from switches and VLANs. You'll split one switch into three locked hallways, then work out its PoE power budget.</p>
 <div class="meta"><span data-k="Time">≈ 60 min, half in Packet Tracer</span><span data-k="Builds on">Lesson 10</span><span data-k="Exam">CCNA 2.1–2.2 · Network+ 2.0</span><span data-k="Tool">Cisco Packet Tracer</span></div>
 
 
-<div class="callout "><span class="label">Why this lesson</span><p>NOC ads list VLANs (Job Ads #39); network technician and junior network engineer roles (Job Ads #34–36, #41–42) assume them. Packet Tracer is free from Cisco Networking Academy: sign up at netacad.com, then download.</p></div>
+<div class="callout "><span class="label">Why this lesson</span><p>NOC ads list VLANs; network technician and junior network engineer roles assume them. Packet Tracer is free from Cisco Networking Academy: sign up at netacad.com, then download.</p></div>
 
 <h2>Warm-up</h2>
 <div class="quiz" data-quiz="12-warm"><script type="application/json">
@@ -60,11 +60,11 @@
 </ul>
 <div class="sim" data-sim2="vlan"></div>
 
-<h2>Part 3 · PoE: where your electrical knowledge pays off</h2>
+<h2>Part 3 · PoE: power through the network cable</h2>
 <p>Cameras, Wi-Fi access points and IP phones usually get their power through the network cable: <b>PoE</b> (Power over Ethernet). The switch is the power source, so every PoE switch has a <b>power budget</b> in watts.</p>
 <div class="table-wrap"><table class=""><thead><tr><th>Standard</th><th>Max power at the switch port</th></tr></thead><tbody><tr><td>802.3af (PoE)</td><td>15.4 W</td></tr><tr><td>802.3at (PoE+)</td><td>30 W</td></tr><tr><td>802.3bt (PoE++)</td><td>60 W (Type 3) or 90 W (Type 4)</td></tr></tbody></table></div>
 
-<p>Your estimator brain already does this: add up the loads, compare with the supply, leave headroom. 30 cameras at about 7 W each = 210 W. A switch with a 370 W PoE budget handles that with room to spare. Most network people learn this the hard way. You can say it in an interview on day one.</p>
+<p>It's a load calculation like any other: add up the loads, compare with the supply, leave headroom. 30 cameras at about 7 W each = 210 W. A switch with a 370 W PoE budget handles that with room to spare. Most network people learn this the hard way. You can say it in an interview on day one.</p>
 <div class="sim" data-sim2="poe"></div>
 
 <h2>Part 4 · Packet Tracer lab: build the office switch</h2>

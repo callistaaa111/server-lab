@@ -74,14 +74,14 @@ Writing setup down in files instead of clicking or typing it each time is a core
       SERVER_NAME: "Palhaven"
       PLAYERS: 16
       SERVER_PASSWORD: "********"
-      BACKUP_CRON_EXPRESSION: "45 4 * * *"              <span class="c"># back up at 4:45 every day</span>
-      AUTO_REBOOT_CRON_EXPRESSION: "55 4 * * *"         <span class="c"># restart at 4:55 every day</span>
+      BACKUP_CRON_EXPRESSION: "45 3 * * *"              <span class="c"># back up at 3:45 every day</span>
+      AUTO_REBOOT_CRON_EXPRESSION: "55 3 * * *"         <span class="c"># restart at 3:55 every day</span>
     volumes:
       - ./data:/palworld                                <span class="c"># world save kept OUTSIDE the room</span></pre>
 <p>The file format is called <b>YAML</b>. It’s a list of <code>name: value</code> settings, and the <b>indentation
 (spaces at the start of a line) matters</b>: it shows what belongs to what. One wrongly indented line can break the
 whole file, and that’s a classic real-world mistake.</p>
-<p class="small">The <code>45 4 * * *</code> style is called a <b>cron expression</b>: minute 45, hour 4, every day, every month, every weekday. You’ll meet cron again in Lesson 07.</p>
+<p class="small">The <code>45 3 * * *</code> style is called a <b>cron expression</b>: minute 45, hour 4, every day, every month, every weekday. You’ll meet cron again in Lesson 07.</p>
 
 <div class="sim" data-sim="explain"><script type="application/json">
 {
@@ -133,12 +133,12 @@ whole file, and that’s a classic real-world mistake.</p>
    "note": "The join password. Hidden here. This is why the file is readable by root only."
   },
   {
-   "code": "      BACKUP_CRON_EXPRESSION: \"45 4 * * *\"",
-   "note": "A cron schedule: minute 45, hour 4, every day, every month, every weekday. Daily backup at 4:45 AM."
+   "code": "      BACKUP_CRON_EXPRESSION: \"45 3 * * *\"",
+   "note": "A cron schedule: minute 45, hour 4, every day, every month, every weekday. Daily backup at 3:45 AM."
   },
   {
-   "code": "      AUTO_REBOOT_CRON_EXPRESSION: \"55 4 * * *\"",
-   "note": "Daily restart warning at 4:55 AM; the restart happens at 5:00 after a 5-minute countdown."
+   "code": "      AUTO_REBOOT_CRON_EXPRESSION: \"55 3 * * *\"",
+   "note": "Daily restart warning at 3:55 AM; the restart happens at 4:00 after a 5-minute countdown."
   },
   {
    "code": "    volumes:",
@@ -299,8 +299,8 @@ The official explanation, with a short video. Then click through to “What is a
 guide is how most professionals learned it.</p>
 
 <div class="callout good">
-  <span class="label">Ask your teacher</span>
-  <p>Ask me anything: “what is Kubernetes?”, “how would I run my own website in a container?”, “why does the image say <code>latest</code>?”.</p>
+  <span class="label">Ask an AI tutor</span>
+  <p>Ask an AI tutor: “what is Kubernetes?”, “how would I run my own website in a container?”, “why does the image say <code>latest</code>?”.</p>
 </div>
 
 <nav class="course">
