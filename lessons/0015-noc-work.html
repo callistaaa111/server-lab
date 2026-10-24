@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>15 · NOC work: alarms, tickets and calm nights</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/interactive.css">
+</head>
+<body>
+<main>
+<nav class="top"><a href="../index.html">Course home</a></nav>
+
+<div class="eyebrow">Server Lab · Lesson 15 · Part 2 · Bridge jobs</div>
+<h1>NOC work: alarms, tickets and calm nights</h1>
+<p class="lede">Monitoring is the most-named skill across all 68 ads. You'll learn how monitoring tools see devices, the incident life cycle, the words every NOC uses, and how to write a ticket someone can pick up at 3 AM.</p>
+<div class="meta"><span data-k="Time">≈ 60 min</span><span data-k="Builds on">Lessons 06–07</span><span data-k="Exam">CCNA 4.4–4.5 · Network+ 3.0, 5.0</span><span data-k="Tool">PRTG free on your laptop</span></div>
+
+
+<div class="callout "><span class="label">Why this lesson</span><p>NOC ads ask for incident handling, ticketing and tools like Zabbix or PRTG (Job Ads #7, #8, #25, #39). Monitoring is named in data center, NOC and cloud ads alike.</p></div>
+
+<h2>Warm-up</h2>
+<div class="quiz" data-quiz="15-warm"><script type="application/json">
+[
+ {
+  "q": "Which golden signal is “memory and CPU in use”?",
+  "options": [
+   "Traffic",
+   "Errors",
+   "Saturation",
+   "Latency"
+  ],
+  "answer": 2,
+  "why": "How full the system is (Lesson 07)."
+ },
+ {
+  "q": "A rack inlet hits 29 °C. What's the recommended range?",
+  "options": [
+   "10–15 °C",
+   "18–27 °C",
+   "25–35 °C",
+   "0–40 °C"
+  ],
+  "answer": 1,
+  "why": "ASHRAE's recommended range (Lesson 14)."
+ },
+ {
+  "q": "Your RPO with daily backups is about…",
+  "options": [
+   "One minute",
+   "One hour",
+   "One day",
+   "One week"
+  ],
+  "answer": 2,
+  "why": "You could lose up to a day (Lesson 07)."
+ }
+]
+</script></div>
+
+<h2>Part 1 · What a NOC does</h2>
+<p>A <b>NOC</b> (network operations center) is a room (or a remote team) watching screens 24/7 for many customers' networks. When something breaks, the NOC is first to know, and their job is to restore service fast and get the right people involved. The data center equivalent watches power and cooling.</p>
+<p>You already run a mini-NOC: your Palhaven monitor collects metrics, alerts your phone, and auto-restarts on low memory.</p>
+<h2>Part 2 · How monitoring tools see devices</h2>
+<ul>
+  <li><b>Ping (ICMP):</b> “are you alive?” The simplest check.</li>
+  <li><b>SNMP</b> (Simple Network Management Protocol): the monitoring server polls devices for numbers like traffic, temperature and errors on UDP 161. Devices can also push urgent messages called <b>traps</b> on UDP 162.</li>
+  <li><b>Syslog:</b> devices send their log messages to a central server, usually on UDP 514.</li>
+  <li><b>Port checks:</b> “does port 22 answer?” (like Test-NetConnection in Lesson 01).</li>
+</ul>
+<p>Common tools: Zabbix and PRTG (both named in Philippine NOC ads), plus Grafana for dashboards.</p>
+<div class="match" data-match="15-proto"><script type="application/json">{"title": "protocol → port", "left": "What it does", "right": "Port", "pairs": [["SNMP polling (monitor asks the device)", "UDP 161"], ["SNMP traps (device pushes an alarm)", "UDP 162"], ["Syslog (device sends its logs)", "UDP 514"], ["SSH (you log in to fix it)", "TCP 22"], ["DNS lookups", "UDP 53"]]}</script></div>
+<h2>Part 3 · The incident life cycle</h2>
+<div class="lab-order" data-id="life"><script type="application/json">
+{
+ "title": "incident life cycle",
+ "intro": "An alert just fired. Put the steps in order.",
+ "items": [
+  "Alert fires",
+  "Acknowledge it (so the team knows someone owns it)",
+  "Open a ticket",
+  "Set severity",
+  "Troubleshoot or escalate",
+  "Restore service",
+  "Close with notes",
+  "Postmortem for big ones"
+ ],
+ "win": "That's the life cycle. Ownership and a record come before troubleshooting."
+}
+</script></div>
+
+<p><b>Severity</b>, typical meaning: P1 critical: service down for many users · P2 high: badly degraded · P3 medium: one user or a workaround exists · P4 low: questions, small requests.</p>
+<div class="lab-sort" data-id="sev"><script type="application/json">
+{
+ "title": "set the severity",
+ "choices": [
+  "P1",
+  "P2",
+  "P3",
+  "P4"
+ ],
+ "items": [
+  {
+   "t": "A client's website is down for all their customers",
+   "a": 0,
+   "why": "Service down for many users."
+  },
+  {
+   "t": "The office internet works but is very slow for everyone",
+   "a": 1,
+   "why": "Badly degraded, not down."
+  },
+  {
+   "t": "One user's printer won't connect; they can print from another one",
+   "a": 2,
+   "why": "One user, workaround exists."
+  },
+  {
+   "t": "A user asks how to add a shared calendar",
+   "a": 3,
+   "why": "A question or small request."
+  },
+  {
+   "t": "Palhaven crashed at peak time and won't restart",
+   "a": 0,
+   "why": "Service down for every player."
+  }
+ ]
+}
+</script></div>
+
+<p>ITIL words every NOC uses (<b>ITIL</b> is the standard IT service management framework):</p>
+<ul>
+  <li><b>Incident:</b> something broke; restore service as fast as possible.</li>
+  <li><b>Problem:</b> the underlying cause of one or more incidents; fix it so it doesn't come back.</li>
+  <li><b>Change:</b> a planned modification, approved before it happens (like an MOP in a data center).</li>
+  <li><b>SLA:</b> the promised response or restore time. <b>MTTR:</b> mean time to restore.</li>
+</ul>
+<div class="lab-sort" data-id="itil"><script type="application/json">
+{
+ "title": "incident, problem or change?",
+ "choices": [
+  "Incident",
+  "Problem",
+  "Change"
+ ],
+ "items": [
+  {
+   "t": "The Palworld server crashed and auto-restarted at 21:40",
+   "a": 0,
+   "why": "Something broke; service was restored."
+  },
+  {
+   "t": "A memory leak in the game causes that crash every week",
+   "a": 1,
+   "why": "The underlying cause of repeat incidents."
+  },
+  {
+   "t": "Upgrading the VM to more memory on Saturday at 05:00, with a rollback plan",
+   "a": 2,
+   "why": "Planned and approved before it happens."
+  },
+  {
+   "t": "Three users can't log in to email right now",
+   "a": 0,
+   "why": "Restore service first."
+  }
+ ]
+}
+</script></div>
+
+<p>CompTIA's 7-step troubleshooting method (memorise it for Network+). Your Lesson 06 “five checkpoints” is steps 2–3 in action.</p>
+<div class="lab-order" data-id="comptia"><script type="application/json">
+{
+ "title": "CompTIA 7 steps",
+ "items": [
+  "Identify the problem",
+  "Establish a theory of probable cause",
+  "Test the theory to determine the cause",
+  "Establish a plan of action",
+  "Implement the solution or escalate",
+  "Verify full functionality and add preventive measures",
+  "Document findings, actions and outcomes"
+ ],
+ "win": "Seven steps, and the last one is always: document."
+}
+</script></div>
+
+<h2>Part 4 · Writing a ticket people can use at 3 AM</h2>
+<p>Ticket template: Ticket ID · Opened (date/time) · Source (alert or person) · Severity · Affected service · Symptom (what is seen, exactly) · Impact (who and how many) · Timeline of actions (each line timestamped: what you checked, what you saw) · Escalated to (who, when) · Resolution · Closed (date/time) · Root cause (if known) · Follow-up needed.</p>
+<p><b>Good ticket line:</b> “02:14 Ping to 10.30.0.10 failing from NOC; R2 172.16.0.2 reachable. Suspect server-side or return route. Checking R2 routing table.” <b>Bad ticket line:</b> “Server down, checking.”</p>
+<div class="sim" data-sim2="ticket"></div>
+
+<h2>Practice 2 · Build a mini-NOC on your laptop</h2>
+<p>30 minutes. PRTG's free edition (up to 100 sensors) runs on Windows. If it's no longer offered when you read this, use Uptime Kuma or Zabbix instead. The steps are the same idea.</p>
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>Install PRTG. Add a ping sensor for your home router (your default gateway from <code>ipconfig</code>).</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>Add a ping sensor for 8.8.8.8 (the internet).</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>Add a port sensor: your server's public IP, TCP port 22 (is SSH answering?).</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>Add a ping sensor for your phone's Wi-Fi IP address (find it in the phone's Wi-Fi settings).</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>Watch them turn green. This is your “NOC screen”.</div></li>
+</ul>
+
+<h2>PASS/FAIL CHECK · the incident drill</h2>
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>Turn your phone's Wi-Fi off. Note the time.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>When sensor 4 turns red, acknowledge it in PRTG. Note how many minutes it took to alert.</div></li>
+  <li><input type="checkbox" aria-label="done"><div>Write a full ticket using the template (treat the phone as “the CCTV recorder”).</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>Turn Wi-Fi back on. Verify green. Close the ticket.</div></li>
+  <li><input type="checkbox" aria-label="done"><div>Write a one-page postmortem for a REAL Palhaven incident (a memory restart or crash from your monitor's history): summary, impact, timeline, root cause, what went well, what to improve, action items with dates. Keep it blameless: describe systems and decisions, not people's faults.</div></li>
+</ul>
+
+<div class="callout good"><span class="label">PASS</span><p>Ticket and postmortem done within 30 minutes of the alert, and every timeline line has a time and a fact.</p></div>
+
+<h2>Practice 1 · Check yourself</h2>
+<div class="quiz" data-quiz="15-check"><script type="application/json">
+[
+ {
+  "q": "Which protocol and port do monitoring servers use to poll devices for counters?",
+  "options": [
+   "Syslog, UDP 514",
+   "SNMP, UDP 161",
+   "SSH, TCP 22",
+   "DNS, UDP 53"
+  ],
+  "answer": 1,
+  "why": "SNMP polling on 161; traps arrive on 162."
+ },
+ {
+  "q": "The Palworld server crashed and auto-restarted. You find a memory leak in the game that causes it weekly. The crash is the ___; the leak is the ___.",
+  "options": [
+   "Problem; incident",
+   "Change; problem",
+   "Incident; problem",
+   "Incident; change"
+  ],
+  "answer": 2,
+  "why": "The incident is the outage. The problem is the underlying cause."
+ },
+ {
+  "q": "First thing to do when an alert fires and you're on shift?",
+  "options": [
+   "Restart everything",
+   "Acknowledge it and open a ticket",
+   "Email the customer",
+   "Wait to see if it clears"
+  ],
+  "answer": 1,
+  "why": "Ownership and a record come first, then troubleshooting."
+ },
+ {
+  "q": "Step 7 of the CompTIA method is…",
+  "options": [
+   "Escalate",
+   "Test the theory",
+   "Document findings",
+   "Identify the problem"
+  ],
+  "answer": 2,
+  "why": "Document, every time."
+ },
+ {
+  "q": "Website down for all customers of one client. Severity?",
+  "options": [
+   "P1",
+   "P3",
+   "P4",
+   "No ticket needed"
+  ],
+  "answer": 0,
+  "why": "Service down for many users."
+ }
+]
+</script></div>
+
+<h2>New words from this lesson</h2>
+<div class="lab-gloss" data-id="words"><script type="application/json">
+{
+ "words": [
+  [
+   "NOC",
+   "Network operations center: 24/7 monitoring team."
+  ],
+  [
+   "SNMP",
+   "Protocol for polling device stats (UDP 161) and receiving traps (UDP 162)."
+  ],
+  [
+   "Syslog",
+   "Central collection of device logs (UDP 514)."
+  ],
+  [
+   "Acknowledge",
+   "Mark an alert as owned by you."
+  ],
+  [
+   "Severity (P1–P4)",
+   "How urgent an incident is."
+  ],
+  [
+   "Incident / Problem / Change",
+   "Broken now / underlying cause / planned modification (ITIL)."
+  ],
+  [
+   "SLA / MTTR",
+   "Promised service level / mean time to restore."
+  ],
+  [
+   "Postmortem",
+   "Written review after an incident, focused on fixes, not blame."
+  ]
+ ]
+}
+</script></div>
+
+<h2>Read next (15 min)</h2>
+<p><a href="https://sre.google/sre-book/postmortem-culture/">Google SRE Book: “Postmortem Culture: Learning from Failure”</a> (free online). Jeremy's IT Lab videos on SNMP and Syslog (around Days 40–41).</p>
+
+<nav class="course">
+  <span>← <a href="0014-inside-a-data-center.html">14 · Inside a data center</a></span>
+  <span><a href="../index.html">Course home</a></span>
+  <span><a href="0016-hands-on-aws.html">16 · Hands-on AWS</a> →</span>
+</nav>
+</main>
+<script src="../assets/lab.js"></script>
+<script src="../assets/quiz.js"></script>
+<script src="../assets/sims.js"></script>
+<script src="../assets/sims2.js"></script>
+<script src="../assets/match.js"></script>
+</body>
+</html>

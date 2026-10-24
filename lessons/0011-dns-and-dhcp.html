@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>11 · DNS and DHCP: the directory and the leasing office</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/interactive.css">
+</head>
+<body>
+<main>
+<nav class="top"><a href="../index.html">Course home</a></nav>
+
+<div class="eyebrow">Server Lab · Lesson 11 · Part 2 · Networking core</div>
+<h1>DNS and DHCP: the directory and the leasing office</h1>
+<p class="lede">DNS and DHCP failures are a huge share of real NOC and help desk tickets. After this lesson you can tell them apart with one test, in under a minute.</p>
+<div class="meta"><span data-k="Time">≈ 35 min</span><span data-k="Builds on">Lessons 01–02, 10</span><span data-k="Exam">CCNA 4.3 · Network+ 1.0, 5.0</span><span data-k="Real server">look only</span></div>
+
+
+<div class="callout "><span class="label">Why this lesson</span><p>NOC ads list “TCP/IP, DNS, DHCP” together (Job Ads #39).</p></div>
+
+<h2>Warm-up</h2>
+<div class="quiz" data-quiz="11-warm"><script type="application/json">
+[
+ {
+  "q": "In 10.20.0.130/26, what is the network address?",
+  "options": [
+   "10.20.0.0",
+   "10.20.0.128",
+   "10.20.0.130",
+   "10.20.0.191"
+  ],
+  "answer": 1,
+  "why": "Block size 64: streets at 0, 64, 128, 192. 130 is on the .128 street."
+ },
+ {
+  "q": "What does the firewall decide?",
+  "options": [
+   "Which ports visitors may reach",
+   "What name a server has",
+   "How fast data travels",
+   "Who gets an IP address"
+  ],
+  "answer": 0,
+  "why": "The lobby guard with a list of allowed ports."
+ }
+]
+</script></div>
+
+<h2>Part 1 · DNS: the village directory</h2>
+<p>People remember names; computers need numbers. <b>DNS</b> (Domain Name System) is the directory that turns a name like google.com into an IP address.</p>
+<p>Condo comparison: you tell the guard “I'm visiting the Santos family”. The guard checks the directory and says “unit 1204”. You never needed to know the number.</p>
+<ol class="gates">
+  <li><b>Your laptop asks its DNS resolver</b> (usually your router or your ISP, sometimes 8.8.8.8 or 1.1.1.1).</li>
+  <li><b>If the resolver doesn't already know,</b> it asks the internet's chain of directories and gets the answer.</li>
+  <li><b>The answer comes back with a TTL</b> (time to live): how many seconds it may be remembered (cached).</li>
+</ol>
+<p>The record types you'll meet:</p>
+<div class="lab-sort" data-id="records"><script type="application/json">
+{
+ "title": "which DNS record?",
+ "intro": "Pick the record type each job needs.",
+ "choices": [
+  "A",
+  "AAAA",
+  "CNAME",
+  "MX",
+  "TXT"
+ ],
+ "items": [
+  {
+   "t": "palhaven.example → 203.0.113.84",
+   "a": 0,
+   "why": "A = name to IPv4 address."
+  },
+  {
+   "t": "Which server receives email for example.com",
+   "a": 3,
+   "why": "MX = mail exchanger."
+  },
+  {
+   "t": "www.example.com is just a nickname for example.com",
+   "a": 2,
+   "why": "CNAME = canonical name, an alias."
+  },
+  {
+   "t": "Prove to Google you own the domain",
+   "a": 4,
+   "why": "TXT records hold notes, often verification codes."
+  },
+  {
+   "t": "example.com → 2001:db8::7",
+   "a": 1,
+   "why": "AAAA = name to IPv6 address."
+  }
+ ]
+}
+</script></div>
+
+<h2>Part 2 · DHCP: the leasing office</h2>
+<p>When your phone joins Wi-Fi, nobody types an address into it. <b>DHCP</b> (Dynamic Host Configuration Protocol) hands out addresses automatically, like a leasing office handing out unit keys. Four steps, remembered as <b>DORA</b>: Discover, Offer, Request, Acknowledge.</p>
+<div class="sim" data-sim2="dora"></div>
+
+<p>A DHCP server hands out four things: an <b>IP address</b>, the <b>subnet mask</b>, the <b>default gateway</b> (way out), and the <b>DNS server</b> address. The range it hands out from is called a <b>scope</b>. Printers, cameras and servers usually get a <b>reservation</b>: always the same address, so other devices can find them.</p>
+<p>The clue every technician knows: if a Windows PC shows an address starting <b>169.254</b>, DHCP failed. The PC gave itself an emergency address (<b>APIPA</b>) and can't reach anything off its own cable.</p>
+<div class="lab-order" data-id="dora"><script type="application/json">
+{
+ "title": "DORA",
+ "intro": "Put the four DHCP messages in the order they happen.",
+ "items": [
+  "Discover: the new device shouts “is there a leasing office?”",
+  "Offer: the server offers an address",
+  "Request: the device says “yes please, I'll take it”",
+  "Acknowledge: the server confirms the lease"
+ ],
+ "win": "D-O-R-A. That's the CCNA answer."
+}
+</script></div>
+
+<h2>Part 3 · The two classic tickets</h2>
+<p><b>Ticket A:</b> “Internet is down.” You can ping 8.8.8.8 (an address) but can't open google.com (a name). → The road works; the directory doesn't. Suspect <b>DNS</b>.</p>
+<p><b>Ticket B:</b> “Can't connect at all.” <code>ipconfig</code> shows 169.254.x.x. → The device never got a lease. Suspect <b>DHCP</b>: cable, Wi-Fi, switch port, or the DHCP server itself.</p>
+<div class="lab-sort" data-id="dnsdhcp"><script type="application/json">
+{
+ "title": "DNS or DHCP?",
+ "intro": "Read each symptom and pick the suspect.",
+ "choices": [
+  "DNS",
+  "DHCP",
+  "Neither: the road"
+ ],
+ "items": [
+  {
+   "t": "Ping 8.8.8.8 works; ping google.com says “could not find host”",
+   "a": 0,
+   "why": "Addresses work, names don't."
+  },
+  {
+   "t": "ipconfig shows 169.254.33.9",
+   "a": 1,
+   "why": "Self-assigned APIPA address: no lease."
+  },
+  {
+   "t": "ping 8.8.8.8 times out, but the PC has 192.168.1.23 and a gateway",
+   "a": 2,
+   "why": "It has a lease, and even addresses fail: check the gateway, cable, ISP."
+  },
+  {
+   "t": "Every PC gets an address, but “DNS Servers” in ipconfig /all is empty",
+   "a": 1,
+   "why": "The DHCP scope isn't handing out the DNS option. Fix the scope; names will then work."
+  },
+  {
+   "t": "A new website works for you but not for a colleague who visited it yesterday",
+   "a": 0,
+   "why": "Their cached answer hasn't expired yet (TTL)."
+  }
+ ]
+}
+</script></div>
+
+<details class="recall"><summary>Say it yourself first, then open this</summary><p>“DNS turns names into IP addresses, like a building directory. DHCP leases addresses automatically using Discover, Offer, Request, Acknowledge, and also hands out the mask, gateway and DNS server. If I can ping an IP but not a name, it's DNS. If I see 169.254, DHCP failed.”</p></details>
+
+<h2>Practice 1 · Check yourself</h2>
+<div class="quiz" data-quiz="11-check"><script type="application/json">
+[
+ {
+  "q": "Which record turns a name into an IPv4 address?",
+  "options": [
+   "MX",
+   "CNAME",
+   "A",
+   "TXT"
+  ],
+  "answer": 2,
+  "why": "A = Address (IPv4). AAAA is the IPv6 version."
+ },
+ {
+  "q": "What is the correct DHCP order?",
+  "options": [
+   "Offer, Discover, Acknowledge, Request",
+   "Discover, Offer, Request, Acknowledge",
+   "Request, Offer, Discover, Acknowledge",
+   "Discover, Request, Offer, Acknowledge"
+  ],
+  "answer": 1,
+  "why": "DORA."
+ },
+ {
+  "q": "A user can reach 8.8.8.8 but not facebook.com. Most likely cause?",
+  "options": [
+   "Broken cable",
+   "DNS problem",
+   "DHCP problem",
+   "Firewall blocking port 22"
+  ],
+  "answer": 1,
+  "why": "Reaching an IP proves the path works. Only the name lookup fails."
+ },
+ {
+  "q": "A laptop shows 169.254.10.7. What does that tell you?",
+  "options": [
+   "It has a public address",
+   "DNS is broken",
+   "It failed to get a DHCP lease",
+   "It's connected to a VPN"
+  ],
+  "answer": 2,
+  "why": "169.254 is the self-assigned emergency address when DHCP fails."
+ },
+ {
+  "q": "Why give a network printer a DHCP reservation?",
+  "options": [
+   "So it always has the same address",
+   "To make it print faster",
+   "To hide it from the internet",
+   "So it can use DNS"
+  ],
+  "answer": 0,
+  "why": "Other devices need to find it at a predictable address."
+ },
+ {
+  "q": "(Lesson 10 review) How many usable hosts in a /26?",
+  "options": [
+   "64",
+   "62",
+   "30",
+   "126"
+  ],
+  "answer": 1,
+  "why": "64 − 2."
+ }
+]
+</script></div>
+
+<h2>Practice 2 · On your laptop and server</h2>
+<p>15 minutes, read-only.</p>
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>PowerShell: <code>ipconfig /all</code>. Find your IPv4 address, subnet mask, default gateway, DHCP server, “Lease Obtained”, and DNS servers. Which device is your DHCP server? (Usually your router.)</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span><code>Resolve-DnsName google.com</code>. Note the IP address(es) and the record type (A).</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span><code>Resolve-DnsName google.com -Type MX</code>. Which servers receive Gmail's email?</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">look only</span>Server: <code>ssh gameserver</code>, then <code>resolvectl status</code>. Find “DNS Servers”: that's who answers your server's questions.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">look only</span>Server: <code>resolvectl query github.com</code>. It answers with GitHub's IP address.</div></li>
+</ul>
+
+<h2>PASS/FAIL CHECK</h2>
+<p>Without notes, write on paper: (1) DORA with one sentence per step, (2) the four things DHCP hands out, (3) what 169.254 means, (4) how to tell a DNS problem from a road problem in one test.</p>
+<div class="callout good"><span class="label">PASS</span><p>All four correct. Then explain Ticket A and Ticket B out loud in under 2 minutes.</p></div>
+
+<h2>Break/fix drill</h2>
+<div class="lab-cases" data-id="bf"><script type="application/json">
+{
+ "cases": [
+  {
+   "sev": "P2",
+   "sym": "Your friend's whole office can open websites by IP but not by name since this morning. Someone “cleaned up” the router settings last night.",
+   "o": [
+    "The ISP line is down",
+    "The DNS server handed out by DHCP was changed or removed",
+    "Every PC lost its DHCP lease",
+    "The office firewall blocks port 443"
+   ],
+   "a": 1,
+   "steps": [
+    "On one PC: <code>ipconfig /all<\/code>. Is “DNS Servers” wrong or empty?",
+    "Test a name directly against a known resolver: <code>Resolve-DnsName google.com -Server 8.8.8.8<\/code>.",
+    "Fix the DHCP scope's DNS option (or the router's own DNS settings).",
+    "Have users reconnect (or <code>ipconfig /renew<\/code>) so they pick up the fixed option."
+   ]
+  }
+ ]
+}
+</script></div>
+
+<h2>New words from this lesson</h2>
+<div class="lab-gloss" data-id="words"><script type="application/json">
+{
+ "words": [
+  [
+   "DNS",
+   "The directory that turns names into IP addresses."
+  ],
+  [
+   "Resolver",
+   "The DNS server your device asks first."
+  ],
+  [
+   "TTL",
+   "How long an answer may be remembered."
+  ],
+  [
+   "A / AAAA / CNAME / MX / TXT",
+   "Common DNS record types."
+  ],
+  [
+   "DHCP",
+   "Automatic address leasing."
+  ],
+  [
+   "DORA",
+   "Discover, Offer, Request, Acknowledge."
+  ],
+  [
+   "Scope",
+   "The range of addresses DHCP hands out."
+  ],
+  [
+   "Reservation",
+   "A device that always gets the same address."
+  ],
+  [
+   "APIPA (169.254.x.x)",
+   "Emergency self-assigned address: DHCP failed."
+  ]
+ ]
+}
+</script></div>
+
+<h2>Read next (10 min)</h2>
+<p><a href="https://www.cloudflare.com/learning/dns/what-is-dns/">Cloudflare Learning Center: “What is DNS?”</a>. Jeremy's IT Lab videos on DNS and DHCP (around Days 38–39).</p>
+
+<nav class="course">
+  <span>← <a href="0010-subnetting.html">10 · Subnetting</a></span>
+  <span><a href="../index.html">Course home</a></span>
+  <span><a href="0012-switches-and-vlans.html">12 · Switches and VLANs</a> →</span>
+</nav>
+</main>
+<script src="../assets/lab.js"></script>
+<script src="../assets/quiz.js"></script>
+<script src="../assets/sims.js"></script>
+<script src="../assets/sims2.js"></script>
+<script src="../assets/match.js"></script>
+</body>
+</html>

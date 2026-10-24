@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Server Lab Word List</title>
+<link rel="stylesheet" href="../assets/course.css">
+<style>
+  dl.terms { margin: 0; }
+  dl.terms dt { font: 600 17px var(--sans); margin-top: 18px; }
+  dl.terms dt .aws { font: 500 13px var(--sans); color: var(--muted); margin-left: 8px; }
+  dl.terms dd { margin: 4px 0 0; max-width: 66ch; }
+  dl.terms dd .eg { display: block; font-size: 15.5px; color: var(--muted); }
+  h2 a { text-decoration: none; }
+  @media print { dl.terms dt { margin-top: 8px; } }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="../index.html">Course home</a> · <a href="commands.html">Command cheat sheet</a></nav>
+<div class="eyebrow">Server Lab · Reference</div>
+<h1>Word list</h1>
+<p class="lede">Every word the course teaches, in plain language, with an example from your server. Grey tags give the
+AWS name where it differs. Grouped by the lesson that teaches it.</p>
+
+<h2><a href="../lessons/0001-decode-your-join-address.html">01 · Decode your join address</a></h2>
+<dl class="terms">
+  <dt>Server / client</dt><dd>A computer that stays on and answers requests / the computer that asks.<span class="eg">The Oracle computer in Singapore / your laptop.</span></dd>
+  <dt>Cloud</dt><dd>Renting computers in someone else’s building and using them over the internet, paying for what you use.<span class="eg">Oracle, AWS (Amazon) and Azure (Microsoft) are cloud providers.</span></dd>
+  <dt>Data center</dt><dd>A large building full of computers.<span class="eg">Oracle’s data center in Singapore.</span></dd>
+  <dt>IP address</dt><dd>A computer’s address on a network: four numbers, 0–255 each.<span class="eg"><code>203.0.113.84</code>: the building’s street address.</span></dd>
+  <dt>Port</dt><dd>A number that picks which program on a computer the data is for.<span class="eg"><code>8211</code> = Palworld, <code>22</code> = SSH: the unit number.</span></dd>
+  <dt>Firewall</dt><dd>Rules for which ports visitors may reach; everything else is blocked.<span class="eg">The lobby guard with a list.</span></dd>
+  <dt>SSH</dt><dd>A secure remote control for typing commands on another computer (TCP port 22).<span class="eg"><code>ssh gameserver</code></span></dd>
+</dl>
+
+<h2><a href="../lessons/0002-two-addresses.html">02 · Your server has two addresses</a></h2>
+<dl class="terms">
+  <dt>Network</dt><dd>A group of connected devices that can talk to each other.</dd>
+  <dt>Public / private IP address</dt><dd>Works across the whole internet / works only inside one network.<span class="eg"><code>203.0.113.84</code> / <code>10.0.0.84</code>. Private ranges start with 10., 172.16–31. or 192.168.</span></dd>
+  <dt>NAT (Network Address Translation)</dt><dd>Swapping public and private addresses as data passes through.<span class="eg">The receptionist transferring outside calls to extensions.</span></dd>
+  <dt>Internet gateway</dt><dd>The door between a cloud private network and the internet; it does the NAT.</dd>
+  <dt>Default gateway</dt><dd>Where a device sends anything it doesn’t know how to reach.<span class="eg">Your home router; <code>10.0.0.1</code> for the server.</span></dd>
+  <dt>Subnet</dt><dd>A block of neighbouring addresses, like one street.<span class="eg"><code>10.0.0.0/24</code> = every address starting 10.0.0.</span></dd>
+</dl>
+
+<h2><a href="../lessons/0003-tcp-and-udp.html">03 · TCP and UDP</a></h2>
+<dl class="terms">
+  <dt>Packet</dt><dd>A small piece of data carrying its destination address and port.</dd>
+  <dt>Protocol</dt><dd>An agreed set of rules for communicating.</dd>
+  <dt>TCP</dt><dd>The reliable protocol: handshake, confirms, resends, keeps order.<span class="eg">SSH, websites. The registered courier.</span></dd>
+  <dt>UDP</dt><dd>The fast protocol: just sends, with no confirmations.<span class="eg">Palworld, voice, video. Shouting updates.</span></dd>
+  <dt>Handshake</dt><dd>TCP’s hello exchange that sets up a connection.</dd>
+  <dt>Listening</dt><dd>A program waiting for packets on a port.<span class="eg">See them with <code>sudo ss -tulpn</code>.</span></dd>
+  <dt>Localhost (127.0.0.1)</dt><dd>“This computer itself”: reachable only from inside.<span class="eg">Your monitor listens on <code>127.0.0.1:8797</code>.</span></dd>
+</dl>
+
+<h2><a href="../lessons/0004-linux-basics.html">04 · Linux basics</a></h2>
+<dl class="terms">
+  <dt>Operating system (OS)</dt><dd>The base software that runs everything else.<span class="eg">Windows on your laptop, Ubuntu Linux on the server.</span></dd>
+  <dt>Terminal / shell / prompt</dt><dd>The text window / the program that runs what you type / the <code>user@machine:folder$</code> line.</dd>
+  <dt>Directory / path</dt><dd>A folder / its location.<span class="eg"><code>/opt/palworld</code></span></dd>
+  <dt>root / sudo</dt><dd>The administrator account / run one command as administrator.<span class="eg">The building manager’s key card.</span></dd>
+  <dt>Permissions</dt><dd>Who may read (r), write (w) or run (x) a file.<span class="eg"><code>rw-------</code> on the compose file: only root.</span></dd>
+  <dt>RAM / disk</dt><dd>Short-term working memory, wiped on reboot / long-term storage.</dd>
+  <dt>Service</dt><dd>A program that runs in the background all the time.<span class="eg"><code>palworld-monitor</code></span></dd>
+</dl>
+
+<h2><a href="../lessons/0005-docker.html">05 · Docker</a></h2>
+<dl class="terms">
+  <dt>Container</dt><dd>An isolated running program with all the files it needs; shares the server’s OS.<span class="eg">The sealed room <code>palworld</code> at <code>172.18.0.2</code>.</span></dd>
+  <dt>Image</dt><dd>The packed kit a container is built from.<span class="eg"><code>thijsvanloef/palworld-server-docker</code></span></dd>
+  <dt>Virtual machine (VM)</dt><dd>A whole pretend computer with its own OS, carved out of a real one.<span class="eg">Your Oracle server.</span></dd>
+  <dt>Docker Compose / YAML</dt><dd>Writing a container’s setup in a file / the indentation-sensitive format that file uses.</dd>
+  <dt>Port mapping</dt><dd>Forwarding a server port into a container.<span class="eg"><code>8211:8211/udp</code></span></dd>
+  <dt>Volume</dt><dd>Storage outside a container that survives when it’s replaced.<span class="eg"><code>./data:/palworld</code></span></dd>
+  <dt>Configuration as code</dt><dd>Keeping setup in files instead of clicks, so it can be repeated and reviewed.</dd>
+</dl>
+
+<h2><a href="../lessons/0006-follow-a-packet.html">06 · Follow a packet</a></h2>
+<dl class="terms">
+  <dt>Security list <span class="aws">AWS: network ACL (subnet) · security group (server)</span></dt><dd>Oracle’s firewall, outside the server, set on the website for a subnet.<span class="eg">The village gate guard.</span></dd>
+  <dt>iptables</dt><dd>The Linux firewall inside the server.<span class="eg">The lobby guard; ends with “reject the rest”.</span></dd>
+  <dt>Troubleshooting (outside-in)</dt><dd>Checking one layer at a time from the internet towards the program, stopping at the first failure.</dd>
+</dl>
+
+<h2><a href="../lessons/0007-monitoring-and-backups.html">07 · Monitoring &amp; backups</a></h2>
+<dl class="terms">
+  <dt>Monitoring / metric / dashboard</dt><dd>Watching numbers over time / one such number / a screen of charts.</dd>
+  <dt>Four golden signals</dt><dd>Latency, traffic, errors, saturation.</dd>
+  <dt>Alert</dt><dd>A message that a human needs to act. Good alerts are rare.</dd>
+  <dt>Health check</dt><dd>A regular “are you OK?” question to a program.<span class="eg"><code>(healthy)</code> in <code>docker ps</code>.</span></dd>
+  <dt>Auto-remediation</dt><dd>The system fixing a known problem by itself.<span class="eg">Restart when memory runs low.</span></dd>
+  <dt>systemd / cron</dt><dd>Starts services at boot and keeps them up / runs jobs on a schedule (<code>45 4 * * *</code>).</dd>
+  <dt>Backup / retention</dt><dd>A copy to go back to / how long copies are kept (7 days).</dd>
+  <dt>RPO / RTO</dt><dd>Most data you can afford to lose / most downtime you can accept.</dd>
+  <dt>3-2-1 rule</dt><dd>3 copies, on 2 kinds of storage, 1 kept somewhere else.</dd>
+</dl>
+
+<h2><a href="../lessons/0008-oracle-to-aws.html">08 · Same ideas, AWS names</a></h2>
+<dl class="terms">
+  <dt>Region / availability domain <span class="aws">AWS: Region / Availability Zone (AZ)</span></dt><dd>An area of the world / a separate data center inside it.<span class="eg"><code>ap-singapore-1</code> (AWS: <code>ap-southeast-1</code>).</span></dd>
+  <dt>High availability</dt><dd>Running copies in more than one zone so one failure doesn’t stop the service.</dd>
+  <dt>Tenancy <span class="aws">AWS: account</span></dt><dd>Your top-level cloud account.</dd>
+  <dt>VCN <span class="aws">AWS: VPC</span></dt><dd>Your own private network in the cloud.</dd>
+  <dt>Compute instance / shape <span class="aws">AWS: EC2 instance / instance type</span></dt><dd>A rented virtual computer / its size.</dd>
+  <dt>Boot volume <span class="aws">AWS: EBS volume</span></dt><dd>The virtual computer’s disk.</dd>
+  <dt>Reserved public IP <span class="aws">AWS: Elastic IP</span></dt><dd>A public address that stays yours until you release it.</dd>
+  <dt>Stateful / stateless</dt><dd>Remembers the conversation and lets replies back / judges each packet alone.</dd>
+  <dt>IAM</dt><dd>Who can do what in a cloud account: users, groups, policies, roles.</dd>
+  <dt>Least privilege / root user / MFA</dt><dd>Only the access needed / the account’s master key / a phone code on top of the password.</dd>
+  <dt>Shared responsibility model</dt><dd>The provider secures the cloud itself; you secure what you put in it.</dd>
+  <dt>Pay-as-you-go / Free Tier / budget alert</dt><dd>Pay for what you use / free usage limits / a notification when spending passes a limit.</dd>
+</dl>
+
+<h2><a href="../lessons/0009-tell-the-story.html">09 · Tell the story</a></h2>
+<dl class="terms">
+  <dt>README</dt><dd>The front page of a project on GitHub.</dd>
+  <dt>STAR</dt><dd>Situation, Task, Action, Result: the shape of a good “tell me about a time” answer.</dd>
+</dl>
+</main>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>02 · Two Addresses</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/interactive.css">
+</head>
+<body>
+<main>
+<nav class="top"><a href="../index.html">Course home</a> · <a href="../reference/glossary.html">Word list</a></nav>
+
+<div class="eyebrow">Server Lab · Lesson 02 · pairs with Tracker Week 2, “Private IPs and NAT”</div>
+<h1>Your server has two addresses</h1>
+<p class="lede">Players reach your server at <code>203.0.113.84</code>. But ask the server its own address and it says
+<code>10.0.0.84</code>. Both are right. By the end of this lesson you’ll know why, and you’ll find the same pattern
+in your own home Wi-Fi.</p>
+<div class="meta"><span>≈ 25 min</span><span>Builds on Lesson 01</span><span>Nothing here can break the server</span></div>
+
+<h2>Warm-up · from Lesson 01</h2>
+<p class="small">Answer from memory. Don’t look back first: having to try is what makes it stick.</p>
+<div class="quiz" data-quiz="02-warm"><script type="application/json">
+[
+ {"q": "In `203.0.113.84:8211`, which part picks the Palworld program?", "options": ["203", "113.84", "8211", "0.113"], "answer": 2, "why": "The port (after the `:`) picks the program, like a unit number. The four numbers before it are the IP address."},
+ {"q": "What is a firewall, in the condo comparison?", "options": ["The street address of the building", "The lobby guard with a list", "The unit number on each door", "The elevator between all the floors"], "answer": 1, "why": "The firewall is the guard: only visitors going to ports on the list (22 and 8211) get through."}
+]
+</script></div>
+
+<h2>Part 1 · Two kinds of address</h2>
+<p>There are two kinds of IP address:</p>
+<ul>
+  <li>A <b>public IP address</b> works on the whole internet. Anyone, anywhere, can send data to it.
+  Your server’s public address is <code>203.0.113.84</code>.</li>
+  <li>A <b>private IP address</b> only works <em>inside one network</em>, like your home Wi-Fi or Oracle’s network
+  for your server. Nobody outside can send to it directly. Your server’s private address is <code>10.0.0.84</code>.</li>
+</ul>
+<p>A <b>network</b> is just a group of devices connected so they can talk to each other: your home Wi-Fi is one,
+and Oracle gives your server one too.</p>
+
+<h3>The office building comparison</h3>
+<p>Think of a company office. From outside, there’s one public phone number. Inside, every desk has its own short
+<b>extension number</b>. Many companies use the same extensions (101, 102…) and it doesn’t matter, because
+extensions only work inside each office.</p>
+<p>When an outside call comes in, the <b>receptionist</b> answers on the public number and transfers it to the right
+extension. The caller never needs to know the extension.</p>
+<div class="table-wrap"><table>
+  <thead><tr><th>Office</th><th>Network</th><th>Your server</th></tr></thead>
+  <tbody>
+    <tr><td>Public phone number</td><td>Public IP address</td><td><code>203.0.113.84</code></td></tr>
+    <tr><td>Desk extension</td><td>Private IP address</td><td><code>10.0.0.84</code></td></tr>
+    <tr><td>Receptionist who transfers calls</td><td>NAT (explained below)</td><td>Oracle’s <b>internet gateway</b></td></tr>
+  </tbody>
+</table></div>
+
+<h2>Part 2 · The receptionist has a name: NAT</h2>
+<p>Swapping a public address for a private one (and back again for the reply) is called <b>NAT</b>, short for
+<b>Network Address Translation</b>. “Translation” just means swapping one address for another.</p>
+<p>In Oracle’s cloud, the receptionist is a part of the network called the <b>internet gateway</b>: the door between
+your private network and the internet. A player sends data to <code>203.0.113.84</code>. The internet gateway swaps
+in <code>10.0.0.84</code> and passes it on. When the server answers, the gateway swaps the address back, so the player
+only ever sees the public one.</p>
+<p>The server itself never sees its public address at all. Amazon’s documentation says the same about its own
+cloud: “Your instance is only aware of the private (internal) IP address space.”<sup class="cite"><a href="https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html">1</a></sup>
+(“Instance” is cloud-speak for a rented computer.)</p>
+
+<figure>
+<svg viewBox="0 0 500 330" role="img" aria-labelledby="t2 d2">
+  <title id="t2">NAT at the internet gateway</title>
+  <desc id="d2">A player sends to 203.0.113.84. The internet gateway swaps the address to 10.0.0.84 and passes the data into Oracle's private network to the server.</desc>
+  <rect class="box" x="120" y="10" width="260" height="54" rx="6"/>
+  <text x="250" y="33" font-size="15" font-weight="600" text-anchor="middle">Player’s laptop</text>
+  <text class="muted" x="250" y="53" font-size="12.5" text-anchor="middle">sends to 203.0.113.84 (public)</text>
+  <line class="wire" x1="250" y1="64" x2="250" y2="250"/>
+  <text class="muted" x="262" y="96" font-size="12.5">the internet</text>
+  <rect class="box" x="120" y="118" width="260" height="62" rx="6" stroke-width="2.5" style="stroke:var(--accent)"/>
+  <text x="250" y="142" font-size="15" font-weight="600" text-anchor="middle">Internet gateway (receptionist)</text>
+  <text x="250" y="164" font-size="13" text-anchor="middle" class="accent">203.0.113.84 ⇄ 10.0.0.84</text>
+  <rect x="30" y="200" width="440" height="120" rx="10" fill="none" stroke="currentColor" stroke-opacity=".5" stroke-dasharray="5 4"/>
+  <text class="muted" x="46" y="222" font-size="12.5">Oracle private network · only 10.0.0.x addresses here</text>
+  <rect class="box" x="120" y="250" width="260" height="54" rx="6"/>
+  <text x="250" y="273" font-size="15" font-weight="600" text-anchor="middle">Your server</text>
+  <text class="muted" x="250" y="293" font-size="12.5" text-anchor="middle">knows itself only as 10.0.0.84 (private)</text>
+</svg>
+<figcaption>The receptionist swaps addresses in both directions. The player and the server never need to know each other’s side.</figcaption>
+</figure>
+
+<h2>Part 3 · How to spot a private address</h2>
+<p>Three ranges of addresses are set aside for private use. They are listed in an official internet standard called
+RFC 1918:<sup class="cite"><a href="https://datatracker.ietf.org/doc/html/rfc1918">2</a></sup></p>
+<div class="table-wrap"><table>
+  <thead><tr><th>Starts with…</th><th>Where you’ve seen it</th></tr></thead>
+  <tbody>
+    <tr><td><code>10.</code></td><td>Your Oracle server: <code>10.0.0.84</code></td></tr>
+    <tr><td><code>172.16.</code> up to <code>172.31.</code></td><td>Docker’s little network inside your server: <code>172.18.0.1</code> (Lesson 05)</td></tr>
+    <tr><td><code>192.168.</code></td><td>Almost every home Wi-Fi router</td></tr>
+  </tbody>
+</table></div>
+<p>Any address outside these ranges, like <code>203.0.113.84</code>, is a public one. (A few other special
+ranges exist, but these three are the ones you’ll meet every day.)</p>
+
+<div class="sim" data-sim="address"><script type="application/json">{"start": "10.0.0.84", "examples": ["10.0.0.84", "203.0.113.84", "192.168.1.23", "172.18.0.2", "100.64.0.10", "127.0.0.1", "8.8.8.8", "172.32.0.1"]}</script></div>
+<p class="small">Try <code>172.32.0.1</code>: it looks private, but the 172 range only runs from 172.16 to 172.31.</p>
+
+<h3>Why bother with private addresses?</h3>
+<p>Two reasons. First, there aren’t enough public addresses: four numbers from 0–255 give about 4.3 billion
+combinations, fewer than the number of devices in the world. With private addresses, a whole office or home shares
+one public address. Second, safety: nobody on the internet can reach a private address directly. They have to
+come through the receptionist.</p>
+
+<h2>Part 4 · Your home works the same way</h2>
+<p>Your internet provider gives your home router <b>one</b> public address. Your router gives every device at
+home (laptop, phone, TV) its own private address, usually starting with <code>192.168.</code>. Your router is your
+home’s receptionist: it does the NAT for everyone.</p>
+<p>The address your laptop uses to reach the router is called the <b>default gateway</b>: “if I don’t know where
+something is, I send it to the receptionist.”</p>
+
+<h3>Neighbourhoods: the subnet</h3>
+<p>In Oracle, your server sits in a <b>subnet</b>: a block of neighbouring addresses. Yours is written
+<code>10.0.0.0/24</code>, which means “every address that starts with <code>10.0.0.</code>”, a street with house
+numbers <code>10.0.0.0</code> to <code>10.0.0.255</code>. Your server is house number 84 on that street. Tracker Week 2
+teaches the <code>/24</code> part properly. For now, “/24 = the first three numbers are the street” is enough.</p>
+
+<details class="recall">
+  <summary>Say it yourself first, then open this</summary>
+  <p>“My server has a public address, 203.0.113.84, that the internet uses, and a private address, 10.0.0.84, that
+  only works inside Oracle’s network. Oracle’s internet gateway acts as a receptionist and swaps between them. That’s
+  called NAT. My home router does the same for my laptop and phone, which have private 192.168 addresses.”</p>
+</details>
+
+<hr>
+
+<h2>Practice 1 · Check yourself</h2>
+<div class="quiz" data-quiz="02-check"><script type="application/json">
+[
+ {"q": "Which of these is a PRIVATE address?", "options": ["203.0.113.84", "8.8.8.8", "192.168.1.15", "52.95.110.1"], "answer": 2, "why": "192.168.x.x is one of the three private ranges (with 10.x and 172.16–31.x). Home routers use it a lot."},
+ {"q": "What does NAT do?", "options": ["Swaps public and private addresses as data passes", "Blocks every port that isn't on its list", "Gives your laptop a much faster internet connection", "Saves a copy of the world every morning"], "answer": 0, "why": "NAT (Network Address Translation) swaps addresses, like a receptionist transferring an outside call to an extension."},
+ {"q": "On the server, the command that lists its addresses shows `10.0.0.84` but never `203.0.113.84`. Why?", "options": ["The public address was deleted last night", "Only Oracle's gateway knows the public address", "Ubuntu hides public addresses for extra speed", "The firewall removes it from the list"], "answer": 1, "why": "The internet gateway holds the public address and swaps it for the private one. The server only ever sees 10.0.0.84."},
+ {"q": "Your friend's laptop at home has the address `192.168.1.20`. Can you send data straight to it from the internet?", "options": ["Yes, any address works from anywhere online", "Yes, but only from inside the Philippines", "No, only after you restart their router", "No, it only works inside their network"], "answer": 3, "why": "Private addresses only work inside their own network. From outside, you'd have to go through their router's public address."},
+ {"q": "Your server's subnet is `10.0.0.0/24`. Which address is on the same street?", "options": ["10.0.1.84", "10.0.0.200", "10.1.0.84", "11.0.0.84"], "answer": 1, "why": "/24 means the first three numbers (10.0.0) are the street. 10.0.0.200 shares them; the others don't."},
+ {"q": "What is the 'default gateway' on your home laptop?", "options": ["Your router, where unknown traffic is sent", "The website you open the most often", "The first app that starts on boot", "The password for your home Wi-Fi network"], "answer": 0, "why": "The default gateway is the receptionist (your router): anything your laptop doesn't know how to reach goes there first."}
+]
+</script></div>
+
+<h2>Practise · safe terminal</h2>
+<p class="small">Practise in this safe copy first: it behaves like your server, using real output captured from it. Then do the real thing below.</p>
+<div class="terminal" data-term="02"><script type="application/json">
+{
+ "start": "laptop",
+ "tasks": [
+  {
+   "text": "See your laptop's addresses: ipconfig",
+   "cmd": "^ipconfig",
+   "note": "Find IPv4 Address (private, 192.168…) and Default Gateway (your router)."
+  },
+  {
+   "text": "What is the (practice) laptop's default gateway?",
+   "ask": true,
+   "answers": [
+    "192.168.1.1"
+   ]
+  },
+  {
+   "text": "Log in to the server: ssh gameserver",
+   "cmd": "^ssh gameserver$"
+  },
+  {
+   "text": "List the server's addresses: ip -4 -br a",
+   "cmd": "^(sudo )?ip (-4 )?(-br )?a(ddr)?$"
+  },
+  {
+   "text": "Which address is on enp0s6, the server's network card? (just the four numbers)",
+   "ask": true,
+   "answers": [
+    "10.0.0.84"
+   ]
+  },
+  {
+   "text": "Find the server's receptionist: ip route",
+   "cmd": "^(sudo )?ip route$"
+  },
+  {
+   "text": "What is the server's default gateway?",
+   "ask": true,
+   "answers": [
+    "10.0.0.1"
+   ]
+  },
+  {
+   "text": "Back to your laptop: exit",
+   "cmd": "^(exit|logout)$"
+  }
+ ]
+}
+</script></div>
+
+<h2>Practice 2 · Find both patterns yourself (10 min)</h2>
+<p>All of these only <em>look</em>. Tick each one off.</p>
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><span><b>Your laptop.</b> In PowerShell, type <code>ipconfig</code>. Find your Wi-Fi section. Write down the
+    <code>IPv4 Address</code> (probably <code>192.168.…</code>: private!) and the <code>Default Gateway</code> (your router, the receptionist).</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>Your server.</b> <code>ssh gameserver</code>, then <code>ip -4 -br a</code>. (It means: show IP version 4 addresses, brief.)
+    Find <code>10.0.0.84</code> next to <code>enp0s6</code>, the server’s network card. Notice that <code>203.0.113.84</code> isn’t there.</span></li>
+  <li><input type="checkbox" aria-label="done"><span>In the same list, spot <code>172.18.0.1</code> (Docker’s private network, Lesson 05) and <code>100.64.0.10</code> next to
+    <code>tailscale0</code>: the private link your phone uses to open the monitor (Lesson 07).</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>Find the receptionist.</b> Still on the server, type <code>ip route</code>. The first line says <code>default via 10.0.0.1</code>:
+    that’s the server’s default gateway inside Oracle’s network, the same idea as your home router. Then type <code>exit</code>.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>Explain it.</b> Out loud, in under a minute: why your server has two addresses, and what NAT does. Use the receptionist comparison.</span></li>
+</ul>
+
+<h2>New words from this lesson</h2>
+<div class="table-wrap"><table><tbody>
+  <tr><td><b>Network</b></td><td>A group of connected devices that can talk to each other.</td></tr>
+  <tr><td><b>Public IP address</b></td><td>An address that works across the whole internet (<code>203.0.113.84</code>).</td></tr>
+  <tr><td><b>Private IP address</b></td><td>An address that only works inside one network (<code>10.0.0.84</code>, <code>192.168.…</code>).</td></tr>
+  <tr><td><b>NAT</b></td><td>Network Address Translation: swapping public and private addresses, like a receptionist.</td></tr>
+  <tr><td><b>Internet gateway</b></td><td>The door between Oracle’s private network and the internet. It does the NAT.</td></tr>
+  <tr><td><b>Default gateway</b></td><td>Where a device sends anything it doesn’t know how to reach (your router; <code>10.0.0.1</code> for the server).</td></tr>
+  <tr><td><b>Subnet</b></td><td>A block of neighbouring addresses, like one street (<code>10.0.0.0/24</code>).</td></tr>
+</tbody></table></div>
+
+<h2>Read next (10 min)</h2>
+<p><a href="https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html"><b>Amazon: Enable internet access using an internet gateway</b></a>.
+Read the section “IP addresses and NAT”. It’s the official version of this lesson, written for Amazon’s cloud, which
+your exam is about. Skip the rest if it feels heavy; Lesson 08 covers the Amazon names.</p>
+
+<div class="callout good">
+  <span class="label">Ask your teacher</span>
+  <p>Ask me anything in Claude Code: “why does my phone on mobile data have a different address?”, “what is IPv6?”,
+  “show me NAT with a different example”. Small questions are welcome.</p>
+</div>
+
+<nav class="course">
+  <span>← <a href="0001-decode-your-join-address.html">01 · Decode your join address</a></span>
+  <span>Next: <a href="0003-tcp-and-udp.html">03 · TCP and UDP</a> →</span>
+</nav>
+
+<ol class="small" style="margin-top:32px">
+  <li><a href="https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html">Amazon VPC User Guide: internet gateways, “IP addresses and NAT”</a></li>
+  <li><a href="https://datatracker.ietf.org/doc/html/rfc1918">RFC 1918: Address Allocation for Private Internets</a></li>
+</ol>
+</main>
+<script src="../assets/lab.js"></script>
+<script src="../assets/quiz.js"></script>
+<script src="../assets/sims.js"></script>
+<script src="../assets/match.js"></script>
+<script src="../assets/terminal.js"></script>
+
+</body>
+</html>

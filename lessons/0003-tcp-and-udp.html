@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>03 · TCP and UDP</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/interactive.css">
+</head>
+<body>
+<main>
+<nav class="top"><a href="../index.html">Course home</a> · <a href="../reference/glossary.html">Word list</a></nav>
+
+<div class="eyebrow">Server Lab · Lesson 03 · pairs with Tracker Week 4, “TCP, UDP and ports”</div>
+<h1>Two ways to send data: TCP and UDP</h1>
+<p class="lede">In Lesson 01 you could knock on port 22 from your laptop, but the same test can’t check
+Palworld’s port 8211. That’s because data travels in two different styles. Once you know them, you can read the
+list of every program waiting for visitors on your server.</p>
+<div class="meta"><span>≈ 25 min</span><span>Builds on Lessons 01–02</span><span>Nothing here can break the server</span></div>
+
+<h2>Warm-up · from Lessons 01–02</h2>
+<div class="quiz" data-quiz="03-warm"><script type="application/json">
+[
+ {"q": "Your server's PRIVATE address is…", "options": ["203.0.113.84", "10.0.0.84", "8211", "192.168.1.1"], "answer": 1, "why": "10.0.0.84 is private: it only works inside Oracle's network. 203.0.113.84 is the public address. 8211 is a port, not an address."},
+ {"q": "Who swaps your server's public and private addresses?", "options": ["Your laptop's Wi-Fi card", "The Palworld game itself", "Oracle's internet gateway (NAT)", "The SSH remote control"], "answer": 2, "why": "The internet gateway acts as the receptionist. Swapping addresses is called NAT."},
+ {"q": "What does port 22 lead to on your server?", "options": ["SSH, the remote control", "The Palworld game world", "The daily backup files", "Oracle's monthly billing website"], "answer": 0, "why": "Port 22 = SSH, the remote control you use with `ssh gameserver`. Port 8211 = Palworld."}
+]
+</script></div>
+
+<h2>Part 1 · Data travels in small pieces</h2>
+<p>Data doesn’t travel as one big lump. It’s cut into small pieces called <b>packets</b>, and each one carries the
+address and port it’s going to. When you move in Palworld, your laptop sends a stream of small packets saying
+“I’m here now… now here… now here.”</p>
+<p>How those packets are sent follows a set of rules called a <b>protocol</b>. Two protocols handle almost
+everything: <b>TCP</b> and <b>UDP</b>. The port number is written inside the TCP or UDP part of each packet. That’s
+how the server knows which program it’s for.<sup class="cite"><a href="https://www.cloudflare.com/learning/network-layer/what-is-a-computer-port/">1</a></sup></p>
+
+<h2>Part 2 · TCP: the registered courier</h2>
+<p><b>TCP</b> (Transmission Control Protocol) works like a registered courier with signatures:</p>
+<ul>
+  <li>Before sending anything, both sides say hello and agree to talk. This is called a <b>handshake</b>, and
+  together they form a <b>connection</b>.</li>
+  <li>Every packet is confirmed (“got it”). Anything lost gets sent again.</li>
+  <li>Packets are put back in the right order at the other end.</li>
+</ul>
+<p>It’s reliable, but all that checking takes a little extra time. TCP is used whenever <em>every piece must arrive</em>:
+websites, email, downloads, and <b>SSH</b>. If one letter of your command went missing, <code>sudo docker ps</code>
+could turn into something else entirely.</p>
+
+<h2>Part 3 · UDP: shouting updates across a room</h2>
+<p><b>UDP</b> (User Datagram Protocol) just sends. There’s no handshake, no “got it”, no resending. It’s like
+calling out the score during a basketball game: if someone misses one shout, it doesn’t matter, because the next one is
+coming a second later and is more up to date anyway.</p>
+<p>That’s exactly what a game needs. If a packet saying “a player is at spot A” arrives late, it’s useless, because you’re
+already at spot B. Waiting to resend it would only cause lag. So <b>Palworld uses UDP</b>, as do voice calls and live video.</p>
+
+<div class="table-wrap"><table>
+  <thead><tr><th></th><th>TCP</th><th>UDP</th></tr></thead>
+  <tbody>
+    <tr><td>Comparison</td><td>Registered courier</td><td>Shouting updates</td></tr>
+    <tr><td>Says hello first?</td><td>Yes (handshake)</td><td>No</td></tr>
+    <tr><td>Confirms and resends?</td><td>Yes</td><td>No</td></tr>
+    <tr><td>Speed</td><td>A little slower</td><td>Faster</td></tr>
+    <tr><td>On your server</td><td>SSH on port 22</td><td>Palworld on port 8211</td></tr>
+  </tbody>
+</table></div>
+
+<div class="sim" data-sim="protocol"></div>
+
+<h3>So that’s why the knock test failed on 8211</h3>
+<p><code>Test-NetConnection</code> knocks the TCP way: it tries a handshake. Palworld listens for UDP, and UDP never
+answers a handshake, so the test can’t tell whether 8211 is working. It’s like ringing a doorbell at a door that only
+takes notes slipped under it.</p>
+<p>It also explains the firewall rules in Oracle’s settings. Each rule names a protocol <em>and</em> a port: “TCP 22” and
+“UDP 8211”. Opening TCP 8211 by mistake wouldn’t let a single player in.</p>
+
+<h2>Part 4 · Who is listening? And what is “localhost”?</h2>
+<p>A program that waits for packets on a port is <b>listening</b>. On Linux you can list every listener with one
+command. Here is part of what your server showed on 17 Oct 2026, tidied up:</p>
+<pre>Protocol  Address : port          Program
+tcp       0.0.0.0 : 22            sshd           <span class="c"># SSH, open to everyone</span>
+udp       0.0.0.0 : 8211          docker-proxy   <span class="c"># Palworld (through Docker, Lesson 05)</span>
+udp       0.0.0.0 : 41641         tailscaled     <span class="c"># Tailscale, your private phone link</span>
+tcp     127.0.0.1 : 8797          python         <span class="c"># your monitor, inside only</span>
+tcp 100.64.0.10 : 8797         python         <span class="c"># your monitor, on your private Tailscale network</span></pre>
+<p>Two special addresses show up here:</p>
+<ul>
+  <li><code>0.0.0.0</code> means “listen on every address this computer has”: open to visitors (if the firewall allows).</li>
+  <li><code>127.0.0.1</code>, also called <b>localhost</b>, means “this computer itself”. A program listening on
+  127.0.0.1 can only be reached from <em>inside</em> the server, like a phone extension that only rings within the building. Your
+  monitor uses this on purpose. Its only other address is its private Tailscale one (<code>100.64.0.10</code>, a network
+  only your own devices can join), never <code>0.0.0.0</code>, so strangers on the internet can’t even knock on it (Lesson 07).</li>
+</ul>
+
+<div class="sim" data-sim="explain"><script type="application/json">
+{
+ "title": "Explorer · read the listener list",
+ "intro": "Click each line of your server’s listener list (from sudo ss -tulpn, tidied up).",
+ "lines": [
+  {
+   "code": "Netid State   Local Address:Port       Process",
+   "note": "The column headings. Netid = protocol (tcp/udp). Local Address:Port = where the program listens. Process = which program."
+  },
+  {
+   "code": "udp   UNCONN  0.0.0.0:8211             docker-proxy",
+   "note": "Palworld, through Docker. UDP, so the state is UNCONN (unconnected): UDP never makes connections. 0.0.0.0 = open on every address."
+  },
+  {
+   "code": "udp   UNCONN  0.0.0.0:41641            tailscaled",
+   "note": "Tailscale, the private network your phone uses to reach the monitor. Also UDP."
+  },
+  {
+   "code": "tcp   LISTEN  0.0.0.0:22               sshd",
+   "note": "SSH, your remote control. TCP, so its state is LISTEN: waiting for a handshake. Open on every address."
+  },
+  {
+   "code": "tcp   LISTEN  127.0.0.1:8797           python",
+   "note": "Your monitor on localhost: only reachable from inside the server."
+  },
+  {
+   "code": "tcp   LISTEN  100.64.0.10:8797      python",
+   "note": "The monitor again, on its private Tailscale address. Only your own devices on Tailscale can reach this, never the public internet."
+  },
+  {
+   "code": "tcp   LISTEN  0.0.0.0:111              rpcbind",
+   "note": "A standard Linux helper. It listens on every address, but neither firewall allows port 111, so visitors can’t reach it. Exactly why two guards matter."
+  },
+  {
+   "code": "tcp   LISTEN  127.0.0.53%lo:53         systemd-resolve",
+   "note": "The server’s own name lookup (DNS) helper, on a localhost address: inside only."
+  }
+ ]
+}
+</script></div>
+
+<details class="recall">
+  <summary>Say it yourself first, then open this</summary>
+  <p>“Data travels in packets. TCP is like a registered courier: handshake first, every packet confirmed and resent if
+  lost. SSH uses it because every character matters. UDP just sends, with no confirmations, which makes it faster. Palworld
+  uses it because a late position update is useless. Firewall rules name both the protocol and the port, like UDP 8211.
+  Localhost, 127.0.0.1, means the computer itself, so my monitor can only be reached from inside.”</p>
+</details>
+
+<hr>
+
+<h2>Practice 1 · Check yourself</h2>
+<div class="quiz" data-quiz="03-check"><script type="application/json">
+[
+ {"q": "Why does Palworld use UDP instead of TCP?", "options": ["UDP packets are encrypted and safer", "A late position update is useless", "UDP works without any IP address", "TCP only works on home Wi-Fi"], "answer": 1, "why": "Games care about the newest update. Waiting to resend an old one would only add lag, so the extra checking TCP does gets in the way."},
+ {"q": "Why does SSH use TCP?", "options": ["Every character of a command must arrive", "It must be as fast as possible", "UDP is blocked on every Linux server", "TCP needs no port number at all"], "answer": 0, "why": "A missing or reordered character could change your command. TCP confirms, resends and orders everything."},
+ {"q": "What is a TCP 'handshake'?", "options": ["A password typed before every command", "A rule in Oracle's firewall settings", "Both sides saying hello before sending", "A lost packet that gets resent"], "answer": 2, "why": "TCP sets up a connection first: both sides agree to talk before the real data flows. UDP skips this."},
+ {"q": "You add a firewall rule for 'TCP 8211'. Can players join Palworld now?", "options": ["Yes, only the port number really matters", "Yes, but only after a server restart", "No, the rule needs port 22 too", "No, Palworld needs UDP 8211, not TCP"], "answer": 3, "why": "Firewall rules match the protocol AND the port. Palworld's packets are UDP, so a TCP rule doesn't let them in."},
+ {"q": "A program listens on `127.0.0.1:8797`. Who can reach it?", "options": ["Anyone on the internet at all", "Only programs on that same server", "Only people in the same city", "Only phones using their mobile data"], "answer": 1, "why": "127.0.0.1 (localhost) means 'this computer itself', so only things running on the server can reach it."},
+ {"q": "What does `0.0.0.0:22` mean in the listener list?", "options": ["SSH is switched off for everyone", "SSH only accepts its own server", "SSH listens on every server address", "SSH has no address assigned yet"], "answer": 2, "why": "0.0.0.0 means 'every address this machine has', so visitors can reach it (if the firewall allows)."}
+]
+</script></div>
+
+<h2>Practise · safe terminal</h2>
+<p class="small">Practise in this safe copy first: it behaves like your server, using real output captured from it. Then do the real thing below.</p>
+<div class="terminal" data-term="03"><script type="application/json">
+{
+ "start": "server",
+ "tasks": [
+  {
+   "text": "Try it without the key card first: ss -tulpn",
+   "cmd": "^ss -tulpn$",
+   "note": "No Process column: without sudo, you can't see which program owns each port."
+  },
+  {
+   "text": "Now with the key card: sudo ss -tulpn",
+   "cmd": "^sudo ss -tulpn$"
+  },
+  {
+   "text": "Which program listens on UDP port 8211?",
+   "ask": true,
+   "answers": [
+    "docker-proxy",
+    "docker proxy",
+    "docker"
+   ]
+  },
+  {
+   "text": "Which UDP port does Tailscale (tailscaled) use?",
+   "ask": true,
+   "answers": [
+    "41641"
+   ]
+  },
+  {
+   "text": "Which port does sshd listen on?",
+   "ask": true,
+   "answers": [
+    "22"
+   ]
+  },
+  {
+   "text": "Go back to your laptop (exit) and try Test-NetConnection 203.0.113.84 -Port 8211 -InformationLevel Quiet",
+   "cmd": "test-netconnection 203\\.0\\.113\\.84 -port 8211",
+   "note": "False, even though Palworld is fine! The test knocks the TCP way, and Palworld only speaks UDP."
+  }
+ ]
+}
+</script></div>
+
+<h2>Practice 2 · See the listeners yourself (10 min)</h2>
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><span><code>ssh gameserver</code></span></li>
+  <li><input type="checkbox" aria-label="done"><span>Type <code>sudo ss -tulpn</code> and press Enter. (<b>ss</b> = socket statistics. The letters mean: <b>t</b>cp, <b>u</b>dp,
+    <b>l</b>istening, show the <b>p</b>rogram, <b>n</b>umbers instead of names. <b>sudo</b> runs it as administrator: Lesson 04.)</span></li>
+  <li><input type="checkbox" aria-label="done"><span>Find these four lines: <code>tcp … 0.0.0.0:22</code> (sshd), <code>udp … 0.0.0.0:8211</code> (docker-proxy),
+    <code>udp … 0.0.0.0:41641</code> (tailscaled) and <code>tcp … 127.0.0.1:8797</code> (python, your monitor).</span></li>
+  <li><input type="checkbox" aria-label="done"><span>Notice other <code>127.0.0.x</code> lines too: helper programs that only talk inside the server. Lots of listeners
+    are normal. What matters is which ones the firewall lets visitors reach. Type <code>exit</code>.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>Explain it.</b> Out loud: why Palworld uses UDP and SSH uses TCP, using the courier and the shouting comparisons.</span></li>
+</ul>
+
+<h2>New words from this lesson</h2>
+<div class="table-wrap"><table><tbody>
+  <tr><td><b>Packet</b></td><td>A small piece of data carrying its destination address and port.</td></tr>
+  <tr><td><b>Protocol</b></td><td>An agreed set of rules for communicating.</td></tr>
+  <tr><td><b>TCP</b></td><td>The reliable protocol: handshake, confirms, resends, keeps order (SSH, websites).</td></tr>
+  <tr><td><b>UDP</b></td><td>The fast protocol: just sends, no confirmations (games, voice, video).</td></tr>
+  <tr><td><b>Handshake</b></td><td>TCP’s hello exchange that sets up a connection.</td></tr>
+  <tr><td><b>Listening</b></td><td>A program waiting for packets on a port.</td></tr>
+  <tr><td><b>Localhost (127.0.0.1)</b></td><td>“This computer itself”: reachable only from inside.</td></tr>
+</tbody></table></div>
+
+<h2>Read next (10 min)</h2>
+<p><a href="https://aws.amazon.com/compare/the-difference-between-tcp-and-udp/"><b>Amazon: What’s the difference between TCP and UDP?</b></a>
+A plain-language comparison from the cloud provider your exam covers. Then watch Jeremy’s IT Lab Day 30 (TCP and UDP) from tracker Week 4 when you get there.</p>
+
+<div class="callout good">
+  <span class="label">Ask your teacher</span>
+  <p>Ask me anything: “why does Tailscale use UDP too?”, “what’s rpcbind on port 111?”, “quiz me on lessons 1–3 mixed”.</p>
+</div>
+
+<nav class="course">
+  <span>← <a href="0002-two-addresses.html">02 · Two addresses</a></span>
+  <span>Next: <a href="0004-linux-basics.html">04 · Linux basics</a> →</span>
+</nav>
+
+<ol class="small" style="margin-top:32px">
+  <li><a href="https://www.cloudflare.com/learning/network-layer/what-is-a-computer-port/">Cloudflare Learning Center: What is a computer port?</a></li>
+  <li><a href="https://aws.amazon.com/compare/the-difference-between-tcp-and-udp/">AWS: The difference between TCP and UDP</a></li>
+</ol>
+</main>
+<script src="../assets/lab.js"></script>
+<script src="../assets/quiz.js"></script>
+<script src="../assets/sims.js"></script>
+<script src="../assets/match.js"></script>
+<script src="../assets/terminal.js"></script>
+
+</body>
+</html>

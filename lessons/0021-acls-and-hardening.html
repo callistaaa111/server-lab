@@ -1,0 +1,1119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>21 · ACLs and hardening</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: a drafting sheet. Title block header, sticky XP rail, numbered sheets in lesson order. */
+:root {
+  --paper: #eaf0f4;
+  --sheet: #ffffff;
+  --ink: #15223a;
+  --muted: #56677d;
+  --line: #c6d1dc;
+  --grid: rgba(40, 90, 140, .07);
+  --accent: #d79600;
+  --accent-soft: #fbefcf;
+  --accent-ink: #6f4b00;
+  --ok: #1d8049;
+  --ok-soft: #dff2e6;
+  --bad: #bd3626;
+  --bad-soft: #f8e1dd;
+  --wire: #8fa1b5;
+  --code-bg: #f3f6f9;
+  --f-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0e151e; --sheet: #151f2b; --ink: #e2e9f1; --muted: #93a4b7; --line: #293848;
+    --grid: rgba(120, 170, 220, .06); --accent: #f0b52e; --accent-soft: #3a2e10; --accent-ink: #f6c95c;
+    --ok: #4cc27e; --ok-soft: #12301f; --bad: #f06a58; --bad-soft: #3a1915; --wire: #4f6378; --code-bg: #0f1822;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0e151e; --sheet: #151f2b; --ink: #e2e9f1; --muted: #93a4b7; --line: #293848;
+  --grid: rgba(120, 170, 220, .06); --accent: #f0b52e; --accent-soft: #3a2e10; --accent-ink: #f6c95c;
+  --ok: #4cc27e; --ok-soft: #12301f; --bad: #f06a58; --bad-soft: #3a1915; --wire: #4f6378; --code-bg: #0f1822;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: var(--ink);
+  font: 16px/1.6 var(--f-body);
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--sheet); }
+.wrap { max-width: 980px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; line-height: 1.1; margin: 0; }
+h2 { font-size: 2rem; letter-spacing: .01em; }
+h3 { font-size: 1.3rem; letter-spacing: .02em; }
+p { margin: 0; max-width: 68ch; }
+code, .mono { font-family: var(--f-mono); font-size: .9em; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+
+/* Title block */
+.titleblock { padding-block: 28px 20px; }
+.tb { display: grid; grid-template-columns: 1fr auto; border: 2px solid var(--ink); background: var(--sheet); }
+.tb-main { padding: 20px 22px; border-right: 2px solid var(--ink); min-width: 0; display: grid; gap: 10px; }
+.tb-main .eyebrow { font: 600 .75rem/1 var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.tb-main h1 { font-size: clamp(2.4rem, 7vw, 4rem); text-transform: uppercase; letter-spacing: .01em; }
+.tb-main h1 span { color: var(--accent); }
+.tb-main p { color: var(--muted); }
+.tb-cells { display: grid; grid-template-rows: repeat(4, auto); min-width: 190px; }
+.tb-cells div { padding: 8px 14px; border-bottom: 1px solid var(--line); display: grid; gap: 2px; }
+.tb-cells div:last-child { border-bottom: 0; }
+.tb-cells b { font: 600 .66rem/1 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.tb-cells span { font: 600 1rem/1.2 var(--f-mono); }
+@media (max-width: 640px) {
+  .tb { grid-template-columns: 1fr; }
+  .tb-main { border-right: 0; border-bottom: 2px solid var(--ink); }
+  .tb-cells { grid-template-columns: 1fr 1fr; grid-template-rows: auto; min-width: 0; }
+  .tb-cells div { border-right: 1px solid var(--line); }
+}
+
+/* XP rail */
+.rail { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--sheet); border-bottom: 2px solid var(--ink); }
+.rail .wrap { display: flex; align-items: center; gap: 14px; padding-block: 10px; flex-wrap: wrap; }
+.rank { font: 700 1.05rem/1 var(--f-display); text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+.xpbar { flex: 1 1 200px; height: 12px; border: 1.5px solid var(--ink); background: var(--paper); position: relative; min-width: 120px; }
+.xpbar i { position: absolute; inset: 0 auto 0 0; width: 0; background: repeating-linear-gradient(-45deg, var(--accent) 0 8px, var(--accent-ink) 8px 10px); transition: width .5s ease; }
+.xpnum { font: 600 .9rem/1 var(--f-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.jump { display: flex; gap: 4px; flex-wrap: wrap; }
+.jump a { font: 600 .72rem/1 var(--f-mono); color: var(--ink); text-decoration: none; border: 1.5px solid var(--line); padding: 5px 7px; background: var(--paper); }
+.jump a.done { border-color: var(--ok); color: var(--ok); }
+.jump a:hover { border-color: var(--ink); }
+
+/* Sheets */
+main { padding-block: 26px 60px; display: grid; gap: 34px; }
+.sheet { background: var(--sheet); border: 1.5px solid var(--line); padding: 26px 24px; display: grid; gap: 18px; scroll-margin-top: 80px; }
+.sheet-head { display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap; border-bottom: 1.5px solid var(--ink); padding-bottom: 12px; }
+.sheet-no { font: 700 .8rem/1 var(--f-mono); background: var(--ink); color: var(--sheet); padding: 5px 8px; letter-spacing: .08em; }
+.sheet-head .meta { margin-left: auto; font: 500 .78rem/1.3 var(--f-mono); color: var(--muted); }
+.lede { font-size: 1.05rem; }
+.note { border-left: 4px solid var(--accent); background: var(--accent-soft); padding: 12px 14px; max-width: 72ch; }
+.note b { color: var(--accent-ink); }
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+.rule { border: 1.5px solid var(--ink); padding: 14px; display: grid; gap: 6px; align-content: start; }
+.rule .n { font: 700 2rem/1 var(--f-display); color: var(--accent); }
+.rule h3 { font-size: 1.15rem; }
+.rule p { font-size: .94rem; color: var(--muted); }
+table { border-collapse: collapse; width: 100%; font-size: .93rem; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 600 .72rem/1.2 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+td.mono { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.scroll { overflow-x: auto; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.two > * { min-width: 0; }
+@media (max-width: 760px) { .two { grid-template-columns: 1fr; } }
+
+/* Quiz */
+.quiz { display: grid; gap: 16px; }
+.q { border: 1.5px solid var(--line); padding: 14px 16px; display: grid; gap: 10px; }
+.q .qt { font-weight: 600; }
+.q .qt small { font: 500 .72rem/1 var(--f-mono); color: var(--muted); letter-spacing: .06em; margin-right: 6px; }
+.opts { display: grid; gap: 6px; }
+.opt { text-align: left; background: var(--paper); border: 1.5px solid var(--line); padding: 8px 12px; display: flex; gap: 10px; }
+.opt b { font-family: var(--f-mono); }
+.opt:hover:not(:disabled) { border-color: var(--ink); }
+.opt:disabled { cursor: default; }
+.opt.right { border-color: var(--ok); background: var(--ok-soft); }
+.opt.wrong { border-color: var(--bad); background: var(--bad-soft); }
+.why { font-size: .93rem; padding: 8px 12px; border-left: 4px solid var(--ok); background: var(--ok-soft); }
+.why.miss { border-color: var(--bad); background: var(--bad-soft); }
+.score { font: 600 .9rem/1 var(--f-mono); }
+
+/* Predict */
+.clip { font-family: var(--f-mono); font-size: .88rem; border: 1.5px solid var(--ink); background: var(--code-bg); }
+.clip div { padding: 6px 10px; border-bottom: 1px dashed var(--line); display: flex; gap: 10px; transition: background .2s; }
+.clip div:last-child { border-bottom: 0; color: var(--muted); font-style: italic; }
+.clip div.hit { background: var(--accent-soft); }
+.clip .ln { color: var(--muted); min-width: 1.5em; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.pcard { border: 1.5px solid var(--line); padding: 12px; display: grid; gap: 8px; }
+.pcard .pk { font: 500 .85rem/1.4 var(--f-mono); }
+.pcard .btns { display: flex; gap: 6px; }
+.btn { border: 1.5px solid var(--ink); background: var(--sheet); padding: 7px 12px; font-weight: 600; font-size: .92rem; }
+.btn:hover:not(:disabled) { background: var(--ink); color: var(--sheet); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #1b1300; }
+.btn.primary:hover:not(:disabled) { background: var(--accent-ink); border-color: var(--accent-ink); color: var(--sheet); }
+.btn:disabled { opacity: .5; cursor: default; }
+.btn.sm { padding: 4px 9px; font-size: .82rem; }
+.verdict { font: 600 .85rem/1.4 var(--f-mono); }
+.ok { color: var(--ok); } .bad { color: var(--bad); }
+
+/* Forge */
+.forge { display: grid; gap: 12px; border: 2px solid var(--ink); padding: 18px; background: var(--code-bg); }
+.forge .prompt { font: 600 1.4rem/1.3 var(--f-mono); }
+.forge-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+input[type=text], select, textarea { font: 500 1rem/1.4 var(--f-mono); color: var(--ink); background: var(--sheet); border: 1.5px solid var(--ink); padding: 8px 10px; border-radius: 0; }
+input[type=text] { width: 12em; max-width: 100%; }
+.streak { font: 600 .85rem/1 var(--f-mono); color: var(--accent-ink); }
+.pips { display: flex; gap: 4px; }
+.pips i { width: 18px; height: 6px; background: var(--line); }
+.pips i.on { background: var(--ok); }
+.pips i.miss { background: var(--bad); }
+
+/* Simulator */
+.sim { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 18px; }
+@media (max-width: 860px) { .sim { grid-template-columns: 1fr; } }
+.topo { border: 1.5px solid var(--ink); background: var(--code-bg); }
+.topo svg { display: block; width: 100%; height: auto; }
+.topo text { font-family: var(--f-mono); fill: var(--ink); }
+.topo .sub { fill: var(--muted); font-size: 10px; }
+.topo .wire { stroke: var(--wire); stroke-width: 2.5; fill: none; }
+.topo .node { fill: var(--sheet); stroke: var(--ink); stroke-width: 1.8; }
+.topo .node.guest { stroke: var(--accent); }
+.topo .acltag rect { fill: var(--accent); }
+.topo .acltag text { fill: #1b1300; font-weight: 600; font-size: 10px; }
+.topo .pkt { fill: var(--accent); stroke: var(--ink); stroke-width: 1.5; }
+.topo .pkt.reply { fill: var(--ok); }
+.topo .boom { fill: none; stroke: var(--bad); stroke-width: 3; }
+.missions { display: flex; gap: 6px; flex-wrap: wrap; }
+.mtab { border: 1.5px solid var(--line); background: var(--paper); padding: 6px 10px; font: 600 .8rem/1 var(--f-mono); }
+.mtab.on { border-color: var(--ink); background: var(--ink); color: var(--sheet); }
+.mtab.won::after { content: " ✓"; color: var(--ok); }
+.mtab.on.won::after { color: var(--sheet); }
+.brief { border: 1.5px solid var(--ink); padding: 12px 14px; display: grid; gap: 6px; }
+.brief h3 { font-size: 1.2rem; }
+.brief p { font-size: .94rem; }
+.editor { display: grid; gap: 8px; }
+.editor label { font: 600 .72rem/1 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+textarea { width: 100%; min-height: 170px; font-size: .86rem; resize: vertical; line-height: 1.55; }
+.apply { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font: 500 .88rem/1 var(--f-mono); }
+.apply select { font-size: .88rem; padding: 6px 8px; }
+.errs { font: 500 .85rem/1.45 var(--f-mono); color: var(--bad); white-space: pre-wrap; }
+.errs:empty { display: none; }
+.matrix td:nth-child(3), .matrix td:nth-child(4) { white-space: nowrap; font-family: var(--f-mono); font-size: .85rem; }
+.matrix tr.pass td:last-child { color: var(--ok); font-weight: 600; }
+.matrix tr.fail td:last-child { color: var(--bad); font-weight: 600; }
+.log { font: 500 .82rem/1.55 var(--f-mono); background: var(--code-bg); border: 1.5px solid var(--line); padding: 10px 12px; min-height: 90px; max-height: 240px; overflow: auto; white-space: pre-wrap; }
+.log .d { color: var(--bad); } .log .p { color: var(--ok); } .log .m { color: var(--muted); }
+.freeplay { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font: 500 .88rem/1 var(--f-mono); }
+.banner { border: 2px solid var(--ok); background: var(--ok-soft); padding: 10px 14px; font-weight: 600; }
+
+/* Harden */
+.cfg { font: 500 .86rem/1.5 var(--f-mono); border: 1.5px solid var(--ink); background: var(--code-bg); }
+.cfg .cap { padding: 6px 10px; border-bottom: 1.5px solid var(--ink); font-weight: 600; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.cfg button { display: block; width: 100%; text-align: left; background: none; border: 0; border-left: 4px solid transparent; padding: 3px 10px; font: inherit; white-space: pre; overflow-x: auto; }
+.cfg button:hover:not(:disabled) { background: var(--accent-soft); }
+.cfg button.found { border-left-color: var(--bad); background: var(--bad-soft); }
+.cfg button.fine { border-left-color: var(--ok); }
+.cfg button:disabled { cursor: default; }
+.findings { display: grid; gap: 8px; }
+.finding { border-left: 4px solid var(--bad); padding: 8px 12px; background: var(--paper); font-size: .92rem; }
+.finding code { color: var(--ok); }
+.order { display: grid; gap: 10px; }
+.pool, .built { display: flex; flex-wrap: wrap; gap: 6px; min-height: 44px; border: 1.5px dashed var(--line); padding: 8px; }
+.built { border-color: var(--ink); border-style: solid; flex-direction: column; align-items: stretch; }
+.chip { font: 500 .84rem/1.2 var(--f-mono); border: 1.5px solid var(--ink); background: var(--sheet); padding: 6px 9px; text-align: left; }
+.chip:hover { background: var(--accent-soft); }
+.built .chip { display: flex; gap: 8px; }
+.built .chip i { font-style: normal; color: var(--muted); }
+
+/* Break/fix */
+.cases { display: grid; gap: 14px; }
+.case { border: 1.5px solid var(--ink); display: grid; }
+.case .sym { padding: 12px 14px; background: var(--bad-soft); border-bottom: 1.5px solid var(--ink); display: grid; gap: 4px; }
+.case .sym b { font: 600 .72rem/1 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--bad); }
+.case .body { padding: 12px 14px; display: grid; gap: 10px; }
+.steps { margin: 0; padding-left: 1.3em; display: grid; gap: 4px; font-size: .93rem; }
+
+/* Lab */
+.checks { display: grid; gap: 8px; }
+.check { display: flex; gap: 10px; align-items: flex-start; }
+.check input { width: 20px; height: 20px; margin-top: 3px; accent-color: var(--ok); flex: none; }
+pre.code { margin: 0; font: 500 .84rem/1.5 var(--f-mono); background: var(--code-bg); border: 1.5px solid var(--line); padding: 10px 12px; overflow-x: auto; position: relative; }
+.codebox { display: grid; gap: 4px; }
+.codebox .bar { display: flex; justify-content: space-between; align-items: center; font: 600 .72rem/1 var(--f-mono); color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+.gloss { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+.flip { border: 1.5px solid var(--ink); background: var(--sheet); padding: 12px; min-height: 92px; text-align: left; display: grid; align-content: center; gap: 4px; }
+.flip b { font: 700 1.1rem/1.1 var(--f-display); letter-spacing: .02em; }
+.flip span { font-size: .88rem; color: var(--muted); }
+.flip.open { background: var(--accent-soft); border-color: var(--accent); }
+.links { display: grid; gap: 6px; padding-left: 1.2em; margin: 0; }
+.links a { color: var(--ink); }
+footer { padding-block: 0 40px; color: var(--muted); font-size: .85rem; }
+.toast { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--sheet); font: 600 .9rem/1.3 var(--f-mono); padding: 10px 14px; z-index: 20; transform: translateY(140%); transition: transform .25s ease; max-width: calc(100% - 32px); }
+.toast.show { transform: none; }
+@media (prefers-reduced-motion: reduce) { .xpbar i, .toast, .clip div { transition: none; } }
+</style>
+</head>
+<body>
+<header class="titleblock">
+  <div class="wrap">
+    <div class="tb">
+      <div class="tb-main">
+        <div class="eyebrow">Server Lab · Part 3 · Lesson 21</div>
+        <h1>The guard gets a <span>clipboard</span></h1>
+        <p>Lesson 13 left guest → staff traffic open on purpose. Today you close it with an ACL, prove it with a ping matrix, then lock the router itself with SSH. Every box on this page is clickable. Earn XP as you go.</p>
+      </div>
+      <div class="tb-cells">
+        <div><b>Exam</b><span>CCNA 5.6 · 4.8 · 5.3</span></div>
+        <div><b>Time</b><span>≈ 70 min</span></div>
+        <div><b>Builds on</b><span>L01 · L10 · L12 · L13</span></div>
+        <div><b>Real server</b><span>Not changed</span></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="rail" aria-label="Progress">
+  <div class="wrap">
+    <a href="../index.html" style="font:700 1.05rem/1 var(--f-display);text-transform:uppercase;letter-spacing:.05em;color:var(--ink);text-decoration:none;white-space:nowrap">Server Lab</a>
+    <span class="rank" id="rank">Visitor</span>
+    <div class="xpbar" role="progressbar" aria-label="XP" aria-valuemin="0" id="xpbar"><i id="xpfill"></i></div>
+    <span class="xpnum" id="xpnum">0 XP</span>
+    <div class="jump" id="jump"></div>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<!-- 1 -->
+<section class="sheet" id="warmup" data-title="Warm-up">
+  <div class="sheet-head"><span class="sheet-no">SHEET 1</span><h2>Warm-up</h2><span class="meta">3 questions · 10 XP each</span></div>
+  <p class="lede">Three quick ones from earlier lessons. Pick an answer; the reason appears right after.</p>
+  <div class="quiz" data-quiz="warm"></div>
+</section>
+
+<!-- 2 -->
+<section class="sheet" id="clipboard" data-title="The clipboard">
+  <div class="sheet-head"><span class="sheet-no">SHEET 2</span><h2>What an ACL is</h2><span class="meta">read 8 min · predict 4 × 5 XP</span></div>
+  <p class="lede">An <b>ACL</b> (access control list) is an ordered list of <b>permit</b> and <b>deny</b> rules on a router. Each line says where traffic comes from, where it's going, and sometimes which protocol. In the village: the guard at the road junction now has a clipboard that says things like “Guest Street may not visit Staff Street.”</p>
+  <div class="rules">
+    <div class="rule"><span class="n">1</span><h3>Top to bottom, first match wins</h3><p>The router stops reading at the first matching line. A <code>permit ip any any</code> on top makes everything under it useless.</p></div>
+    <div class="rule"><span class="n">2</span><h3>Invisible deny-all at the end</h3><p>If no line matches, the packet is dropped. An ACL with only deny lines blocks all traffic.</p></div>
+    <div class="rule"><span class="n">3</span><h3>One per interface, per direction</h3><p><b>in</b> = packets entering the router on that port. <b>out</b> = packets leaving on it.</p></div>
+  </div>
+  <div class="two">
+    <div style="display:grid;gap:10px">
+      <h3>Predict the guard</h3>
+      <p>This ACL sits inbound on the guest door, <code>g0/0.30</code>. For each visitor, say what happens. The matching line lights up after you answer.</p>
+      <div class="clip" id="predictClip"></div>
+    </div>
+    <div class="cards" id="predictCards"></div>
+  </div>
+  <div class="note"><b>Standard vs extended.</b> A <b>standard</b> ACL (1–99) checks only the source address, so place it close to the <b>destination</b>. An <b>extended</b> ACL (100–199, or named) checks source, destination and protocol, so place it close to the <b>source</b> and drop bad traffic before it travels. Our job, “guests may not reach staff, CCTV or the servers,” needs destinations: extended, inbound on <code>g0/0.30</code>.</div>
+</section>
+
+<!-- 3 -->
+<section class="sheet" id="forge" data-title="Wildcards">
+  <div class="sheet-head"><span class="sheet-no">SHEET 3</span><h2>Wildcard forge</h2><span class="meta">8 rounds · 10 XP each</span></div>
+  <p class="lede">ACLs don't use subnet masks. They use <b>wildcard masks</b>: 0 = must match, 1 = don't care. Shortcut: <b>wildcard = 255.255.255.255 − mask</b>. A /26 mask is 255.255.255.192, so its wildcard is 0.0.0.63. <code>host 10.30.0.10</code> means wildcard 0.0.0.0, and <code>any</code> means 255.255.255.255.</p>
+  <div class="forge">
+    <div class="forge-row" style="justify-content:space-between"><span class="streak" id="forgeRound">Round 1 of 8</span><div class="pips" id="forgePips"></div></div>
+    <div class="prompt" id="forgePrompt"></div>
+    <div class="forge-row">
+      <label for="forgeIn" class="mono">Wildcard</label>
+      <input type="text" id="forgeIn" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="0.0.0.?">
+      <button class="btn primary" id="forgeGo">Check</button>
+      <button class="btn" id="forgeNext" hidden>Next round</button>
+    </div>
+    <div class="verdict" id="forgeMsg" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="sheet" id="sim" data-title="Simulator">
+  <div class="sheet-head"><span class="sheet-no">SHEET 4</span><h2>ACL simulator</h2><span class="meta">5 missions · 50 XP each</span></div>
+  <p class="lede">This is your Lesson 13 office. Type real Cisco ACL lines, pick where to apply them, then run the mission's ping tests. Packets fly; the guard reads the clipboard. Lines use the form <code>permit|deny ip|icmp SOURCE DEST [echo|echo-reply]</code>, where SOURCE and DEST are <code>any</code>, <code>host A.B.C.D</code>, or <code>A.B.C.D wildcard</code>.</p>
+  <div class="missions" id="missionTabs" role="tablist"></div>
+  <div class="sim">
+    <div style="display:grid;gap:12px;align-content:start">
+      <div class="topo" id="topo"></div>
+      <div class="freeplay">
+        <span>Free ping:</span>
+        <select id="fpSrc" aria-label="Ping from"></select>
+        <span>→</span>
+        <select id="fpDst" aria-label="Ping to"></select>
+        <button class="btn sm" id="fpGo">Send</button>
+      </div>
+      <div class="log" id="log" aria-live="polite"><span class="m">Packet log. Run the tests or send a free ping.</span></div>
+    </div>
+    <div style="display:grid;gap:12px;align-content:start">
+      <div class="brief" id="brief"></div>
+      <div class="editor">
+        <label for="aclText">ip access-list extended GUEST-IN</label>
+        <textarea id="aclText" spellcheck="false" autocomplete="off"></textarea>
+        <div class="apply">
+          <span>interface</span>
+          <select id="aclIf" aria-label="Interface">
+            <option value="g0/0.10">g0/0.10 (staff)</option>
+            <option value="g0/0.20">g0/0.20 (CCTV)</option>
+            <option value="g0/0.30">g0/0.30 (guest)</option>
+            <option value="g0/1">g0/1 (to R2)</option>
+          </select>
+          <span>ip access-group GUEST-IN</span>
+          <select id="aclDir" aria-label="Direction"><option>in</option><option>out</option></select>
+        </div>
+        <div class="errs" id="errs"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn primary" id="runTests">Run mission tests</button>
+          <button class="btn" id="hintBtn">Hint</button>
+          <button class="btn" id="resetBtn">Reset mission</button>
+        </div>
+      </div>
+      <div class="scroll"><table class="matrix" id="matrix"><thead><tr><th>From</th><th>To</th><th>Need</th><th>Got</th></tr></thead><tbody></tbody></table></div>
+      <div id="winBanner"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="sheet" id="harden" data-title="Harden">
+  <div class="sheet-head"><span class="sheet-no">SHEET 5</span><h2>Lock the guard's own office</h2><span class="meta">8 weak lines × 15 XP · SSH build 40 XP</span></div>
+  <p class="lede">The ACL protects the streets. But whoever logs into the router can delete the ACL, so the router needs protecting too. That's <b>hardening</b>: closing the easy ways in. Your electrical side knows this already: it's LOTO and locked panel boards. Live parts stay behind a lock, and only named people hold a key.</p>
+  <div class="two">
+    <div class="cfg" id="cfgR1"></div>
+    <div class="cfg" id="cfgSW"></div>
+  </div>
+  <p><b>Spot the weakness:</b> click every line an attacker would love. <span class="score" id="weakScore"></span></p>
+  <div class="findings" id="findings"></div>
+  <div class="order">
+    <h3>Build SSH in a working order</h3>
+    <p>Tap the commands in an order the router will accept. IOS refuses some commands until others exist. Tap a placed command to send it back.</p>
+    <div class="pool" id="pool"></div>
+    <div class="built" id="built"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" id="orderCheck">Check order</button><button class="btn" id="orderReset">Reset</button></div>
+    <div class="verdict" id="orderMsg" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="sheet" id="breakfix" data-title="Break/fix">
+  <div class="sheet-head"><span class="sheet-no">SHEET 6</span><h2>Break/fix: the NOC phone rings</h2><span class="meta">3 tickets · 20 XP each</span></div>
+  <p class="lede">Each ticket is a real-sounding complaint. Pick the most likely cause first, then read the check order. Checking in the right order is what interviewers listen for.</p>
+  <div class="cases" id="cases"></div>
+</section>
+
+<!-- 7 -->
+<section class="sheet" id="final" data-title="Final check">
+  <div class="sheet-head"><span class="sheet-no">SHEET 7</span><h2>Check yourself</h2><span class="meta">6 questions · 15 XP each</span></div>
+  <div class="note"><b>Say it yourself first.</b> Out loud, in 4–6 sentences: what an ACL is, the two rules about order, what a wildcard mask is, where extended and standard ACLs go, why Cisco ACLs block replies, and three hardening steps. Then answer below.</div>
+  <div class="quiz" data-quiz="final"></div>
+  <p class="score" id="finalScore"></p>
+</section>
+
+<!-- 8 -->
+<section class="sheet" id="lab" data-title="Lab">
+  <div class="sheet-head"><span class="sheet-no">SHEET 8</span><h2>Packet Tracer lab and PASS/FAIL</h2><span class="meta">40 min · changes the LAB only</span></div>
+  <p class="lede">Now do it for real in Packet Tracer. Open <code>lesson13-routing.pkt</code> and save a copy as <code>lesson21-security.pkt</code> first. Ticks are saved in this browser only.</p>
+  <div class="checks" id="labChecks"></div>
+  <div class="two">
+    <div class="codebox"><div class="bar"><span>R1 · guest ACL</span><button class="btn sm" data-copy="codeAcl">Copy</button></div><pre class="code" id="codeAcl">enable
+configure terminal
+ip access-list extended GUEST-IN
+ remark Guests may not reach staff, CCTV or the server room
+ deny ip 10.20.0.128 0.0.0.63 10.20.0.0 0.0.0.127
+ deny ip 10.20.0.128 0.0.0.63 10.20.0.192 0.0.0.63
+ deny ip 10.20.0.128 0.0.0.63 10.30.0.0 0.0.0.255
+ permit ip 10.20.0.128 0.0.0.63 any
+exit
+interface g0/0.30
+ ip access-group GUEST-IN in
+end
+show access-lists</pre></div>
+    <div class="codebox"><div class="bar"><span>R1 · hardening</span><button class="btn sm" data-copy="codeHard">Copy</button></div><pre class="code" id="codeHard">configure terminal
+hostname R1
+ip domain-name lab.local
+enable secret &lt;your-lab-enable-secret&gt;
+service password-encryption
+username admin secret &lt;your-lab-user-secret&gt;
+crypto key generate rsa general-keys modulus 1024
+ip ssh version 2
+access-list 10 remark Only staff may log in to R1
+access-list 10 permit 10.20.0.0 0.0.0.127
+line vty 0 4
+ login local
+ transport input ssh
+ access-class 10 in
+ exec-timeout 5 0
+line con 0
+ login local
+ exec-timeout 5 0
+exit
+banner motd # Authorized access only. Activity is logged. #
+end
+copy running-config startup-config</pre></div>
+  </div>
+  <div class="two">
+    <div class="codebox"><div class="bar"><span>SW1 · park unused ports</span><button class="btn sm" data-copy="codeSw">Copy</button></div><pre class="code" id="codeSw">enable
+configure terminal
+vlan 999
+ name PARKING
+interface range fa0/7 - 24 , g0/2
+ switchport mode access
+ switchport access vlan 999
+ shutdown
+end
+show interfaces status</pre></div>
+    <div class="codebox"><div class="bar"><span>Stretch · let staff ping guests</span><button class="btn sm" data-copy="codeStretch">Copy</button></div><pre class="code" id="codeStretch">configure terminal
+ip access-list extended GUEST-IN
+ 5 permit icmp 10.20.0.128 0.0.0.63 10.20.0.0 0.0.0.127 echo-reply
+end
+show access-lists</pre></div>
+  </div>
+  <p class="mono" style="font-size:.85rem;color:var(--muted)">Pick your own lab passwords. Never reuse a real one and never paste them anywhere public. If Packet Tracer rejects the one-line crypto command, type <code>crypto key generate rsa</code> and answer 1024. Confirm the stretch line's sequence numbers with <code>show access-lists</code> first.</p>
+  <h3>PASS/FAIL: ping matrix (after the ACL, before the stretch)</h3>
+  <div class="scroll"><table>
+    <thead><tr><th>From → To</th><th>Expected</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>PC5 guest → PC1 10.20.0.10</td><td class="bad">fails</td><td>deny line 1</td></tr>
+      <tr><td>PC5 guest → PC3 10.20.0.200 (CCTV)</td><td class="bad">fails</td><td>deny line 2</td></tr>
+      <tr><td>PC5 guest → server 10.30.0.10</td><td class="bad">fails</td><td>deny line 3</td></tr>
+      <tr><td>PC5 guest → R2 172.16.0.2 (“internet”)</td><td class="ok">success</td><td>permit line 4</td></tr>
+      <tr><td>PC5 guest → PC6 10.20.0.141</td><td class="ok">success</td><td>same street, never reaches R1</td></tr>
+      <tr><td>PC1 staff → PC3 (CCTV)</td><td class="ok">success</td><td>ACL is only on the guest door</td></tr>
+      <tr><td>PC1 staff → server 10.30.0.10</td><td class="ok">success</td><td>ACL is only on the guest door</td></tr>
+      <tr><td>PC1 staff → PC5 guest</td><td class="bad">fails</td><td>the guest's reply is denied (stateless)</td></tr>
+    </tbody>
+  </table></div>
+  <p>Also PASS: match counters above 0 on lines 1–4 · <code>ssh -l admin 10.20.0.1</code> from PC1 logs in · <code>telnet 10.20.0.1</code> from PC1 is refused · <code>ssh -l admin 10.20.0.129</code> from PC5 is refused · Fa0/7–24 and Gi0/2 show disabled in VLAN 999 · you rebuild the ACL from memory in under 10 minutes.</p>
+  <div class="codebox"><div class="bar"><span>Readiness Checks row</span><button class="btn sm" data-copy="codeRow">Copy</button></div><pre class="code" id="codeRow">L21 ACL + hardening: ping matrix 8/8, SSH/Telnet tests 3/3, rebuilt in __ min.</pre></div>
+  <div class="note"><b>Real world, look only (10 min).</b> In the Oracle console, open your VCN's security list and read the ingress rules as ACL lines: source CIDR, protocol, port. Find the UDP 8211 rule and the “Stateless: No” column. On the server, <code>sudo ss -tulpn</code> lists every listener. For each, ask: internet, Tailscale only, or localhost only? Don't change any real rule today. Write anything you'd tighten as a planned change (Lesson 15).</div>
+  <h3>New words · tap to flip</h3>
+  <div class="gloss" id="gloss"></div>
+  <h3>Read next (30 min)</h3>
+  <ul class="links">
+    <li>Jeremy's IT Lab: around Day 34 (standard ACLs) and Day 35 (extended ACLs). Do his Packet Tracer labs.</li>
+    <li>Jeremy's IT Lab: around Day 42 (SSH).</li>
+    <li>Cisco, “Configure and Filter IP Access Lists” (document ID 23602): the wildcard and apply-to-interface sections. <a href="https://www.cisco.com/c/en/us/support/docs/ip/access-lists/26448-ACLsamples.html" target="_blank" rel="noopener">cisco.com ACL support docs</a></li>
+    <li>Next: Lesson 22, NAT and PAT on Cisco (CCNA 4.1), which replaces “R2 as the internet” with a real outside interface.</li>
+  </ul>
+</section>
+
+<nav style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font:600 .9rem var(--f-mono);border-top:2px solid var(--ink);padding-top:16px"><span>← <a style="color:var(--ink)" href="0020-getting-hired.html">20 · Getting hired</a></span><span><a style="color:var(--ink)" href="../index.html">Course home</a></span></nav>
+</main>
+<footer class="wrap"><p>Server Lab · Lesson 21 · Packet Tracer topology from Lessons 12–13. Why this lesson: the remote NOC ad (Job Ads #39) lists firewalls, NAT and VLANs together, and CCNA is the most-named cert in the evidence sheet. <button class="btn sm" id="wipe">Reset my progress</button> <span id="wipeConfirm" hidden><button class="btn sm" id="wipeYes">Yes, clear XP and ticks</button></span></p></footer>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ---------- ENGINE (pure, tested) ---------- */
+const Engine = (() => {
+  const ipToInt = s => {
+    const p = String(s).trim().split('.');
+    if (p.length !== 4) return null;
+    let n = 0;
+    for (const x of p) {
+      if (!/^\d{1,3}$/.test(x) || +x > 255) return null;
+      n = n * 256 + +x;
+    }
+    return n >>> 0;
+  };
+  const HOSTS = {
+    PC1: { ip: '10.20.0.10', iface: 'g0/0.10', label: 'PC1 staff' },
+    PC3: { ip: '10.20.0.200', iface: 'g0/0.20', label: 'PC3 CCTV' },
+    PC5: { ip: '10.20.0.140', iface: 'g0/0.30', label: 'PC5 guest' },
+    PC6: { ip: '10.20.0.141', iface: 'g0/0.30', label: 'PC6 guest' },
+    GW:  { ip: '10.20.0.129', iface: 'g0/0.30', label: 'R1 guest gateway', router: true },
+    R2:  { ip: '172.16.0.2', iface: 'g0/1', label: 'R2 (“internet”)' },
+    SRV: { ip: '10.30.0.10', iface: 'g0/1', label: 'Server' }
+  };
+  function parseAddr(tok, i) {
+    const t = tok[i];
+    if (!t) return { err: 'missing address' };
+    if (t === 'any') return { net: 0, wc: 0xffffffff, next: i + 1 };
+    if (t === 'host') {
+      const a = ipToInt(tok[i + 1]);
+      if (a === null) return { err: `"host" needs an address, got "${tok[i + 1] || ''}"` };
+      return { net: a, wc: 0, next: i + 2 };
+    }
+    const a = ipToInt(t), w = ipToInt(tok[i + 1]);
+    if (a === null) return { err: `"${t}" is not an address (use any, host A.B.C.D, or A.B.C.D wildcard)` };
+    if (w === null) return { err: `address ${t} needs a wildcard mask after it` };
+    return { net: a, wc: w, next: i + 2 };
+  }
+  function parse(text) {
+    const rules = [], errors = [];
+    String(text).split(/\r?\n/).forEach((raw, idx) => {
+      let line = raw.trim();
+      if (!line || line.startsWith('!') || /^remark\b/i.test(line) || /^ip access-list\b/i.test(line) || /^exit$/i.test(line)) return;
+      let tok = line.toLowerCase().split(/\s+/);
+      let seq = null;
+      if (/^\d+$/.test(tok[0])) { seq = +tok[0]; tok = tok.slice(1); }
+      if (tok[0] === 'remark') return;
+      const where = `line ${idx + 1}: ${raw.trim()}\n  `;
+      if (tok[0] !== 'permit' && tok[0] !== 'deny') { errors.push(where + '% Invalid input: start with permit or deny'); return; }
+      if (!['ip', 'icmp', 'tcp', 'udp'].includes(tok[1])) { errors.push(where + '% Invalid input: protocol must be ip, icmp, tcp or udp'); return; }
+      const s = parseAddr(tok, 2); if (s.err) { errors.push(where + '% ' + s.err); return; }
+      const d = parseAddr(tok, s.next); if (d.err) { errors.push(where + '% ' + d.err); return; }
+      let icmpType = null, rest = tok.slice(d.next);
+      if (rest.length) {
+        if (tok[1] === 'icmp' && rest.length === 1 && (rest[0] === 'echo' || rest[0] === 'echo-reply')) icmpType = rest[0];
+        else if (tok[1] === 'tcp' || tok[1] === 'udp') { /* ports accepted; pings never match tcp/udp */ }
+        else { errors.push(where + `% Invalid input near "${rest.join(' ')}" (this simulator knows echo and echo-reply)`); return; }
+      }
+      rules.push({ seq, action: tok[0], proto: tok[1], src: s, dst: d, icmpType, text: line, srcLine: idx + 1 });
+    });
+    // Cisco numbering: unnumbered lines get +10 after the highest so far; then sort by sequence
+    let max = 0;
+    for (const r of rules) { if (r.seq === null) { r.seq = max + 10; } max = Math.max(max, r.seq); }
+    rules.sort((a, b) => a.seq - b.seq);
+    return { rules, errors };
+  }
+  const inNet = (ip, a) => (((ip ^ a.net) & ~a.wc) >>> 0) === 0;
+  function evaluate(rules, pkt) {
+    const s = ipToInt(pkt.src), d = ipToInt(pkt.dst);
+    for (let i = 0; i < rules.length; i++) {
+      const r = rules[i];
+      if (r.proto === 'tcp' || r.proto === 'udp') continue;
+      if (r.proto === 'icmp' && r.icmpType && r.icmpType !== pkt.type) continue;
+      if (inNet(s, r.src) && inNet(d, r.dst)) return { action: r.action, rule: r, index: i };
+    }
+    return { action: 'deny', rule: null, index: -1 };
+  }
+  // acl: {rules, iface, dir} or null
+  function ping(srcKey, dstKey, acl) {
+    const S = HOSTS[srcKey], D = HOSTS[dstKey], steps = [];
+    if (S.iface === D.iface && !S.router && !D.router) {
+      steps.push({ kind: 'note', text: S.iface === 'g0/1' ? `R2 delivers this one; R1 never sees it.` : `${S.label} and ${D.label} share a street. The switch delivers it; R1 never sees it.` });
+      return { ok: true, steps, local: true };
+    }
+    const check = (pkt, iface, dir, phase) => {
+      if (!acl || acl.iface !== iface || acl.dir !== dir) return true;
+      const v = evaluate(acl.rules, pkt);
+      steps.push({ kind: v.action, phase, iface, dir, text: v.rule ? `line ${v.rule.seq}  ${v.rule.text}` : 'no line matched → implicit deny' });
+      return v.action === 'permit';
+    };
+    const req = { src: S.ip, dst: D.ip, type: 'echo' };
+    if (!check(req, S.iface, 'in', 'request')) return { ok: false, steps, dropAt: 'request' };
+    if (!D.router && !check(req, D.iface, 'out', 'request')) return { ok: false, steps, dropAt: 'request' };
+    const rep = { src: D.ip, dst: S.ip, type: 'echo-reply' };
+    if (!D.router && !check(rep, D.iface, 'in', 'reply')) return { ok: false, steps, dropAt: 'reply' };
+    // replies the router generates itself are not filtered by its outbound ACLs
+    if (!D.router && !check(rep, S.iface, 'out', 'reply')) return { ok: false, steps, dropAt: 'reply' };
+    return { ok: true, steps };
+  }
+  return { ipToInt, parse, evaluate, ping, HOSTS };
+})();
+/* ---------- END ENGINE ---------- */
+
+/* ---------- state ---------- */
+const KEY = 'serverlab-l21-v1';
+let state = { xp: 0, got: {}, missions: {}, labs: {}, acl: {} };
+try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s) state = Object.assign(state, s); } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+const MAX_XP = 30 + 20 + 80 + 250 + 120 + 40 + 60 + 90;
+const RANKS = [[0, 'Visitor'], [60, 'Guard trainee'], [200, 'Shift guard'], [400, 'Head of security'], [600, 'NOC-ready']];
+const $ = s => document.querySelector(s);
+const el = (tag, attrs = {}, html = '') => { const e = document.createElement(tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (html) e.innerHTML = html; return e; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+let toastT;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2200); }
+function award(id, pts, msg) {
+  if (state.got[id]) return false;
+  state.got[id] = pts; state.xp += pts; save(); renderXP();
+  toast(`+${pts} XP${msg ? ' · ' + msg : ''}`);
+  return true;
+}
+function renderXP() {
+  const pct = Math.min(100, state.xp / MAX_XP * 100);
+  $('#xpfill').style.width = pct + '%';
+  $('#xpbar').setAttribute('aria-valuemax', MAX_XP); $('#xpbar').setAttribute('aria-valuenow', state.xp);
+  $('#xpnum').textContent = `${state.xp} / ${MAX_XP} XP`;
+  let r = RANKS[0][1]; for (const [n, name] of RANKS) if (state.xp >= n) r = name;
+  $('#rank').textContent = r;
+  document.querySelectorAll('#jump a').forEach(a => { const f = SECTION_DONE[a.dataset.id]; a.classList.toggle('done', !!(f && f())); });
+}
+
+/* ---------- quizzes ---------- */
+const QUIZ = {
+  warm: [
+    { tag: 'L13', q: 'PC1 can ping R2\'s 172.16.0.2 but not the server 10.30.0.10. R1\'s routing table looks fine. Most likely?', o: ['The switch trunk is down', 'The server\'s default gateway is wrong or missing', 'R2 has no route back to 10.20.0.0/24', 'PC1 is in the wrong VLAN'], a: 1, w: 'R2 answered PC1, so R2 already has its route back. The server is the one that can\'t send replies off its own street. A bad trunk or VLAN would also break the ping to 172.16.0.2.' },
+    { tag: 'L10', q: 'Which address range is the guest subnet 10.20.0.128/26?', o: ['10.20.0.128 – 10.20.0.191', '10.20.0.128 – 10.20.0.255', '10.20.0.0 – 10.20.0.127', '10.20.0.128 – 10.20.0.159'], a: 0, w: 'A /26 is 64 addresses: .128 to .191. CCTV starts at .192.' },
+    { tag: 'L01', q: 'In the condo comparison, what is the firewall?', o: ['The street address', 'The unit number', 'The lobby guard', 'The leasing office'], a: 2, w: 'The lobby guard decides who gets in. Today the guard gets a written list.' }
+  ],
+  final: [
+    { tag: 'Q1', q: 'Lines in order: permit ip any any, then deny ip 10.20.0.128 0.0.0.63 any. A guest at 10.20.0.140 sends a packet. Result?', o: ['Denied, deny lines are checked first', 'Permitted: the first line matches and the router stops reading', 'Denied by the implicit deny', 'The router rejects the ACL'], a: 1, w: 'First match wins. The deny line is never reached.' },
+    { tag: 'Q2', q: 'Wildcard mask for 10.20.0.0/25?', o: ['255.255.255.128', '0.0.0.128', '0.0.0.127', '0.0.0.255'], a: 2, w: '255 − 128 = 127.' },
+    { tag: 'Q3', q: 'An extended ACL has one line: deny ip 10.20.0.128 0.0.0.63 10.20.0.0 0.0.0.127, inbound on g0/0.30. Can guests reach the server 10.30.0.10?', o: ['Yes, only staff is denied', 'No, the implicit deny drops everything that didn\'t match', 'Yes, the server is on R2', 'Only by ping'], a: 1, w: 'With no permit line, the invisible deny-all drops everything else.' },
+    { tag: 'Q4', q: 'Where should a STANDARD ACL go?', o: ['Close to the source', 'Close to the destination', 'On the switch trunk', 'It doesn\'t matter'], a: 1, w: 'It only sees the source, so near the source it would block that source from everywhere.' },
+    { tag: 'Q5', q: 'Why use transport input ssh on the VTY lines?', o: ['SSH is faster than Telnet', 'Telnet sends usernames and passwords in clear text; SSH encrypts them', 'Packet Tracer has no Telnet', 'It turns on the ACL'], a: 1, w: 'Anyone capturing traffic can read a Telnet password.' },
+    { tag: 'L12', q: 'Best practice for unused switch ports?', o: ['Leave them in VLAN 1 and up', 'Put them in the STAFF VLAN', 'Put them in an unused VLAN and shut them down', 'Make them trunks'], a: 2, w: 'A shut, parked port gives a stranger\'s laptop nothing.' }
+  ]
+};
+const QPTS = { warm: 10, final: 15 };
+function renderQuiz(box) {
+  const set = box.dataset.quiz;
+  QUIZ[set].forEach((item, qi) => {
+    const id = `${set}-${qi}`;
+    const q = el('div', { class: 'q' });
+    q.appendChild(el('div', { class: 'qt' }, `<small>${item.tag}</small>${esc(item.q)}`));
+    const opts = el('div', { class: 'opts' });
+    const why = el('div', { class: 'why', hidden: '' });
+    item.o.forEach((o, oi) => {
+      const b = el('button', { class: 'opt' }, `<b>${'ABCD'[oi]}</b><span>${esc(o)}</span>`);
+      b.addEventListener('click', () => answer(oi));
+      opts.appendChild(b);
+    });
+    function answer(oi, silent) {
+      const btns = opts.querySelectorAll('.opt');
+      btns.forEach((b, i) => { b.disabled = true; if (i === item.a) b.classList.add('right'); if (i === oi && oi !== item.a) b.classList.add('wrong'); });
+      const right = oi === item.a;
+      why.hidden = false; why.classList.toggle('miss', !right);
+      why.innerHTML = `<b>${right ? 'Right.' : 'Answer: ' + 'ABCD'[item.a] + '.'}</b> ${esc(item.w)}`;
+      if (!silent) {
+        state.acl['ans-' + id] = oi; save();
+        if (right) award('q-' + id, QPTS[set]); else { state.got['q-' + id] = 0; save(); renderXP(); }
+      }
+      if (set === 'final') finalScore();
+      syncScore(set);
+    }
+    q.append(opts, why);
+    box.appendChild(q);
+    if (state.acl['ans-' + id] !== undefined) answer(state.acl['ans-' + id], true);
+  });
+}
+// course home reads finished quizzes from "serverlab.scores" (same store as quiz.js)
+function syncScore(set) {
+  const items = QUIZ[set], ans = items.map((_, i) => state.acl[`ans-${set}-${i}`]);
+  if (ans.some(v => v === undefined)) return;
+  try {
+    const k = 'serverlab.scores', s = JSON.parse(localStorage.getItem(k) || '{}');
+    s[set === 'warm' ? '21-warm' : '21-check'] = { right: ans.filter((v, i) => v === items[i].a).length, total: items.length, at: new Date().toISOString() };
+    localStorage.setItem(k, JSON.stringify(s));
+  } catch (e) {}
+}
+function finalScore() {
+  const n = QUIZ.final.length; let done = 0, right = 0;
+  QUIZ.final.forEach((_, i) => { const v = state.acl['ans-final-' + i]; if (v !== undefined) { done++; if (v === QUIZ.final[i].a) right++; } });
+  $('#finalScore').textContent = done ? `Score: ${right} / ${n}${done === n ? (right >= 5 ? ' · ready for the lab' : ' · re-read Sheet 2, then try the simulator again') : ''}` : '';
+}
+
+/* ---------- predict ---------- */
+const PRED_ACL = ['deny ip 10.20.0.128 0.0.0.63 10.20.0.0 0.0.0.127', 'deny ip 10.20.0.128 0.0.0.63 host 10.30.0.10', 'permit ip 10.20.0.128 0.0.0.63 any'];
+const PRED = [
+  { s: '10.20.0.140', d: '10.20.0.10', who: 'Guest → staff PC' },
+  { s: '10.20.0.140', d: '172.16.0.2', who: 'Guest → R2 (“internet”)' },
+  { s: '10.20.0.150', d: '10.30.0.10', who: 'Guest → server' },
+  { s: '10.20.0.140', d: '10.30.0.20', who: 'Guest → another server-room PC' }
+];
+function renderPredict() {
+  const clip = $('#predictClip');
+  const parsed = Engine.parse(PRED_ACL.join('\n')).rules;
+  PRED_ACL.forEach((l, i) => clip.appendChild(el('div', { 'data-i': i }, `<span class="ln">${(i + 1) * 10}</span><span>${esc(l)}</span>`)));
+  clip.appendChild(el('div', { 'data-i': 'x' }, `<span class="ln">··</span><span>(deny any any, invisible)</span>`));
+  PRED.forEach((p, i) => {
+    const v = Engine.evaluate(parsed, { src: p.s, dst: p.d, type: 'echo' });
+    const c = el('div', { class: 'pcard' });
+    c.innerHTML = `<b>${esc(p.who)}</b><span class="pk">${p.s} → ${p.d}</span>`;
+    const btns = el('div', { class: 'btns' });
+    const msg = el('div', { class: 'verdict' });
+    ['permit', 'deny'].forEach(a => {
+      const b = el('button', { class: 'btn sm' }, a === 'permit' ? 'Passes' : 'Dropped');
+      b.addEventListener('click', () => reveal(a));
+      btns.appendChild(b);
+    });
+    function reveal(a, silent) {
+      btns.querySelectorAll('button').forEach(b => b.disabled = true);
+      const right = a === v.action;
+      const which = v.index >= 0 ? `line ${(v.index + 1) * 10}` : 'the invisible deny';
+      msg.className = 'verdict ' + (right ? 'ok' : 'bad');
+      msg.textContent = `${right ? 'Right' : 'Not quite'}: ${v.action === 'permit' ? 'passes' : 'dropped'} by ${which}.`;
+      clip.querySelectorAll('div').forEach(d => d.classList.toggle('hit', d.dataset.i === String(v.index >= 0 ? v.index : 'x')));
+      if (!silent) { state.acl['pred-' + i] = a; save(); if (right) award('pred-' + i, 5); }
+    }
+    c.append(btns, msg);
+    $('#predictCards').appendChild(c);
+    if (state.acl['pred-' + i]) reveal(state.acl['pred-' + i], true);
+  });
+}
+
+/* ---------- forge ---------- */
+const FORGE = [
+  { p: 'Guest street 10.20.0.128/26', a: '0.0.0.63' },
+  { p: 'Staff street 10.20.0.0/25', a: '0.0.0.127' },
+  { p: 'Server room 10.30.0.0/24', a: '0.0.0.255' },
+  { p: 'R1–R2 link 172.16.0.0/30', a: '0.0.0.3' },
+  { p: 'Mask 255.255.255.224 (/27)', a: '0.0.0.31' },
+  { p: 'Mask 255.255.255.240 (/28)', a: '0.0.0.15' },
+  { p: 'One host only: 10.30.0.10', a: '0.0.0.0' },
+  { p: 'The whole village 10.0.0.0/8', a: '0.255.255.255' }
+];
+let fr = 0;
+function forgeRender() {
+  const done = FORGE.every((_, i) => state.got['forge-' + i] !== undefined);
+  if (fr >= FORGE.length) {
+    $('#forgePrompt').textContent = done ? 'Forge complete.' : '';
+    $('#forgeRound').textContent = 'All 8 rounds done';
+    $('#forgeIn').disabled = true; $('#forgeGo').disabled = true; $('#forgeNext').hidden = true;
+    $('#forgeMsg').innerHTML = '<span class="ok">Reading wildcards is now a reflex. On to the simulator.</span> <button class="btn sm" id="forgeAgain">Practise again</button>';
+    $('#forgeAgain').onclick = () => { fr = 0; $('#forgeIn').disabled = false; $('#forgeGo').disabled = false; forgeRender(); };
+  } else {
+    $('#forgeRound').textContent = `Round ${fr + 1} of ${FORGE.length}`;
+    $('#forgePrompt').textContent = FORGE[fr].p;
+    $('#forgeIn').value = ''; $('#forgeMsg').textContent = ''; $('#forgeNext').hidden = true; $('#forgeGo').hidden = false;
+  }
+  const pips = $('#forgePips'); pips.innerHTML = '';
+  FORGE.forEach((_, i) => { const v = state.got['forge-' + i]; pips.appendChild(el('i', { class: v > 0 ? 'on' : v === 0 ? 'miss' : '' })); });
+}
+function forgeCheck() {
+  if (fr >= FORGE.length) return;
+  const v = $('#forgeIn').value.trim(), want = FORGE[fr].a;
+  if (Engine.ipToInt(v) === null) { $('#forgeMsg').innerHTML = '<span class="bad">Type four numbers separated by dots, like 0.0.0.63.</span>'; return; }
+  const right = Engine.ipToInt(v) === Engine.ipToInt(want);
+  const id = 'forge-' + fr;
+  if (right) award(id, 10); else if (state.got[id] === undefined) { state.got[id] = 0; save(); }
+  $('#forgeMsg').innerHTML = right ? `<span class="ok">Correct: ${want}.</span>` : `<span class="bad">It's ${want}.</span> Take the mask, then subtract each octet from 255.`;
+  $('#forgeGo').hidden = true; $('#forgeNext').hidden = false; $('#forgeNext').focus();
+  forgeRender2();
+}
+function forgeRender2() { const pips = $('#forgePips'); pips.innerHTML = ''; FORGE.forEach((_, i) => { const v = state.got['forge-' + i]; pips.appendChild(el('i', { class: v > 0 ? 'on' : v === 0 ? 'miss' : '' })); }); renderXP(); }
+
+/* ---------- simulator ---------- */
+const FULL_TESTS = [['PC5', 'PC1', false], ['PC5', 'PC3', false], ['PC5', 'SRV', false], ['PC5', 'R2', true], ['PC5', 'GW', true], ['PC1', 'PC3', true], ['PC1', 'SRV', true]];
+const GOOD_ACL = 'deny ip 10.20.0.128 0.0.0.63 10.20.0.0 0.0.0.127\ndeny ip 10.20.0.128 0.0.0.63 10.20.0.192 0.0.0.63\ndeny ip 10.20.0.128 0.0.0.63 10.30.0.0 0.0.0.255\npermit ip 10.20.0.128 0.0.0.63 any';
+const MISSIONS = [
+  { name: 'M1 Close the hole', title: 'Mission 1 · Close the hole', brief: 'Guests can reach staff PCs. Stop guest → staff, but guests must still reach R2 (our stand-in for the internet). Staff must still reach CCTV.',
+    start: '', iface: 'g0/0.30', dir: 'in', tests: [['PC5', 'PC1', false], ['PC5', 'R2', true], ['PC1', 'PC3', true], ['PC5', 'PC6', true]],
+    hint: 'Two lines. A deny from the guest street (10.20.0.128 0.0.0.63) to the staff street (10.20.0.0 0.0.0.127), then a permit for the guests to any. Without the permit, the invisible deny eats everything.' },
+  { name: 'M2 Full isolation', title: 'Mission 2 · Full guest isolation', brief: 'Guests may not reach staff, CCTV, or the server room 10.30.0.0/24. They may still reach their own gateway and the internet. Staff traffic is untouched.',
+    start: 'deny ip 10.20.0.128 0.0.0.63 10.20.0.0 0.0.0.127\npermit ip 10.20.0.128 0.0.0.63 any', iface: 'g0/0.30', dir: 'in', tests: FULL_TESTS,
+    hint: 'Add two more deny lines ABOVE the permit: one to CCTV 10.20.0.192 0.0.0.63 and one to 10.30.0.0 0.0.0.255. Order matters: anything under the permit is never read.' },
+  { name: 'M3 Bug hunt', title: 'Mission 3 · Bug hunt', brief: 'A junior engineer wrote this. They say "the ACL does nothing." Find and fix the bug without adding new lines.',
+    start: 'permit ip 10.20.0.128 0.0.0.63 any\ndeny ip 10.20.0.128 0.0.0.63 10.20.0.0 0.0.0.127\ndeny ip 10.20.0.128 0.0.0.63 10.20.0.192 0.0.0.63\ndeny ip 10.20.0.128 0.0.0.63 10.30.0.0 0.0.0.255', iface: 'g0/0.30', dir: 'in', tests: FULL_TESTS,
+    hint: 'First match wins. The permit on line 1 matches every guest packet, so the router never reads the denies. Move the permit to the bottom.' },
+  { name: 'M4 Wrong door', title: 'Mission 4 · Wrong door', brief: 'The ACL text is perfect, but after it went live the staff phoned in: "We can\'t reach anything!" Fix it by changing only where it is applied.',
+    start: GOOD_ACL, iface: 'g0/0.10', dir: 'in', tests: FULL_TESTS,
+    hint: 'Inbound on g0/0.10 means the guard checks STAFF packets. None match a guest source line, so the implicit deny drops them all. Extended ACLs go close to the source: the guest door, g0/0.30, in.' },
+  { name: 'M5 Stateless surprise', title: 'Mission 5 · The stateless surprise', brief: 'Staff now want to ping guest PCs to help them, but guests must still not start traffic to staff. Run the tests first and watch PC1 → PC5 fail. Why? Then fix it with one line.',
+    start: GOOD_ACL, iface: 'g0/0.30', dir: 'in', tests: FULL_TESTS.concat([['PC1', 'PC5', true]]),
+    hint: 'The request leaves fine, but the guest\'s ECHO-REPLY enters g0/0.30 and hits deny line 1. Cisco ACLs don\'t remember conversations. Add on top: permit icmp 10.20.0.128 0.0.0.63 10.20.0.0 0.0.0.127 echo-reply' }
+];
+let mi = 0, busy = false;
+const POS = { PC1: [90, 262], PC3: [210, 262], PC5: [330, 262], PC6: [440, 262], SW: [260, 168], R1: [260, 62], R2: [450, 62], SRV: [600, 62] };
+function topoSVG() {
+  const node = (k, label, sub, w = 78, cls = '') => { const [x, y] = POS[k]; return `<g><rect class="node ${cls}" x="${x - w / 2}" y="${y - 18}" width="${w}" height="36" rx="2"/><text x="${x}" y="${y - 1}" text-anchor="middle" font-size="12" font-weight="600">${label}</text><text class="sub" x="${x}" y="${y + 12}" text-anchor="middle">${sub}</text></g>`; };
+  const line = (a, b) => `<line class="wire" x1="${POS[a][0]}" y1="${POS[a][1]}" x2="${POS[b][0]}" y2="${POS[b][1]}"/>`;
+  return `<svg viewBox="0 0 680 300" role="img" aria-label="Topology: four PCs on switch SW1, trunk to router R1, R1 to R2, R2 to the server">
+    ${line('PC1', 'SW')}${line('PC3', 'SW')}${line('PC5', 'SW')}${line('PC6', 'SW')}${line('SW', 'R1')}${line('R1', 'R2')}${line('R2', 'SRV')}
+    <text class="sub" x="270" y="118">trunk · g0/0.10 .20 .30</text>
+    <text class="sub" x="300" y="52">g0/1</text>
+    <text class="sub" x="355" y="80">172.16.0.0/30</text>
+    ${node('PC1', 'PC1', 'staff .10')}${node('PC3', 'PC3', 'CCTV .200')}${node('PC5', 'PC5', 'guest .140', 78, 'guest')}${node('PC6', 'PC6', 'guest .141', 78, 'guest')}
+    ${node('SW', 'SW1', '2960', 90)}${node('R1', 'R1', '2911 · gw .1/.129/.193', 150)}${node('R2', 'R2', '“internet” .2')}${node('SRV', 'Server', '10.30.0.10', 84)}
+    <g class="acltag" id="aclTag"></g>
+    <g id="fx"></g>
+  </svg>`;
+}
+const IFPOS = { 'g0/0.10': [205, 96], 'g0/0.20': [205, 96], 'g0/0.30': [205, 96], 'g0/1': [330, 30] };
+function drawTag() {
+  const iface = $('#aclIf').value, dir = $('#aclDir').value, [x, y] = IFPOS[iface];
+  const t = `GUEST-IN ${dir} @ ${iface}`, w = t.length * 6.3 + 12;
+  $('#aclTag').innerHTML = `<rect x="${x - w / 2}" y="${y - 10}" width="${w}" height="18"/><text x="${x}" y="${y + 3}" text-anchor="middle">${t}</text>`;
+}
+function pathTo(k) { // from host to R1
+  if (k === 'R2') return [POS.R2, POS.R1];
+  if (k === 'SRV') return [POS.SRV, POS.R2, POS.R1];
+  if (k === 'GW') return [POS.R1];
+  return [POS[k], POS.SW, POS.R1];
+}
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function animate(pts, cls, ms) {
+  return new Promise(res => {
+    if (reduce || pts.length < 2) return res();
+    const fx = $('#fx'); const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    c.setAttribute('r', 7); c.setAttribute('class', 'pkt ' + cls); fx.appendChild(c);
+    const seg = []; let total = 0;
+    for (let i = 1; i < pts.length; i++) { const d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); seg.push(d); total += d; }
+    const t0 = performance.now();
+    (function step(t) {
+      let f = Math.min(1, (t - t0) / ms), dist = f * total, i = 0;
+      while (i < seg.length - 1 && dist > seg[i]) { dist -= seg[i]; i++; }
+      const r = seg[i] ? dist / seg[i] : 0;
+      c.setAttribute('cx', pts[i][0] + (pts[i + 1][0] - pts[i][0]) * r); c.setAttribute('cy', pts[i][1] + (pts[i + 1][1] - pts[i][1]) * r);
+      if (f < 1) requestAnimationFrame(step); else { c.remove(); res(); }
+    })(t0);
+  });
+}
+function boom(p) {
+  if (reduce) return;
+  const fx = $('#fx'); const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  c.setAttribute('cx', p[0]); c.setAttribute('cy', p[1]); c.setAttribute('class', 'boom'); fx.appendChild(c);
+  let r = 6; const iv = setInterval(() => { r += 3; c.setAttribute('r', r); c.setAttribute('opacity', Math.max(0, 1 - r / 34)); if (r > 34) { clearInterval(iv); c.remove(); } }, 16);
+}
+function currentACL() {
+  const p = Engine.parse($('#aclText').value);
+  $('#errs').textContent = p.errors.join('\n');
+  drawTag();
+  return p.errors.length ? null : { rules: p.rules, iface: $('#aclIf').value, dir: $('#aclDir').value };
+}
+function logLine(html) { const l = $('#log'); if (l.dataset.fresh !== '1') { l.innerHTML = ''; l.dataset.fresh = '1'; } l.insertAdjacentHTML('beforeend', html + '\n'); l.scrollTop = l.scrollHeight; }
+async function firePing(s, d, acl, fast) {
+  const H = Engine.HOSTS, r = Engine.ping(s, d, acl);
+  logLine(`<b>${H[s].label} → ${H[d].label}</b>`);
+  r.steps.forEach(st => {
+    if (st.kind === 'note') logLine(`<span class="m">  ${esc(st.text)}</span>`);
+    else logLine(`<span class="${st.kind === 'permit' ? 'p' : 'd'}">  ${st.phase} @ ${st.iface} ${st.dir}: ${esc(st.text)} → ${st.kind === 'permit' ? 'PERMIT' : 'DROP'}</span>`);
+  });
+  if (acl && !r.steps.some(st => st.kind !== 'note') && !r.local) logLine('<span class="m">  ACL not on this path</span>');
+  const ms = fast ? 380 : 700;
+  if (r.local) { await animate(Engine.HOSTS[s].iface === 'g0/1' ? [POS[s], POS[d]] : [POS[s], POS.SW, POS[d]], '', ms); }
+  else {
+    const up = pathTo(s), down = pathTo(d).slice().reverse();
+    if (r.dropAt === 'request') { await animate(up, '', ms); boom(POS.R1); }
+    else {
+      await animate(up.concat(down.slice(1)), '', ms * 1.4);
+      const back = pathTo(d).concat(pathTo(s).slice().reverse().slice(1));
+      if (r.dropAt === 'reply') { await animate(pathTo(d), 'reply', ms); boom(POS.R1); }
+      else await animate(back, 'reply', ms * 1.4);
+    }
+  }
+  logLine(r.ok ? '<span class="p">  ! reply received</span>' : '<span class="d">  . request timed out</span>');
+  return r.ok;
+}
+function renderMissionTabs() {
+  const box = $('#missionTabs'); box.innerHTML = '';
+  MISSIONS.forEach((m, i) => {
+    const b = el('button', { class: 'mtab' + (i === mi ? ' on' : '') + (state.missions[i] ? ' won' : ''), role: 'tab', 'aria-selected': i === mi }, esc(m.name));
+    b.addEventListener('click', () => { if (!busy) loadMission(i); });
+    box.appendChild(b);
+  });
+}
+function loadMission(i, reset) {
+  mi = i; const m = MISSIONS[i];
+  const saved = !reset && state.acl['m' + i];
+  $('#aclText').value = saved ? saved.text : m.start;
+  $('#aclIf').value = saved ? saved.iface : m.iface;
+  $('#aclDir').value = saved ? saved.dir : m.dir;
+  $('#brief').innerHTML = `<h3>${esc(m.title)}</h3><p>${esc(m.brief)}</p><p class="mono" style="font-size:.8rem;color:var(--muted)" id="hintText" hidden></p>`;
+  renderMatrix(null); $('#winBanner').innerHTML = state.missions[i] ? '<div class="banner">Mission complete. Try another, or experiment freely.</div>' : '';
+  currentACL(); renderMissionTabs();
+}
+function renderMatrix(results) {
+  const m = MISSIONS[mi], tb = $('#matrix tbody'), H = Engine.HOSTS; tb.innerHTML = '';
+  m.tests.forEach(([s, d, want], k) => {
+    const got = results ? results[k] : null;
+    const tr = el('tr', { class: got === null ? '' : got === want ? 'pass' : 'fail' });
+    tr.innerHTML = `<td>${esc(H[s].label)}</td><td>${esc(H[d].label)}</td><td>${want ? 'success' : 'fails'}</td><td>${got === null ? '–' : (got ? 'success' : 'fails') + (got === want ? ' ✓' : ' ✗')}</td>`;
+    tb.appendChild(tr);
+  });
+}
+async function runTests() {
+  if (busy) return; const acl = currentACL(); if (!acl) { toast('Fix the red error first'); return; }
+  busy = true; $('#runTests').disabled = true;
+  state.acl['m' + mi] = { text: $('#aclText').value, iface: acl.iface, dir: acl.dir }; save();
+  $('#log').dataset.fresh = '0';
+  const m = MISSIONS[mi], res = [];
+  renderMatrix(res.concat(m.tests.map(() => null)).slice(0, m.tests.length));
+  for (const [s, d] of m.tests) { res.push(await firePing(s, d, acl, true)); const pad = res.concat(m.tests.slice(res.length).map(() => null)); renderMatrix(pad); }
+  const win = m.tests.every(([, , w], k) => res[k] === w);
+  if (win) {
+    state.missions[mi] = true; save();
+    award('mission-' + mi, 50, 'mission complete');
+    $('#winBanner').innerHTML = `<div class="banner">All ${m.tests.length} tests pass. ${mi < MISSIONS.length - 1 ? 'Next mission unlocked.' : 'Every mission done. You can read and fix an ACL.'}</div>`;
+    renderMissionTabs();
+  } else {
+    const n = m.tests.filter(([, , w], k) => res[k] !== w).length;
+    $('#winBanner').innerHTML = `<p class="verdict bad">${n} test${n > 1 ? 's' : ''} wrong. Read the packet log: it names the line that matched.</p>`;
+  }
+  busy = false; $('#runTests').disabled = false;
+}
+function setupSim() {
+  $('#topo').innerHTML = topoSVG();
+  const H = Engine.HOSTS;
+  for (const k of ['PC1', 'PC3', 'PC5', 'PC6', 'SRV']) $('#fpSrc').appendChild(el('option', { value: k }, esc(H[k].label)));
+  for (const k of ['PC1', 'PC3', 'PC5', 'PC6', 'GW', 'R2', 'SRV']) $('#fpDst').appendChild(el('option', { value: k }, esc(H[k].label + ' ' + H[k].ip)));
+  $('#fpSrc').value = 'PC5'; $('#fpDst').value = 'PC1';
+  $('#fpGo').addEventListener('click', async () => {
+    if (busy) return; const acl = currentACL(); if (!acl) { toast('Fix the red error first'); return; }
+    const s = $('#fpSrc').value, d = $('#fpDst').value; if (s === d) { toast('Pick two different devices'); return; }
+    busy = true; $('#log').dataset.fresh = '0'; await firePing(s, d, acl); busy = false;
+  });
+  $('#aclText').addEventListener('input', currentACL);
+  $('#aclIf').addEventListener('change', currentACL); $('#aclDir').addEventListener('change', currentACL);
+  $('#runTests').addEventListener('click', runTests);
+  $('#hintBtn').addEventListener('click', () => { const h = $('#hintText'); h.hidden = false; h.textContent = 'Hint: ' + MISSIONS[mi].hint; });
+  $('#resetBtn').addEventListener('click', () => { if (!busy) { delete state.acl['m' + mi]; save(); loadMission(mi, true); } });
+  let first = MISSIONS.findIndex((_, i) => !state.missions[i]); loadMission(first < 0 ? 0 : first);
+}
+
+/* ---------- harden ---------- */
+const CFG = {
+  R1: { cap: 'R1# show running-config (excerpt)', lines: [
+    ['hostname R1'],
+    ['no service password-encryption', 'Passwords sit in the config as plain text. Anyone who sees a backup or a screen share can read them.', 'service password-encryption'],
+    ['enable password cisco', '"enable password" is stored in clear text, and "cisco" is the first word an attacker tries.', 'enable secret <strong-lab-secret>'],
+    ['ip domain-name lab.local'],
+    ['ip http server', 'A web management page nobody uses is one more door to attack.', 'no ip http server'],
+    ['!'],
+    ['interface GigabitEthernet0/0.30'],
+    [' encapsulation dot1Q 30'],
+    [' ip address 10.20.0.129 255.255.255.192'],
+    [' ip access-group GUEST-IN in'],
+    ['!'],
+    ['line vty 0 4'],
+    [' password cisco', 'One shared password for everyone means no way to tell who logged in.', 'username admin secret …  +  login local'],
+    [' login'],
+    [' transport input telnet', 'Telnet sends the username and password across the network in clear text.', 'transport input ssh'],
+    [' exec-timeout 0 0', '0 0 means "never log out". A forgotten session stays open forever.', 'exec-timeout 5 0'],
+    ['line con 0'],
+    [' logging synchronous']
+  ] },
+  SW: { cap: 'SW1# show running-config (excerpt)', lines: [
+    ['interface FastEthernet0/5'],
+    [' switchport mode access'],
+    [' switchport access vlan 30'],
+    ['!'],
+    ['interface range FastEthernet0/7 - 24', 'Eighteen unused ports are up in VLAN 1. Anyone with a laptop in the comms room gets a live port.', 'switchport access vlan 999  +  shutdown'],
+    [' no shutdown'],
+    ['!'],
+    ['interface Vlan1', 'The switch\'s management address lives in VLAN 1, the same VLAN the unused ports sit in.', 'move management to its own VLAN'],
+    [' ip address 10.20.0.120 255.255.255.128']
+  ] }
+};
+const WEAK_TOTAL = Object.values(CFG).reduce((n, c) => n + c.lines.filter(l => l[1]).length, 0);
+function renderHarden() {
+  for (const k of ['R1', 'SW']) {
+    const box = k === 'R1' ? $('#cfgR1') : $('#cfgSW');
+    box.innerHTML = `<div class="cap"><span>${esc(CFG[k].cap)}</span></div>`;
+    CFG[k].lines.forEach((l, i) => {
+      const id = `weak-${k}-${i}`;
+      const b = el('button', {}, esc(l[0]));
+      b.addEventListener('click', () => pick(b, l, id));
+      box.appendChild(b);
+      if (state.got[id]) pick(b, l, id, true);
+    });
+  }
+  weakScore();
+}
+function pick(b, l, id, silent) {
+  if (l[1]) {
+    b.classList.add('found'); b.disabled = true;
+    if (!silent) award(id, 15, 'weak spot');
+    $('#findings').appendChild(el('div', { class: 'finding' }, `<b class="mono">${esc(l[0].trim())}</b> · ${esc(l[1])} Fix: <code>${esc(l[2])}</code>`));
+    weakScore();
+  } else if (!silent) {
+    b.classList.add('fine'); setTimeout(() => b.classList.remove('fine'), 700);
+    toast('That line is fine');
+  }
+}
+function weakScore() { const n = document.querySelectorAll('.cfg button.found').length; $('#weakScore').textContent = `Found ${n} of ${WEAK_TOTAL}.`; }
+
+const ORDER = [
+  { id: 'host', t: 'hostname R1' },
+  { id: 'dom', t: 'ip domain-name lab.local' },
+  { id: 'user', t: 'username admin secret …' },
+  { id: 'key', t: 'crypto key generate rsa general-keys modulus 1024' },
+  { id: 'v2', t: 'ip ssh version 2' },
+  { id: 'vty', t: 'line vty 0 4' },
+  { id: 'login', t: ' login local' },
+  { id: 'tin', t: ' transport input ssh' }
+];
+const RULES = [
+  ['host', 'key', 'RSA keys are named after hostname + domain. Set hostname first.'],
+  ['dom', 'key', 'IOS refuses to generate keys until ip domain-name exists.'],
+  ['key', 'v2', 'SSH version 2 needs RSA keys to exist first.'],
+  ['vty', 'login', 'login local is a line command. Enter line vty 0 4 first.'],
+  ['vty', 'tin', 'transport input is a line command. Enter line vty 0 4 first.'],
+  ['user', 'login', 'Create the user before login local, or you lock yourself out of remote login.']
+];
+let built = [];
+function renderOrder() {
+  const pool = $('#pool'), b = $('#built'); pool.innerHTML = ''; b.innerHTML = '';
+  const shuffled = ORDER.filter(o => !built.includes(o.id)).sort((x, y) => (x.id.charCodeAt(1) * 7 % 11) - (y.id.charCodeAt(1) * 7 % 11));
+  shuffled.forEach(o => { const c = el('button', { class: 'chip' }, esc(o.t.trim())); c.addEventListener('click', () => { built.push(o.id); renderOrder(); }); pool.appendChild(c); });
+  if (!built.length) b.appendChild(el('span', { class: 'mono', style: 'color:var(--muted);font-size:.85rem' }, 'R1(config)# … tap commands above'));
+  built.forEach((id, i) => { const o = ORDER.find(x => x.id === id); const c = el('button', { class: 'chip' }, `<i>${i + 1}</i>${esc(o.t)}`); c.addEventListener('click', () => { built.splice(i, 1); renderOrder(); }); b.appendChild(c); });
+}
+function checkOrder() {
+  if (built.length < ORDER.length) { $('#orderMsg').innerHTML = `<span class="bad">Place all ${ORDER.length} commands first.</span>`; return; }
+  const broken = RULES.filter(([a, z]) => built.indexOf(a) > built.indexOf(z));
+  if (!broken.length) { $('#orderMsg').innerHTML = '<span class="ok">IOS accepts it. SSH is ready.</span>'; award('order', 40, 'SSH built'); }
+  else $('#orderMsg').innerHTML = '<span class="bad">' + broken.map(r => esc(r[2])).join('<br>') + '</span>';
+}
+
+/* ---------- break/fix ---------- */
+const CASES = [
+  { sym: 'Right after GUEST-IN went live, guests can\'t reach anything, not even R2. Staff are fine.',
+    o: ['The trunk to the switch went down', 'The permit line is missing or mistyped, so the implicit deny drops everything', 'R2 lost its return route', 'Guests need a new DHCP lease'], a: 1,
+    steps: ['show access-lists: is permit ip 10.20.0.128 0.0.0.63 any there? Is its counter 0?', 'show ip interface g0/0.30: "Inbound access list is GUEST-IN"?', 'Check the wildcards: 0.0.0.63, not 0.0.0.255.', 'Fix: add the permit at the bottom. Re-run the ping matrix.'] },
+  { sym: 'A staff member: "I can\'t SSH to the router any more, yesterday it worked." Their PC shows 10.20.0.140.',
+    o: ['The RSA keys expired', 'Their PC is on a guest address, so access-class 10 refuses it', 'SSH version 2 is off', 'The router is out of VTY lines'], a: 1,
+    steps: ['10.20.0.140 is inside 10.20.0.128/26: the guest street.', 'Check the switch port\'s VLAN (show vlan brief, Lesson 12). Was the PC moved to a guest port?', 'Or check if the PC was given a wrong static address.', 'Fix the port or address. Don\'t widen the ACL: it\'s doing its job.'] },
+  { sym: 'After a change window, staff can ping guest PCs again, but guests can now also ping staff.',
+    o: ['Someone added permit icmp … echo-reply and it\'s working as designed', 'Someone added permit icmp guest → staff without "echo-reply", so it permits all ICMP', 'The switch flooded the packets', 'Guests moved to VLAN 10'], a: 1,
+    steps: ['show access-lists: read the new line exactly. Is the word echo-reply at the end?', 'Without a type, permit icmp matches echo requests too, so guests can start pings to staff.', 'Fix: remove the line (no 5) and re-add it with echo-reply.', 'Record it in the change log (Lesson 15): what changed, who, rollback.'] }
+];
+function renderCases() {
+  CASES.forEach((c, i) => {
+    const box = el('div', { class: 'case' });
+    box.innerHTML = `<div class="sym"><b>Ticket #${2101 + i} · P3</b><span>${esc(c.sym)}</span></div>`;
+    const body = el('div', { class: 'body' }), opts = el('div', { class: 'opts' }), out = el('div', { hidden: '' });
+    c.o.forEach((o, oi) => { const b = el('button', { class: 'opt' }, `<b>${'ABCD'[oi]}</b><span>${esc(o)}</span>`); b.addEventListener('click', () => go(oi)); opts.appendChild(b); });
+    function go(oi, silent) {
+      opts.querySelectorAll('.opt').forEach((b, k) => { b.disabled = true; if (k === c.a) b.classList.add('right'); if (k === oi && oi !== c.a) b.classList.add('wrong'); });
+      out.hidden = false; out.innerHTML = `<p class="verdict ${oi === c.a ? 'ok' : 'bad'}">${oi === c.a ? 'Good call.' : 'The likely cause is ' + 'ABCD'[c.a] + '.'} Check in this order:</p><ol class="steps">${c.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>`;
+      if (!silent) { state.acl['case-' + i] = oi; save(); if (oi === c.a) award('case-' + i, 20); }
+    }
+    body.append(opts, out); box.appendChild(body); $('#cases').appendChild(box);
+    if (state.acl['case-' + i] !== undefined) go(state.acl['case-' + i], true);
+  });
+}
+
+/* ---------- lab + glossary ---------- */
+const LAB = ['Prove the hole: PC5 → PC1 ping succeeds before any ACL', 'Build GUEST-IN and apply it inbound on g0/0.30', 'Run the 8-row ping matrix; check match counters in show access-lists', 'Harden R1: enable secret, local user, SSH v2, access-class 10 on VTY', 'Test: SSH from PC1 works, Telnet from PC1 refused, SSH from PC5 refused', 'Park SW1 unused ports in VLAN 999 and shut them', 'Stretch: add the echo-reply line, re-test PC1 → PC5', 'Rebuild GUEST-IN from memory in under 10 minutes', 'Record the result in the Readiness Checks tab'];
+function renderLab() {
+  LAB.forEach((t, i) => {
+    const id = 'lab' + i, row = el('label', { class: 'check', for: id });
+    const cb = el('input', { type: 'checkbox', id }); cb.checked = !!state.labs[i];
+    cb.addEventListener('change', () => { state.labs[i] = cb.checked; save(); renderXP(); });
+    row.append(cb, el('span', {}, esc(t))); $('#labChecks').appendChild(row);
+  });
+  document.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', () => {
+    const pre = document.getElementById(b.dataset.copy), txt = pre.textContent;
+    const sel = () => { const r = document.createRange(); r.selectNodeContents(pre); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast('Selected. Press Ctrl+C'); };
+    try { navigator.clipboard.writeText(txt).then(() => toast('Copied'), sel); } catch (e) { sel(); }
+  }));
+}
+const GLOSS = [['ACL', 'Ordered permit/deny rules a router checks for each packet.'], ['ACE', 'One line of an ACL.'], ['Implicit deny', 'The invisible last line: deny everything.'], ['Wildcard mask', 'Inverse of a subnet mask. 0 = must match, 1 = don\'t care.'], ['Standard ACL', 'Source only. 1–99. Place near the destination.'], ['Extended ACL', 'Source, destination, protocol, port. 100–199. Place near the source.'], ['Named ACL', 'An ACL with a name like GUEST-IN. Easier to read and edit.'], ['Inbound / outbound', 'Packets entering / leaving the router on that interface.'], ['Stateless', 'Judges each packet alone; replies are checked too. Cisco ACLs, AWS NACLs.'], ['Stateful', 'Remembers conversations; replies allowed automatically. Oracle security lists (default), AWS security groups.'], ['Hardening', 'Removing easy ways to attack a device.'], ['SSH', 'Encrypted remote login. Replaces Telnet.'], ['VTY lines', 'The router\'s virtual doors for remote login.'], ['access-class', 'Applies an ACL to the VTY lines: who may try to log in.'], ['enable secret', 'Privileged-mode password, stored as a hash.']];
+function renderGloss() {
+  GLOSS.forEach(([w, d]) => {
+    const b = el('button', { class: 'flip', 'aria-expanded': 'false' }, `<b>${esc(w)}</b><span>Tap to reveal</span>`);
+    b.addEventListener('click', () => { const open = b.classList.toggle('open'); b.setAttribute('aria-expanded', open); b.querySelector('span').textContent = open ? d : 'Tap to reveal'; });
+    $('#gloss').appendChild(b);
+  });
+}
+
+/* ---------- nav ---------- */
+const SECTION_DONE = {
+  warmup: () => QUIZ.warm.every((_, i) => state.acl['ans-warm-' + i] !== undefined),
+  clipboard: () => PRED.every((_, i) => state.acl['pred-' + i]),
+  forge: () => FORGE.every((_, i) => state.got['forge-' + i] !== undefined),
+  sim: () => MISSIONS.every((_, i) => state.missions[i]),
+  harden: () => !!state.got.order && Object.keys(state.got).filter(k => k.startsWith('weak-')).length === WEAK_TOTAL,
+  breakfix: () => CASES.every((_, i) => state.acl['case-' + i] !== undefined),
+  final: () => QUIZ.final.every((_, i) => state.acl['ans-final-' + i] !== undefined),
+  lab: () => LAB.every((_, i) => state.labs[i])
+};
+function renderJump() { document.querySelectorAll('.sheet').forEach((s, i) => { const a = el('a', { href: '#' + s.id, 'data-id': s.id, title: s.dataset.title }, `${i + 1} ${esc(s.dataset.title)}`); $('#jump').appendChild(a); }); }
+
+/* ---------- boot ---------- */
+renderJump();
+document.querySelectorAll('[data-quiz]').forEach(renderQuiz);
+renderPredict();
+fr = FORGE.findIndex((_, i) => state.got['forge-' + i] === undefined); if (fr < 0) fr = FORGE.length;
+forgeRender();
+$('#forgeGo').addEventListener('click', forgeCheck);
+$('#forgeIn').addEventListener('keydown', e => { if (e.key === 'Enter') { if (!$('#forgeNext').hidden) $('#forgeNext').click(); else forgeCheck(); } });
+$('#forgeNext').addEventListener('click', () => { fr++; forgeRender(); $('#forgeIn').focus(); });
+setupSim();
+renderHarden(); renderOrder();
+$('#orderCheck').addEventListener('click', checkOrder);
+$('#orderReset').addEventListener('click', () => { built = []; $('#orderMsg').textContent = ''; renderOrder(); });
+renderCases(); renderLab(); renderGloss(); finalScore(); renderXP();
+$('#wipe').addEventListener('click', () => { $('#wipeConfirm').hidden = false; });
+$('#wipeYes').addEventListener('click', () => { try { localStorage.removeItem(KEY); } catch (e) {} location.reload(); });
+</script>
+</body>
+</html>

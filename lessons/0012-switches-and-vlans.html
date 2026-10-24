@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>12 · Switches and VLANs: hallways and locked doors</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/interactive.css">
+</head>
+<body>
+<main>
+<nav class="top"><a href="../index.html">Course home</a></nav>
+
+<div class="eyebrow">Server Lab · Lesson 12 · Part 2 · Networking core</div>
+<h1>Switches and VLANs: hallways and locked doors</h1>
+<p class="lede">Every office, mall and data center network is built from switches and VLANs. You'll split one switch into three locked hallways, then size the PoE budget the way an estimator would.</p>
+<div class="meta"><span data-k="Time">≈ 60 min, half in Packet Tracer</span><span data-k="Builds on">Lesson 10</span><span data-k="Exam">CCNA 2.1–2.2 · Network+ 2.0</span><span data-k="Tool">Cisco Packet Tracer</span></div>
+
+
+<div class="callout "><span class="label">Why this lesson</span><p>NOC ads list VLANs (Job Ads #39); network technician and junior network engineer roles (Job Ads #34–36, #41–42) assume them. Packet Tracer is free from Cisco Networking Academy: sign up at netacad.com, then download.</p></div>
+
+<h2>Warm-up</h2>
+<div class="quiz" data-quiz="12-warm"><script type="application/json">
+[
+ {
+  "q": "Ping to 8.8.8.8 works, but names don't resolve. Which service is broken?",
+  "options": [
+   "DHCP",
+   "DNS",
+   "NAT",
+   "SSH"
+  ],
+  "answer": 1,
+  "why": "The path works; the directory doesn't."
+ },
+ {
+  "q": "In the Lesson 10 office plan, which subnet is for staff?",
+  "options": [
+   "10.20.0.0/25",
+   "10.20.0.128/26",
+   "10.20.0.192/26",
+   "10.20.0.0/24"
+  ],
+  "answer": 0,
+  "why": "The biggest group (100 staff) got the /25."
+ }
+]
+</script></div>
+
+<h2>Part 1 · What a switch does</h2>
+<p>A <b>switch</b> is the box in the comms room with many network ports. It connects devices on the same street. Every network card has a <b>MAC address</b>: a permanent ID burned in at the factory (like a unit owner's ID card), written like 00:1A:2B:3C:4D:5E.</p>
+<p>The switch learns which MAC address lives behind which port, and keeps a <b>MAC address table</b>. When data arrives for a MAC it knows, it sends it out only that port. When it doesn't know, it floods it out of every port (like a broadcast).</p>
+<p>Condo comparison: the switch is <b>one floor's hallway</b>. Everyone on that floor can knock on each other's doors.</p>
+<h2>Part 2 · VLANs: locked doors in the hallway</h2>
+<p>Problem: staff PCs, CCTV and guests are all plugged into the same switch. Without separation, a guest could reach the camera recorder.</p>
+<p>A <b>VLAN</b> (Virtual LAN) splits one physical switch into separate virtual switches. Each port is assigned to one VLAN. Devices in VLAN 10 can't talk to devices in VLAN 20 at all, unless a router lets them (Lesson 13). Condo comparison: one physical hallway with locked doors, so it acts like separate hallways.</p>
+<ul>
+  <li><b>Access port:</b> belongs to one VLAN. Used for PCs, cameras, phones.</li>
+  <li><b>Trunk port:</b> carries many VLANs over one cable, between switches or to a router. Each frame gets a small VLAN tag (the <b>802.1Q</b> standard) saying which VLAN it belongs to.</li>
+</ul>
+<div class="sim" data-sim2="vlan"></div>
+
+<h2>Part 3 · PoE: where your electrical knowledge pays off</h2>
+<p>Cameras, Wi-Fi access points and IP phones usually get their power through the network cable: <b>PoE</b> (Power over Ethernet). The switch is the power source, so every PoE switch has a <b>power budget</b> in watts.</p>
+<div class="table-wrap"><table class=""><thead><tr><th>Standard</th><th>Max power at the switch port</th></tr></thead><tbody><tr><td>802.3af (PoE)</td><td>15.4 W</td></tr><tr><td>802.3at (PoE+)</td><td>30 W</td></tr><tr><td>802.3bt (PoE++)</td><td>60 W (Type 3) or 90 W (Type 4)</td></tr></tbody></table></div>
+
+<p>Your estimator brain already does this: add up the loads, compare with the supply, leave headroom. 30 cameras at about 7 W each = 210 W. A switch with a 370 W PoE budget handles that with room to spare. Most network people learn this the hard way. You can say it in an interview on day one.</p>
+<div class="sim" data-sim2="poe"></div>
+
+<h2>Part 4 · Packet Tracer lab: build the office switch</h2>
+<p>30 minutes. One 2960 switch, six PCs. PC1–PC2 = staff, PC3–PC4 = CCTV, PC5–PC6 = guest.</p>
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><div><span class="tag lab">lab only</span>Connect PC1–PC6 to switch ports Fa0/1–Fa0/6 with copper straight-through cables.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag lab">lab only</span>Give ALL six PCs addresses on the SAME test street first: 192.168.1.1 to 192.168.1.6, mask 255.255.255.0.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag lab">lab only</span>Ping from PC1 to PC3 and PC5. Both work: one big hallway, no locked doors.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag lab">lab only</span>Click the switch → CLI tab. Type:<pre>enable
+configure terminal
+vlan 10
+ name STAFF
+vlan 20
+ name CCTV
+vlan 30
+ name GUEST
+interface range fa0/1 - 2
+ switchport mode access
+ switchport access vlan 10
+interface range fa0/3 - 4
+ switchport mode access
+ switchport access vlan 20
+interface range fa0/5 - 6
+ switchport mode access
+ switchport access vlan 30
+end
+show vlan brief</pre>
+</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag lab">lab only</span>Save it: <code>copy running-config startup-config</code> (press Enter to confirm). Save the file as <code>lesson12-vlans.pkt</code>. Lesson 13 builds on it.</div></li>
+</ul>
+
+<div class="lab-order" data-id="vlanorder"><script type="application/json">
+{
+ "title": "the switch CLI",
+ "intro": "Put the steps for putting Fa0/3 into the CCTV VLAN in a working order.",
+ "items": [
+  "enable",
+  "configure terminal",
+  "vlan 20",
+  " name CCTV",
+  "interface fa0/3",
+  " switchport mode access",
+  " switchport access vlan 20",
+  "end"
+ ],
+ "rules": [
+  [
+   0,
+   1,
+   "`configure terminal` only works after `enable`."
+  ],
+  [
+   1,
+   2,
+   "Creating a VLAN is a config-mode command: `configure terminal` first."
+  ],
+  [
+   2,
+   3,
+   "`name CCTV` names the VLAN you just entered with `vlan 20`."
+  ],
+  [
+   1,
+   4,
+   "`interface fa0/3` is a config-mode command."
+  ],
+  [
+   4,
+   5,
+   "Port commands go after `interface fa0/3`."
+  ],
+  [
+   4,
+   6,
+   "Port commands go after `interface fa0/3`."
+  ],
+  [
+   5,
+   7,
+   "`end` leaves config mode; finish the port first."
+  ],
+  [
+   6,
+   7,
+   "`end` leaves config mode; finish the port first."
+  ]
+ ],
+ "win": "IOS accepts it. Fa0/3 is a CCTV access port."
+}
+</script></div>
+
+<h2>PASS/FAIL CHECK</h2>
+<p>Fill in this table by pinging from each PC. PASS = every result matches the “expected” column.</p>
+<div class="table-wrap"><table class=""><thead><tr><th>From → To</th><th>Expected</th></tr></thead><tbody><tr><td>PC1 → PC2 (both STAFF)</td><td>success</td></tr><tr><td>PC1 → PC3 (STAFF → CCTV)</td><td>fails</td></tr><tr><td>PC1 → PC5 (STAFF → GUEST)</td><td>fails</td></tr><tr><td>PC3 → PC4 (both CCTV)</td><td>success</td></tr><tr><td>PC5 → PC6 (both GUEST)</td><td>success</td></tr><tr><td>PC5 → PC3 (GUEST → CCTV)</td><td>fails</td></tr></tbody></table></div>
+
+<div class="callout good"><span class="label">PASS</span><p>Every ping matches, and <code>show vlan brief</code> lists Fa0/1–2 under STAFF, Fa0/3–4 under CCTV, Fa0/5–6 under GUEST.</p></div>
+
+<h2>Break/fix drill</h2>
+<div class="lab-cases" data-id="bf"><script type="application/json">
+{
+ "cases": [
+  {
+   "sev": "P3",
+   "sym": "PC4 (a camera) can't reach PC3 (the recorder), but every other ping in the table is right.",
+   "o": [
+    "The switch is out of PoE budget",
+    "Fa0/4 is in the wrong VLAN",
+    "PC3 needs a trunk port",
+    "DNS is broken on PC4"
+   ],
+   "a": 1,
+   "steps": [
+    "Is it plugged in? Check the link light.",
+    "<code>show vlan brief<\/code>: is Fa0/4 under CCTV?",
+    "Fix: <code>interface fa0/4<\/code>, <code>switchport access vlan 20<\/code>.",
+    "Right IP and mask on PC4? Then re-run the ping table."
+   ]
+  }
+ ]
+}
+</script></div>
+
+<h2>Practice 1 · Check yourself</h2>
+<div class="quiz" data-quiz="12-check"><script type="application/json">
+[
+ {
+  "q": "What does a switch use to decide which port to send data out of?",
+  "options": [
+   "IP addresses",
+   "MAC addresses",
+   "Port numbers like 8211",
+   "DNS names"
+  ],
+  "answer": 1,
+  "why": "Switches work with MAC addresses, using their MAC address table."
+ },
+ {
+  "q": "Which port type carries several VLANs between two switches?",
+  "options": [
+   "Access port",
+   "Trunk port",
+   "Console port",
+   "PoE port"
+  ],
+  "answer": 1,
+  "why": "Trunks carry many VLANs, each frame tagged with 802.1Q."
+ },
+ {
+  "q": "Two PCs are in different VLANs on the same switch, with no router. Can they ping each other?",
+  "options": [
+   "Yes, they share the switch",
+   "Only if they're in the same subnet",
+   "No, VLANs separate them completely",
+   "Only over Wi-Fi"
+  ],
+  "answer": 2,
+  "why": "Without a router (Lesson 13), different VLANs can't talk, even on the same switch."
+ },
+ {
+  "q": "A Wi-Fi access point needs 25 W. Which PoE standard is the minimum?",
+  "options": [
+   "802.3af",
+   "802.3at (PoE+)",
+   "No PoE needed",
+   "802.3bt Type 4 only"
+  ],
+  "answer": 1,
+  "why": "802.3af gives at most 15.4 W at the port; PoE+ gives 30 W."
+ },
+ {
+  "q": "Why put CCTV cameras in their own VLAN?",
+  "options": [
+   "Cameras need more speed",
+   "To keep other users, especially guests, away from them",
+   "Cameras can't use DHCP",
+   "VLANs give cameras power"
+  ],
+  "answer": 1,
+  "why": "Separation is a security measure: cameras are a favourite target for attackers."
+ }
+]
+</script></div>
+
+<h2>New words from this lesson</h2>
+<div class="lab-gloss" data-id="words"><script type="application/json">
+{
+ "words": [
+  [
+   "Switch",
+   "Connects devices on the same network; learns MAC addresses."
+  ],
+  [
+   "MAC address",
+   "A network card's permanent factory ID."
+  ],
+  [
+   "MAC address table",
+   "The switch's list of which MAC is behind which port."
+  ],
+  [
+   "VLAN",
+   "One switch split into separate virtual switches."
+  ],
+  [
+   "Access port",
+   "A port in one VLAN, for an end device."
+  ],
+  [
+   "Trunk port",
+   "A port carrying many VLANs, tagged with 802.1Q."
+  ],
+  [
+   "PoE",
+   "Power over Ethernet: power through the data cable."
+  ],
+  [
+   "PoE budget",
+   "Total watts a switch can supply to devices."
+  ]
+ ]
+}
+</script></div>
+
+<h2>Read next (15 min)</h2>
+<p>Jeremy's IT Lab: Day 16 (VLANs part 1) and Day 17 (VLANs part 2: trunks).</p>
+
+<nav class="course">
+  <span>← <a href="0011-dns-and-dhcp.html">11 · DNS and DHCP</a></span>
+  <span><a href="../index.html">Course home</a></span>
+  <span><a href="0013-routing.html">13 · Routing</a> →</span>
+</nav>
+</main>
+<script src="../assets/lab.js"></script>
+<script src="../assets/quiz.js"></script>
+<script src="../assets/sims.js"></script>
+<script src="../assets/sims2.js"></script>
+<script src="../assets/match.js"></script>
+</body>
+</html>

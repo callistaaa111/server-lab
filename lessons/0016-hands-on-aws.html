@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>16 · Hands-on AWS: safety first, then off-site backups</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/interactive.css">
+</head>
+<body>
+<main>
+<nav class="top"><a href="../index.html">Course home</a></nav>
+
+<div class="eyebrow">Server Lab · Lesson 16 · Part 2 · Cloud</div>
+<h1>Hands-on AWS: safety first, then off-site backups</h1>
+<p class="lede">Lesson 08 taught AWS names on paper. Now you lock the account down, then fix Palhaven's biggest weakness from Lesson 07: backups that sit on the same disk as the world.</p>
+<div class="meta"><span data-k="Time">≈ 90 min, can be split</span><span data-k="Needs">AWS account (card required)</span><span data-k="Exam">CLF Domains 2, 3, 4</span><span data-k="Real server">Part 4 installs one program</span></div>
+
+
+<div class="callout "><span class="label">Why this lesson</span><p>Cloud ads expect hands-on AWS (Job Ads #50, #51, #57). Cost: a few pesos a month for a few GB of backups. Check the size first with <code>du -sh /opt/palworld/data/backups</code>.</p></div>
+
+<h2>Warm-up</h2>
+<div class="quiz" data-quiz="16-warm"><script type="application/json">
+[
+ {
+  "q": "AWS's Singapore region is…",
+  "options": [
+   "ap-singapore-1",
+   "ap-southeast-1",
+   "asia-sg",
+   "sg-central-1"
+  ],
+  "answer": 1,
+  "why": "(ap-singapore-1 is Oracle's name.)"
+ },
+ {
+  "q": "Under shared responsibility, who protects your account password and access keys?",
+  "options": [
+   "AWS",
+   "You",
+   "Both equally",
+   "Your ISP"
+  ],
+  "answer": 1,
+  "why": "AWS secures the cloud; you secure what you put in it and who can get in."
+ },
+ {
+  "q": "3-2-1 means 3 copies, 2 kinds of storage, and…",
+  "options": [
+   "1 encrypted copy",
+   "1 copy somewhere else",
+   "1 copy per day",
+   "1 restore test"
+  ],
+  "answer": 1,
+  "why": "One copy off-site. That's what S3 will be."
+ }
+]
+</script></div>
+
+<h2>Part 1 · Lock the doors before moving in</h2>
+<p>Do these first, in order.</p>
+<div class="lab-order" data-id="safety"><script type="application/json">
+{
+ "title": "a brand-new AWS account",
+ "intro": "Put the first steps in a safe order.",
+ "items": [
+  "Sign up. The account you create is the root user: the master key.",
+  "Turn on MFA for the root user (authenticator app on your phone)",
+  "Billing → Budgets → Zero spend budget, with your email",
+  "Create an everyday admin login (IAM Identity Center, or an IAM user with MFA)",
+  "Stop using root for daily work"
+ ],
+ "rules": [
+  [
+   0,
+   1,
+   "You can't protect an account that doesn't exist yet."
+  ],
+  [
+   1,
+   2,
+   "MFA on root comes before anything else: it's the master key."
+  ],
+  [
+   1,
+   3,
+   "Lock the master key before making other logins."
+  ],
+  [
+   3,
+   4,
+   "You need the everyday login before you can stop using root."
+  ]
+ ],
+ "win": "MFA, budget, everyday login, root locked away. That's the CLF answer and real practice."
+}
+</script></div>
+
+<ol class="gates">
+  <li><b>Sign up at aws.amazon.com.</b> Turn on MFA for root immediately (IAM → Security credentials → Assign MFA).</li>
+  <li><b>Billing → Budgets → Create budget</b> → “Zero spend budget” template, with your email. You'll get an email the moment anything costs money. S3 storage costs a few pesos, so expect that email once the backups start; then add a monthly budget of US$2 so you're only warned if something unexpected appears. AWS changed its free tier in 2025, so read the current Free Tier page once.</li>
+  <li><b>Create an everyday admin login</b> for yourself (IAM Identity Center is AWS's recommended way; an IAM user with MFA is fine for learning). Stop using root for daily work.</li>
+</ol>
+<h2>Part 2 · The backup design</h2>
+<p>Palhaven (Oracle, Singapore) → every morning after the 4:45 backup → copy new backup files → S3 bucket in ap-southeast-1 → a <b>lifecycle rule</b> deletes copies older than 30 days.</p>
+<p><b>Least privilege:</b> the server gets its own IAM user that can ONLY list, upload and download in this ONE bucket. If its key ever leaks, the damage is one bucket of game saves, not your whole account. (Inside AWS you'd use an IAM role instead of keys. Your server is on Oracle, so a tightly limited key is the practical choice here. Say this in interviews: it shows you know the difference.)</p>
+<h2>Part 3 · Build it (console)</h2>
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><div>S3 → Create bucket. Name: <code>palhaven-backups-&lt;6 random digits&gt;</code> (names are global). Region: ap-southeast-1. Keep “Block all public access” ON.</div></li>
+  <li><input type="checkbox" aria-label="done"><div>Bucket → Management → Create lifecycle rule: apply to all objects, “Expire current versions” after 30 days.</div></li>
+  <li><input type="checkbox" aria-label="done"><div>IAM → Users → Create user “palhaven-backup” (no console access). Attach an inline policy (JSON tab), replacing BUCKET with your bucket name. Read it line by line in the explorer below first.</div></li>
+  <li><input type="checkbox" aria-label="done"><div>That user → Security credentials → Create access key → “Command Line Interface”. Save the two values in your password manager. Never paste them into chats, GitHub or screenshots.</div></li>
+</ul>
+
+<div class="sim" data-sim="explain"><script type="application/json">
+{
+ "title": "Explorer · read the IAM policy",
+ "intro": "Click each line to see what it allows. This is the whole policy for the backup user.",
+ "lines": [
+  {
+   "code": "{"
+  },
+  {
+   "code": "  \"Version\": \"2012-10-17\",",
+   "note": "The policy language version. Always this exact date; it is not today's date."
+  },
+  {
+   "code": "  \"Statement\": [",
+   "note": "A list of rules. Each one allows (or denies) some actions on some resources."
+  },
+  {
+   "code": "    { \"Effect\": \"Allow\", \"Action\": [\"s3:ListBucket\"],",
+   "note": "Rule 1: allow listing what's in a bucket."
+  },
+  {
+   "code": "      \"Resource\": \"arn:aws:s3:::BUCKET\" },",
+   "note": "…but only THIS bucket. An ARN is AWS's full address for a resource. No /* here: listing is an action on the bucket itself."
+  },
+  {
+   "code": "    { \"Effect\": \"Allow\", \"Action\": [\"s3:PutObject\", \"s3:GetObject\"],",
+   "note": "Rule 2: allow uploading (Put) and downloading (Get) files. No Delete: a leaked key can't wipe your backups."
+  },
+  {
+   "code": "      \"Resource\": \"arn:aws:s3:::BUCKET/*\" }",
+   "note": "…only for files INSIDE this bucket. The /* means “any object in it”."
+  },
+  {
+   "code": "  ]"
+  },
+  {
+   "code": "}",
+   "note": "Anything not allowed here is denied. That's least privilege."
+  }
+ ]
+}
+</script></div>
+
+<div class="lab-sort" data-id="secret"><script type="application/json">
+{
+ "title": "public or secret?",
+ "intro": "Which of these may go in a GitHub repo, a screenshot or a chat?",
+ "choices": [
+  "Fine to share",
+  "Keep secret"
+ ],
+ "items": [
+  {
+   "t": "The IAM policy JSON (with BUCKET as a placeholder)",
+   "a": 0,
+   "why": "It describes permissions, not credentials."
+  },
+  {
+   "t": "The access key ID and secret access key",
+   "a": 1,
+   "why": "Anyone with both can act as palhaven-backup."
+  },
+  {
+   "t": "The region name ap-southeast-1",
+   "a": 0,
+   "why": "Public information."
+  },
+  {
+   "t": "Your root password and MFA backup codes",
+   "a": 1,
+   "why": "The master key. Password manager only."
+  },
+  {
+   "t": "The cron line with `s3 sync`",
+   "a": 0,
+   "why": "It holds no secrets: the key lives in ~/.aws/credentials."
+  },
+  {
+   "t": "The file ~/.aws/credentials",
+   "a": 1,
+   "why": "That's where the key is stored."
+  }
+ ]
+}
+</script></div>
+
+<h2>Part 4 · Connect the server</h2>
+<div class="callout warn"><span class="label">This changes the server</span><p>It installs the AWS command-line tool. Check <code>rest-cli players</code> first and do it when nobody is online.</p></div>
+
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><div><span class="tag change">changes the server</span><code>ssh gameserver</code>, then <code>uname -m</code>. It says aarch64 (ARM) or x86_64. Use the matching line:<pre>curl &quot;https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip&quot; -o awscliv2.zip
+curl &quot;https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip&quot; -o awscliv2.zip</pre>
+</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag change">changes the server</span><code>unzip awscliv2.zip</code> (if unzip is missing: <code>sudo apt install unzip</code>), then <code>sudo ./aws/install</code>, then <code>aws --version</code>.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag change">changes the server</span><code>aws configure</code>: paste the key and secret, region ap-southeast-1, output json.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">look only</span><code>aws sts get-caller-identity</code>: it must show the palhaven-backup user, NOT root.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag change">changes the server</span>First upload: <code>aws s3 sync /opt/palworld/data/backups s3://BUCKET/backups/</code>. If you see “Permission denied” on the backup files, stop and ask me. Don't change permissions blindly.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag change">changes the server</span>Schedule it: <code>crontab -e</code> and add this line (5:15 AM, after the 4:45 backup and 5:00 restart):<pre>15 5 * * * /usr/local/bin/aws s3 sync /opt/palworld/data/backups s3://BUCKET/backups/ &gt;&gt; /home/ubuntu/s3sync.log 2&gt;&amp;1</pre>
+</div></li>
+</ul>
+
+<h2>PASS/FAIL CHECK</h2>
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><div>The zero-spend budget exists (screenshot).</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">look only</span><code>aws sts get-caller-identity</code> shows palhaven-backup.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">look only</span>Restore test: download one file and compare fingerprints. “A backup you've never restored is just a hope.”<pre>mkdir -p /tmp/restore-test
+aws s3 cp s3://BUCKET/backups/&lt;FILE&gt; /tmp/restore-test/
+sha256sum /opt/palworld/data/backups/&lt;FILE&gt; /tmp/restore-test/&lt;FILE&gt;</pre>
+The two long codes must be identical. Then <code>rm -r /tmp/restore-test</code>.</div></li>
+  <li><input type="checkbox" aria-label="done"><div>The bucket's “Access” column in the S3 console says “Bucket and objects not public”.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">look only</span>The morning after, <code>tail /home/ubuntu/s3sync.log</code> shows a new upload line.</div></li>
+</ul>
+
+<h2>Break/fix drill</h2>
+<div class="lab-cases" data-id="bf"><script type="application/json">
+{
+ "cases": [
+  {
+   "sev": "P3",
+   "sym": "`aws s3 sync` suddenly fails with “AccessDenied” on PutObject. Nothing changed on the server.",
+   "o": [
+    "The server's disk is full",
+    "IAM: the policy was edited or detached, or its bucket name doesn't match",
+    "S3 is down in Singapore",
+    "The cron line has a typo"
+   ],
+   "a": 1,
+   "steps": [
+    "<code>aws sts get-caller-identity<\/code>: is it still the palhaven-backup user?",
+    "IAM → Users → palhaven-backup: is the inline policy still attached?",
+    "Compare the policy's Resource ARNs with the real bucket name, character by character.",
+    "Fix the policy, then run the sync by hand and check the log."
+   ]
+  }
+ ]
+}
+</script></div>
+
+<h2>Practice 1 · Check yourself</h2>
+<div class="quiz" data-quiz="16-check"><script type="application/json">
+[
+ {
+  "q": "First thing to do on a brand-new AWS account?",
+  "options": [
+   "Launch a server",
+   "Turn on MFA for the root user",
+   "Create a bucket",
+   "Delete the default VPC"
+  ],
+  "answer": 1,
+  "why": "Then set a budget alarm."
+ },
+ {
+  "q": "Why does the backup user only get access to one bucket?",
+  "options": [
+   "S3 requires it",
+   "Least privilege limits the damage if the key leaks",
+   "It's faster",
+   "To save money"
+  ],
+  "answer": 1,
+  "why": "A leaked key can only touch one bucket of game saves."
+ },
+ {
+  "q": "Which feature deletes old backups automatically?",
+  "options": [
+   "Versioning",
+   "Lifecycle rule",
+   "IAM policy",
+   "Budget"
+  ],
+  "answer": 1,
+  "why": "Lifecycle rules expire or move objects by age."
+ },
+ {
+  "q": "In the CLF-C02 shared responsibility model, who maintains the physical data center disks under S3?",
+  "options": [
+   "You",
+   "AWS"
+  ],
+  "answer": 1,
+  "why": "Security OF the cloud is AWS's job."
+ },
+ {
+  "q": "(Lesson 14 review) What does 2N mean?",
+  "options": [
+   "One spare",
+   "Two complete independent systems"
+  ],
+  "answer": 1,
+  "why": "Either side can carry everything."
+ }
+]
+</script></div>
+
+<h2>New words from this lesson</h2>
+<div class="lab-gloss" data-id="words"><script type="application/json">
+{
+ "words": [
+  [
+   "Root user",
+   "The account's master login. MFA on, then lock it away."
+  ],
+  [
+   "MFA",
+   "A second proof (phone code) on top of a password."
+  ],
+  [
+   "IAM user / policy",
+   "An identity / the JSON that says what it may do."
+  ],
+  [
+   "Least privilege",
+   "Give only the permissions needed, nothing more."
+  ],
+  [
+   "Access key",
+   "A key pair that lets a program act as an IAM user."
+  ],
+  [
+   "S3 bucket",
+   "A storage container for files (“objects”)."
+  ],
+  [
+   "Lifecycle rule",
+   "Automatically expire or move objects by age."
+  ],
+  [
+   "Zero spend budget",
+   "Emails you when anything costs money."
+  ],
+  [
+   "sha256sum",
+   "A file's fingerprint; identical fingerprints = identical files."
+  ]
+ ]
+}
+</script></div>
+
+<h2>Read next (15 min)</h2>
+<p><a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html">AWS docs: “Security best practices in IAM”</a>. Then start the free AWS Skill Builder course “AWS Cloud Practitioner Essentials” (tracker Week 7).</p>
+
+<nav class="course">
+  <span>← <a href="0015-noc-work.html">15 · NOC work</a></span>
+  <span><a href="../index.html">Course home</a></span>
+  <span><a href="0017-terraform.html">17 · Terraform</a> →</span>
+</nav>
+</main>
+<script src="../assets/lab.js"></script>
+<script src="../assets/quiz.js"></script>
+<script src="../assets/sims.js"></script>
+<script src="../assets/sims2.js"></script>
+<script src="../assets/match.js"></script>
+</body>
+</html>

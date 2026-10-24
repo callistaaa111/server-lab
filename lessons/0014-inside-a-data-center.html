@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>14 · Inside a data center: the building the cloud lives in</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/interactive.css">
+</head>
+<body>
+<main>
+<nav class="top"><a href="../index.html">Course home</a></nav>
+
+<div class="eyebrow">Server Lab · Lesson 14 · Part 2 · Bridge jobs</div>
+<h1>Inside a data center: the building the cloud lives in</h1>
+<p class="lede">Data center operations is the best-fit bridge job for an electrical background. This is where you start ahead of IT graduates: power chains, redundancy, cooling, racks and the procedures that keep it all running.</p>
+<div class="meta"><span data-k="Time">≈ 50 min</span><span data-k="Tools">paper, then app.diagrams.net</span><span data-k="Exam">Network+ physical topics · Server+ · CDCP</span><span data-k="Real server">not touched</span></div>
+
+
+<div class="callout "><span class="label">Why this lesson</span><p>Ads ask for UPS, cooling (PACU/chillers), generators, transformers, PDUs, BMS, technical drawings and RME/NCII (Job Ads #1, #3, #6, #13–15).</p></div>
+
+<h2>Warm-up</h2>
+<div class="quiz" data-quiz="14-warm"><script type="application/json">
+[
+ {
+  "q": "In Packet Tracer, what made PC1 (VLAN 10) able to reach PC3 (VLAN 20)?",
+  "options": [
+   "A trunk alone",
+   "A router with sub-interfaces (router-on-a-stick)",
+   "Putting them on the same subnet",
+   "DNS"
+  ],
+  "answer": 1,
+  "why": "A trunk carries the VLANs to the router; the router routes between them."
+ },
+ {
+  "q": "Oracle's “availability domain” is AWS's…",
+  "options": [
+   "Region",
+   "Availability Zone",
+   "VPC",
+   "Edge location"
+  ],
+  "answer": 1,
+  "why": "A separate data center inside a region (Lesson 08)."
+ }
+]
+</script></div>
+
+<h2>Part 1 · Your server lives in one of these</h2>
+<p>Palhaven runs in an Oracle data center in Singapore. Metro Manila has its own: the big STT campus being built in Fairview, Quezon City (planned 124 MW), plus ePLDT VITRO, Converge and others. A data center is a building designed for one job: keep thousands of computers powered, cool and connected, every second of every year.</p>
+<p>The people who keep it running are data center technicians and facilities/critical-environment technicians. Their work: rack and stack (installing servers), cabling, “remote hands” tasks for customers, monitoring alarms, preventive maintenance, and following written procedures for every change.</p>
+<h2>Part 2 · The power chain (you know half of this already)</h2>
+<div class="lab-order" data-id="chain"><script type="application/json">
+{
+ "title": "street to server",
+ "intro": "Follow the power from the street to one server. Put the equipment in order.",
+ "items": [
+  "Utility (Meralco)",
+  "Medium-voltage switchgear and transformer",
+  "ATS (automatic transfer switch), with the generator on its other input",
+  "UPS (battery-backed, keeps power perfectly steady)",
+  "PDU / RPP in the data hall",
+  "Rack PDU (the power strip inside the rack)",
+  "The server's two power supplies"
+ ],
+ "win": "Utility → switchgear → ATS + generator → UPS → PDU → rack PDU → dual PSUs. Interview question #1, answered."
+}
+</script></div>
+
+<ul>
+  <li>When Meralco power fails, the <b>UPS</b> batteries carry the load for minutes while the generator starts and the <b>ATS</b> switches over. Servers never notice.</li>
+  <li>Servers have two power supplies. Each rack gets an <b>A feed</b> and a <b>B feed</b> from separate UPS systems, so one whole side can fail or be shut down for maintenance and nothing goes off.</li>
+  <li>A device with only one power cord is a <b>single point of failure</b> (SPOF): one fault takes it down. Technicians flag these. A static transfer switch (STS) can feed a single-corded device from two sources.</li>
+</ul>
+<div class="sim" data-sim2="power"></div>
+
+<p>Redundancy words you'll hear in every interview:</p>
+<div class="table-wrap"><table class=""><thead><tr><th>Word</th><th>Meaning</th></tr></thead><tbody><tr><td>N</td><td>Exactly enough capacity. No spare.</td></tr><tr><td>N+1</td><td>One extra unit (e.g., 4 UPS modules needed, 5 installed).</td></tr><tr><td>2N</td><td>Two complete, independent systems (A and B). Either can carry everything.</td></tr></tbody></table></div>
+
+<p>The Uptime Institute's <b>Tier levels</b> describe the whole site: Tier I basic · Tier II redundant components · Tier III concurrently maintainable (any part can be maintained without shutting down IT) · Tier IV fault tolerant (survives any single failure automatically).</p>
+<div class="lab-sort" data-id="redund"><script type="application/json">
+{
+ "title": "N, N+1 or 2N?",
+ "choices": [
+  "N",
+  "N+1",
+  "2N"
+ ],
+ "items": [
+  {
+   "t": "4 UPS modules needed, 4 installed",
+   "a": 0,
+   "why": "Exactly enough. One failure = not enough."
+  },
+  {
+   "t": "3 CRAC units needed, 4 installed",
+   "a": 1,
+   "why": "One spare."
+  },
+  {
+   "t": "Two full UPS systems, A and B, each able to carry the whole hall",
+   "a": 2,
+   "why": "Two complete independent systems."
+  },
+  {
+   "t": "2 generators needed, 3 installed",
+   "a": 1,
+   "why": "One spare unit."
+  }
+ ]
+}
+</script></div>
+
+<h2>Part 3 · Cooling, and the alarms that come with it</h2>
+<p>Every watt of electricity a server uses becomes heat. Remove the heat or the servers shut themselves down.</p>
+<ul>
+  <li>Racks face each other in rows: <b>cold aisle</b> (front, where servers breathe in) and <b>hot aisle</b> (back, where hot air comes out). Mixing them wastes cooling. That's why <b>blanking panels</b> fill empty rack spaces.</li>
+  <li>CRAC/CRAH units or precision air conditioning units (PACU in the Converge ad) cool the room; chillers cool the water for big sites.</li>
+  <li>ASHRAE's recommended server inlet range is <b>18–27 °C</b>. Alarms trigger outside that range.</li>
+  <li>A <b>BMS</b> (building management system) watches power and cooling equipment and raises alarms. <b>DCIM</b> software adds rack-level detail.</li>
+  <li><b>PUE</b> (power usage effectiveness) = total facility power ÷ IT power. 1,500 kW total for 1,000 kW of IT = PUE 1.5. Lower is better. 1.0 would mean zero overhead.</li>
+</ul>
+<h2>Part 4 · Racks, cabling and procedures</h2>
+<ul>
+  <li>Rack space is counted in <b>U</b>: 1U = 1.75 inches (44.45 mm). A standard rack is 42U.</li>
+  <li>Copper: Cat6/Cat6A. The structured cabling standard (<b>TIA-568</b>) limits a copper channel to 100 m: 90 m of permanent link plus 10 m of patch cords. Fiber (single-mode for long runs, multimode for short) uses LC connectors inside the building.</li>
+  <li>Labels on both ends of every cable, matching the drawings. Your drawing-reading skill is a real advantage.</li>
+  <li>Nothing changes without a written procedure: an <b>MOP</b> (method of procedure) for planned work, <b>SOPs</b> for routine tasks, and <b>EOPs</b> (emergency operating procedures) for failures. Work happens in approved change windows.</li>
+  <li>Safety: lock-out/tag-out (<b>LOTO</b>) before electrical work, ESD straps for electronics, escorts and access logs.</li>
+</ul>
+<h2>Part 5 · A calculation they might give you</h2>
+<p>A rack has 10 servers at 450 W each, on a 230 V single-phase rack PDU rated 32 A.</p>
+<ul>
+  <li>Load: 10 × 450 = 4,500 W. Current: 4,500 ÷ 230 ≈ 19.6 A.</li>
+  <li>Continuous-load headroom: 32 A × 0.8 = 25.6 A available. 19.6 A fits.</li>
+  <li>But with A/B feeds, each PDU must be able to carry the WHOLE rack if the other side fails. So each side must handle 19.6 A, not half of it. Many beginners split the load in half and get this wrong.</li>
+</ul>
+<div class="lab-drill" data-id="rackcalc"><script type="application/json">
+{
+ "title": "rack power",
+ "intro": "230 V single-phase, 80% continuous-load rule. Round amps to one decimal.",
+ "placeholder": "number",
+ "rounds": [
+  {
+   "p": "8 servers × 500 W. Total watts?",
+   "a": [
+    "4000",
+    "4,000"
+   ],
+   "why": "8 × 500."
+  },
+  {
+   "p": "4,000 W at 230 V. Amps (one decimal)?",
+   "a": [
+    "17.4"
+   ],
+   "why": "4,000 ÷ 230 = 17.39."
+  },
+  {
+   "p": "Usable amps on a 32 A PDU at 80%?",
+   "a": [
+    "25.6"
+   ],
+   "why": "32 × 0.8."
+  },
+  {
+   "p": "With A/B feeds and 4,000 W per rack, how many amps must EACH side carry?",
+   "a": [
+    "17.4"
+   ],
+   "why": "Each side must carry the full rack if the other fails."
+  },
+  {
+   "p": "Max 450 W servers per rack on 32 A PDUs, A/B fed?",
+   "a": [
+    "13"
+   ],
+   "why": "25.6 A × 230 V = 5,888 W; 5,888 ÷ 450 = 13.08 → 13."
+  },
+  {
+   "p": "Facility 1,200 kW, IT 800 kW. PUE?",
+   "a": [
+    "1.5"
+   ],
+   "why": "1,200 ÷ 800."
+  }
+ ]
+}
+</script></div>
+
+<details class="recall"><summary>Say it yourself first, then open this</summary><p>“Power goes utility, switchgear, ATS with generator, UPS, PDU, rack PDU, dual power supplies. A and B feeds mean either side can carry the full load, which is 2N. N+1 means one spare unit. Cooling uses hot and cold aisles and alarms if inlet temperature leaves 18–27 °C. Every change follows an MOP. I already read these drawings at work.”</p></details>
+
+<h2>Practice 1 · Check yourself</h2>
+<div class="quiz" data-quiz="14-check"><script type="application/json">
+[
+ {
+  "q": "What keeps servers running in the seconds after a utility outage, before the generator takes over?",
+  "options": [
+   "The ATS",
+   "The UPS",
+   "The rack PDU",
+   "The chiller"
+  ],
+  "answer": 1,
+  "why": "The UPS batteries bridge the gap; the ATS then switches to generator."
+ },
+ {
+  "q": "2N means…",
+  "options": [
+   "One spare unit",
+   "Two complete independent systems",
+   "Double the servers",
+   "Two generators sharing one UPS"
+  ],
+  "answer": 1,
+  "why": "Either system alone can carry the whole load."
+ },
+ {
+  "q": "A server with a single power cord on the A feed is a…",
+  "options": [
+   "Hot aisle",
+   "Single point of failure",
+   "Blanking panel",
+   "Tier IV design"
+  ],
+  "answer": 1,
+  "why": "If the A side goes down, it goes down."
+ },
+ {
+  "q": "Facility uses 1,200 kW; IT uses 800 kW. PUE?",
+  "options": [
+   "0.67",
+   "1.2",
+   "1.5",
+   "2.0"
+  ],
+  "answer": 2,
+  "why": "1,200 ÷ 800 = 1.5."
+ },
+ {
+  "q": "Maximum copper permanent link under TIA-568?",
+  "options": [
+   "100 m",
+   "90 m",
+   "55 m",
+   "300 m"
+  ],
+  "answer": 1,
+  "why": "90 m permanent link + 10 m cords = 100 m channel."
+ },
+ {
+  "q": "Before planned work on a UPS, a technician needs an approved…",
+  "options": [
+   "DNS record",
+   "MOP",
+   "VLAN",
+   "PUE"
+  ],
+  "answer": 1,
+  "why": "A method of procedure: step-by-step plan, approvals, rollback."
+ }
+]
+</script></div>
+
+<h2>Practice 2 · Draw it</h2>
+<p>30 minutes.</p>
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><div>In <a href="https://app.diagrams.net">app.diagrams.net</a>, draw a one-line diagram for a small data hall: utility, transformer, ATS + generator, two UPS (A and B), two PDUs, three racks. Each rack gets an A and a B feed.</div></li>
+  <li><input type="checkbox" aria-label="done"><div>Add one single-corded device on purpose, and mark it in red as a SPOF.</div></li>
+  <li><input type="checkbox" aria-label="done"><div>Write 5 lines under the drawing: what happens when (1) Meralco fails, (2) UPS-A is taken down for maintenance, (3) the generator fails to start, (4) PDU-B trips, (5) the red device's feed fails. Check yourself with the simulator in Sheet 3.</div></li>
+</ul>
+
+<h2>PASS/FAIL CHECK</h2>
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><div>Every rack traces back to two independent UPS systems, except the one SPOF you marked.</div></li>
+  <li><input type="checkbox" aria-label="done"><div>Your 5 “what happens” lines are correct (check them with me).</div></li>
+  <li><input type="checkbox" aria-label="done"><div>A working data center or facilities technician has looked at it (LinkedIn message, or r/datacenter) and you've written their comments in the Readiness Checks tab.</div></li>
+</ul>
+
+<h2>Break/fix drill</h2>
+<div class="lab-cases" data-id="bf"><script type="application/json">
+{
+ "cases": [
+  {
+   "sev": "P2",
+   "sym": "Alarm at 2 AM: “Rack R07 inlet temperature 29 °C”. The two racks beside it are at 24 °C.",
+   "o": [
+    "Shut R07 down immediately",
+    "Something local to R07: confirm the reading, then check blanking panels, doors and airflow in front of it",
+    "The whole cooling plant has failed",
+    "Raise the alarm threshold to 30 °C"
+   ],
+   "a": 1,
+   "steps": [
+    "Confirm on site with a handheld or second sensor (sensor fault?).",
+    "Look for missing blanking panels or an open rack door letting hot air back into the front.",
+    "Check the floor tile or containment in front of R07 (blocked airflow).",
+    "Check nearby cooling unit alarms in the BMS.",
+    "Follow the EOP, log everything, escalate if it rises."
+   ]
+  }
+ ]
+}
+</script></div>
+
+<h2>New words from this lesson</h2>
+<div class="lab-gloss" data-id="words"><script type="application/json">
+{
+ "words": [
+  [
+   "ATS",
+   "Automatic transfer switch: switches between utility and generator."
+  ],
+  [
+   "UPS",
+   "Battery system that keeps power steady through outages."
+  ],
+  [
+   "PDU / rack PDU",
+   "Power distribution in the hall / the power strip in the rack."
+  ],
+  [
+   "A/B feeds",
+   "Two independent power paths to each rack."
+  ],
+  [
+   "SPOF",
+   "Single point of failure."
+  ],
+  [
+   "N, N+1, 2N",
+   "Exactly enough, one spare, fully duplicated."
+  ],
+  [
+   "Tier I–IV",
+   "Uptime Institute site resilience levels."
+  ],
+  [
+   "CRAC / PACU",
+   "Room cooling units."
+  ],
+  [
+   "Hot/cold aisle",
+   "Rack layout separating exhaust and intake air."
+  ],
+  [
+   "BMS / DCIM",
+   "Systems that monitor facility equipment / racks."
+  ],
+  [
+   "PUE",
+   "Total facility power ÷ IT power."
+  ],
+  [
+   "U",
+   "Rack unit, 1.75 in."
+  ],
+  [
+   "MOP / SOP / EOP",
+   "Written procedures for planned, routine and emergency work."
+  ],
+  [
+   "LOTO",
+   "Lock-out/tag-out electrical safety."
+  ]
+ ]
+}
+</script></div>
+
+<h2>Read next (15 min)</h2>
+<p><a href="https://uptimeinstitute.com/tiers">Uptime Institute: Tier Classification System</a> overview page. Then search YouTube for “data center tour” and watch one tour, naming every piece of equipment from this lesson as you see it.</p>
+
+<nav class="course">
+  <span>← <a href="0013-routing.html">13 · Routing</a></span>
+  <span><a href="../index.html">Course home</a></span>
+  <span><a href="0015-noc-work.html">15 · NOC work</a> →</span>
+</nav>
+</main>
+<script src="../assets/lab.js"></script>
+<script src="../assets/quiz.js"></script>
+<script src="../assets/sims.js"></script>
+<script src="../assets/sims2.js"></script>
+<script src="../assets/match.js"></script>
+</body>
+</html>

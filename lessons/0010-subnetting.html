@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>10 · Subnetting: cutting a village into streets</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/interactive.css">
+</head>
+<body>
+<main>
+<nav class="top"><a href="../index.html">Course home</a></nav>
+
+<div class="eyebrow">Server Lab · Lesson 10 · Part 2 · Networking core</div>
+<h1>Subnetting: cutting a village into streets</h1>
+<p class="lede">The single most-tested networking skill. You'll learn what the /24 on your server means, find the street any address lives on, and plan the addresses for a real office: the same plan Lessons 12, 13, 19 and 21 build on.</p>
+<div class="meta"><span data-k="Time">≈ 45 min</span><span data-k="Builds on">Lesson 02</span><span data-k="Exam">CCNA 1.6 · Network+ 1.0 · SAA 1</span><span data-k="Real server">look only</span></div>
+
+
+<div class="callout "><span class="label">Why this lesson</span><p>NOC ads list subnetting directly (Job Ads #39), every AWS VPC design needs it (Lesson 17), and you'll use it for the capstone IP plan (Lesson 19).</p></div>
+
+<h2>Warm-up · from Lessons 01–02</h2>
+<div class="quiz" data-quiz="10-warm"><script type="application/json">
+[
+ {
+  "q": "Which of these is a private address?",
+  "options": [
+   "203.0.113.84",
+   "10.0.0.84",
+   "8.8.8.8",
+   "203.0.113.7"
+  ],
+  "answer": 1,
+  "why": "10.x.x.x is one of the three private ranges (10.x, 172.16–31.x, 192.168.x)."
+ },
+ {
+  "q": "Who swaps the private address 10.0.0.84 for the public 203.0.113.84?",
+  "options": [
+   "The firewall",
+   "Docker",
+   "NAT, the receptionist",
+   "SSH"
+  ],
+  "answer": 2,
+  "why": "NAT (Network Address Translation) swaps private and public addresses at the door."
+ },
+ {
+  "q": "Each of the four numbers in an IPv4 address can be at most…",
+  "options": [
+   "99",
+   "255",
+   "1000",
+   "512"
+  ],
+  "answer": 1,
+  "why": "Each number is one byte (8 bits), so 0–255."
+ }
+]
+</script></div>
+
+<h2>Part 1 · What the /24 means</h2>
+<p>On your server, <code>ip -4 addr</code> shows <code>10.0.0.84/24</code>. You know the first part. The /24 is new.</p>
+<p>An IPv4 address is <b>32 bits</b> (32 ones-and-zeros), written as four numbers of 8 bits each. The number after the slash says how many of those 32 bits are the <b>street name</b>. The rest are the <b>house number</b>.</p>
+<ul>
+  <li>/24 → the first 24 bits (first three numbers, 10.0.0) are the street. The last 8 bits are house numbers.</li>
+  <li>8 bits of house numbers = 2⁸ = 256 addresses: 10.0.0.0 to 10.0.0.255.</li>
+</ul>
+<p>In the village comparison: 10.0.0.0/24 is one street with 256 house numbers. Your server lives at house 84.</p>
+<p>This “slash number” style is called <b>CIDR notation</b> (Classless Inter-Domain Routing). The same information can be written as a <b>subnet mask</b>: /24 = 255.255.255.0. Each 255 means “this whole number is street name”.</p>
+<div class="sim" data-sim2="subnet"></div>
+
+<h2>Part 2 · Two addresses you can never give to a computer</h2>
+<p>On every street, two house numbers are reserved:</p>
+<ul>
+  <li>The first one (10.0.0.0) is the <b>network address</b>: the street's name itself.</li>
+  <li>The last one (10.0.0.255) is the <b>broadcast address</b>: shouting to every house on the street at once.</li>
+</ul>
+<p>So a /24 has 256 addresses but only <b>254 usable hosts</b> (a <b>host</b> is any device that gets an address). The formula: usable hosts = 2<sup>(32 − prefix)</sup> − 2.</p>
+<p>AWS goes further: it reserves 5 addresses in every subnet (the first four and the last one), so an AWS /24 gives you 251. Good to know for Lesson 17 and the SAA exam.</p>
+<h2>Part 3 · Cutting a street into smaller streets</h2>
+<p>Why cut? An office with staff PCs, CCTV cameras and guest Wi-Fi shouldn't all live on one street: a guest shouldn't be able to reach the cameras. Each group gets its own smaller street: a <b>subnet</b>.</p>
+<p>The table you'll use forever (learn it like a multiplication table):</p>
+<div class="table-wrap"><table class=""><thead><tr><th>Prefix</th><th>Mask (last number)</th><th>Block size</th><th>Usable hosts</th></tr></thead><tbody><tr><td>/24</td><td>255.255.255.0</td><td>256</td><td>254</td></tr><tr><td>/25</td><td>255.255.255.128</td><td>128</td><td>126</td></tr><tr><td>/26</td><td>255.255.255.192</td><td>64</td><td>62</td></tr><tr><td>/27</td><td>255.255.255.224</td><td>32</td><td>30</td></tr><tr><td>/28</td><td>255.255.255.240</td><td>16</td><td>14</td></tr><tr><td>/29</td><td>255.255.255.248</td><td>8</td><td>6</td></tr><tr><td>/30</td><td>255.255.255.252</td><td>4</td><td>2</td></tr></tbody></table></div>
+
+<p>The trick (the “magic number”): <b>block size = 256 − the last mask number</b>. For /26: 256 − 192 = 64. So /26 streets start at 0, 64, 128, 192.</p>
+<p><b>Worked example:</b> which /26 street is 192.168.10.100 on? Block size is 64, so streets start at .0, .64, .128, .192. 100 is between 64 and 127, so it's on the .64 street: network 192.168.10.64 · first usable .65 · last usable .126 · broadcast .127.</p>
+<div class="lab-drill" data-id="magic"><script type="application/json">
+{
+ "title": "the magic number",
+ "intro": "Pencil and paper, no calculator. Answer with just the number or address asked for.",
+ "placeholder": "answer",
+ "rounds": [
+  {
+   "p": "Block size of a /27?",
+   "a": [
+    "32"
+   ],
+   "why": "256 − 224 = 32."
+  },
+  {
+   "p": "Usable hosts in a /28?",
+   "a": [
+    "14"
+   ],
+   "why": "16 addresses − network − broadcast."
+  },
+  {
+   "p": "Network address of 192.168.10.100/26?",
+   "a": [
+    "192.168.10.64"
+   ],
+   "why": "Streets at 0, 64, 128, 192; 100 is on the .64 street."
+  },
+  {
+   "p": "Broadcast of 172.16.5.0/28?",
+   "a": [
+    "172.16.5.15"
+   ],
+   "why": "Block 16: the street is .0–.15."
+  },
+  {
+   "p": "Which /26 street is 10.1.1.200 on? (network address)",
+   "a": [
+    "10.1.1.192"
+   ],
+   "why": "200 sits between 192 and 255."
+  },
+  {
+   "p": "Smallest prefix that fits 28 cameras? (type like /27)",
+   "a": [
+    "/27",
+    "27"
+   ],
+   "why": "/28 gives 14, /27 gives 30."
+  },
+  {
+   "p": "Mask for /25?",
+   "a": [
+    "255.255.255.128"
+   ],
+   "why": "One extra street bit in the last number = 128."
+  },
+  {
+   "p": "Usable addresses in an AWS /24?",
+   "a": [
+    "251"
+   ],
+   "why": "AWS reserves 5: 256 − 5."
+  }
+ ]
+}
+</script></div>
+
+<h2>Part 4 · Planning addresses for a real building</h2>
+<p>You estimate buildings, so let's plan one. A small office needs staff PCs: 100 devices · CCTV cameras: 40 · guest Wi-Fi: 50. You have 10.20.0.0/24.</p>
+<p>Rule: give the <b>biggest group its street first</b>, then go down in size.</p>
+<div class="table-wrap"><table class=""><thead><tr><th>Group</th><th>Needs</th><th>Street</th><th>Range</th><th>Gateway</th></tr></thead><tbody><tr><td>Staff</td><td>100</td><td>10.20.0.0/25</td><td>.0 – .127</td><td>10.20.0.1</td></tr><tr><td>Guest</td><td>50</td><td>10.20.0.128/26</td><td>.128 – .191</td><td>10.20.0.129</td></tr><tr><td>CCTV</td><td>40</td><td>10.20.0.192/26</td><td>.192 – .255</td><td>10.20.0.193</td></tr></tbody></table></div>
+
+<p>Total: 128 + 64 + 64 = 256. It fits exactly. Convention: the router (<b>gateway</b>) takes the first usable address on each street. You'll use this exact plan in Lessons 12, 13, 19 and 21. Try changing the numbers below and watch it stop fitting.</p>
+<div class="sim" data-sim2="vlsm"></div>
+
+<details class="recall"><summary>Say it yourself first, then open this</summary><p>“A /24 is one street of 256 addresses, 254 usable. A bigger slash number means a smaller street. Block size is 256 minus the last mask number. To plan a building I give each group its own subnet, biggest first, so guests, cameras and staff are separated.”</p></details>
+
+<h2>Practice 1 · Check yourself</h2>
+<div class="quiz" data-quiz="10-check"><script type="application/json">
+[
+ {
+  "q": "How many usable hosts does a /27 have?",
+  "options": [
+   "32",
+   "30",
+   "62",
+   "14"
+  ],
+  "answer": 1,
+  "why": "2^(32−27) = 32 addresses, minus network and broadcast = 30."
+ },
+ {
+  "q": "What is the broadcast address of 172.16.5.0/28?",
+  "options": [
+   "172.16.5.16",
+   "172.16.5.14",
+   "172.16.5.15",
+   "172.16.5.255"
+  ],
+  "answer": 2,
+  "why": "Block size 16, so the street runs .0 to .15. The last one, .15, is broadcast."
+ },
+ {
+  "q": "Which subnet is 10.1.1.200/26 in?",
+  "options": [
+   "10.1.1.128/26",
+   "10.1.1.192/26",
+   "10.1.1.0/26",
+   "10.1.1.200/26"
+  ],
+  "answer": 1,
+  "why": "Streets start at 0, 64, 128, 192. 200 is between 192 and 255."
+ },
+ {
+  "q": "A CCTV system will have 25 cameras, plus room to grow to 28. Smallest subnet that fits?",
+  "options": [
+   "/28",
+   "/26",
+   "/27",
+   "/29"
+  ],
+  "answer": 2,
+  "why": "/28 gives 14 (too small). /27 gives 30, enough for 28."
+ },
+ {
+  "q": "An AWS subnet is 10.40.1.0/24. How many addresses can your servers actually use?",
+  "options": [
+   "256",
+   "254",
+   "251",
+   "250"
+  ],
+  "answer": 2,
+  "why": "AWS reserves 5 per subnet: 256 − 5 = 251."
+ },
+ {
+  "q": "(Lesson 03 review) Palworld uses UDP on 8211. What does UDP NOT do that TCP does?",
+  "options": [
+   "Use port numbers",
+   "Confirm each piece arrived",
+   "Carry data",
+   "Use IP addresses"
+  ],
+  "answer": 1,
+  "why": "UDP sends without confirmations; TCP checks every piece arrived, in order."
+ }
+]
+</script></div>
+
+<h2>Practice 2 · On your real server</h2>
+<p>10 minutes, read-only.</p>
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">look only</span><code>ssh gameserver</code>, then <code>ip -4 addr</code>. Find the line with 10.0.0.84/24.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">look only</span>Ask Python (already installed) to check your work. Type exactly:<pre>python3 -c &quot;import ipaddress as i; n=i.ip_interface(&#x27;10.0.0.84/24&#x27;).network; print(n, n.num_addresses, n.netmask, n.broadcast_address)&quot;</pre>
+It prints <code>10.0.0.0/24 256 255.255.255.0 10.0.0.255</code>. Each value should match what you worked out by hand.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">look only</span>Use the same tool to check the office plan in Part 4. Replace the address, for example <code>'10.20.0.150/26'</code>.</div></li>
+</ul>
+
+<h2>PASS/FAIL CHECK</h2>
+<p>Go to <a href="https://subnettingpractice.com/">subnettingpractice.com</a> (free). Do 10 questions with a timer, no calculator.</p>
+<div class="callout good"><span class="label">PASS</span><p>At least 9 correct in under 15 minutes. Record it in the Readiness Checks tab (“Subnetting speed”). Not there yet? Do 10 a day. Most people pass within a week of daily practice.</p></div>
+
+<h2>Break/fix drill</h2>
+<div class="lab-cases" data-id="bf"><script type="application/json">
+{
+ "cases": [
+  {
+   "sev": "P3",
+   "sym": "A technician set a camera to 10.20.0.191 with mask /26 and gateway 10.20.0.193. It can't reach the recorder.",
+   "o": [
+    "The recorder is switched off",
+    "10.20.0.191 is the guest street's broadcast address, so the camera is on the wrong street",
+    "The gateway should be 10.20.0.1",
+    "The mask should be /24"
+   ],
+   "a": 1,
+   "steps": [
+    "Work out the street: .191 with /26 sits on .128–.191 (guest), and it's the last address: broadcast.",
+    "The camera belongs on the CCTV street .192–.255.",
+    "Fix: give it an address from .194–.254 with gateway .193.",
+    "Check with the explorer above: type 10.20.0.191/26."
+   ]
+  }
+ ]
+}
+</script></div>
+
+<h2>New words from this lesson</h2>
+<div class="lab-gloss" data-id="words"><script type="application/json">
+{
+ "words": [
+  [
+   "CIDR / prefix (/24)",
+   "How many bits are the street name."
+  ],
+  [
+   "Subnet mask",
+   "The same idea written as 255.255.255.0."
+  ],
+  [
+   "Subnet",
+   "One smaller street cut from a bigger range."
+  ],
+  [
+   "Network address",
+   "First address: the street's name. Not usable by a device."
+  ],
+  [
+   "Broadcast address",
+   "Last address: “everyone on this street”. Not usable by a device."
+  ],
+  [
+   "Host",
+   "Any device with an address."
+  ],
+  [
+   "Block size",
+   "256 minus the last mask number. Where streets start."
+  ],
+  [
+   "Gateway",
+   "The router's address on a street: the way out."
+  ]
+ ]
+}
+</script></div>
+
+<h2>Read next (15 min)</h2>
+<p>Jeremy's IT Lab (already in your tracker): Day 13 “Subnetting (Part 1)”. Then practise at subnettingpractice.com.</p>
+
+<nav class="course">
+  <span>← <a href="0009-tell-the-story.html">09 · Tell the story</a></span>
+  <span><a href="../index.html">Course home</a></span>
+  <span><a href="0011-dns-and-dhcp.html">11 · DNS and DHCP</a> →</span>
+</nav>
+</main>
+<script src="../assets/lab.js"></script>
+<script src="../assets/quiz.js"></script>
+<script src="../assets/sims.js"></script>
+<script src="../assets/sims2.js"></script>
+<script src="../assets/match.js"></script>
+</body>
+</html>

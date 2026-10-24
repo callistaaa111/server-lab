@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>09 · Tell the Story</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/interactive.css">
+</head>
+<body>
+<main>
+<nav class="top"><a href="../index.html">Course home</a> · <a href="../reference/glossary.html">Word list</a></nav>
+
+<div class="eyebrow">Server Lab · Lesson 09 · pairs with Tracker Week 11, “Write it up”</div>
+<h1>Tell the story: portfolio &amp; interview</h1>
+<p class="lede">For a beginner, a real project you can explain counts for a lot. You have one: a live server with
+real users, two firewalls, containers, automated backups and your own monitoring. This lesson turns it into a
+one-line pitch, a GitHub write-up and interview answers you can give with confidence.</p>
+<div class="meta"><span>≈ 40 min</span><span>Uses Lessons 01–08</span><span>Output: a README draft + two practised stories</span></div>
+
+<h2>Warm-up · mixed, from the whole course</h2>
+<div class="quiz" data-quiz="09-warm"><script type="application/json">
+[
+ {"q": "Why does Palworld use UDP?", "options": ["Late game updates are useless anyway", "UDP is the only encrypted protocol", "Oracle blocks every single TCP port", "UDP gives the server an address"], "answer": 0, "why": "Games want the newest update fast; TCP's confirm-and-resend adds lag for no benefit."},
+ {"q": "Players can't connect, but everything inside the server is healthy. Which layer is likely at fault?", "options": ["The Docker image", "The save volume", "Oracle's security list", "The cron schedule"], "answer": 2, "why": "When the inside is healthy, look at what's outside: Oracle's firewall (the security list) in front of the server."},
+ {"q": "What is the AWS name for a rented virtual server?", "options": ["VPC", "IAM", "EBS", "EC2"], "answer": 3, "why": "EC2 instance. VPC = private network, IAM = access control, EBS = disk."},
+ {"q": "In Docker, what keeps data safe when the container is replaced?", "options": ["A health check", "A storage volume", "A port mapping", "An image tag"], "answer": 1, "why": "Volumes live outside the container, so the world save survives updates."}
+]
+</script></div>
+
+<h2>Part 1 · Your one-sentence pitch</h2>
+<p>When someone asks “what have you built?”, you need one or two sentences that make them want to hear more. Here’s a
+starting point. Change the words until it sounds like you:</p>
+<div class="callout">
+  <p>“I run a Palworld game server for my friends (up to 16 players) on Oracle Cloud: an Ubuntu virtual machine running the game in
+  Docker, behind two layers of firewall, with automated daily backups and restarts, and a monitoring dashboard I built that
+  alerts my phone and restarts the server by itself when memory runs low.”</p>
+</div>
+<p>Notice what it does: it names real tools (Oracle Cloud, Ubuntu, Docker), real operations work (firewalls, backups,
+monitoring, automation) and real users. Each phrase is a door the interviewer can open, and you’ve studied what’s behind every one.</p>
+
+<h3>Be honest about how you built it</h3>
+<p>You built this with an AI assistant. Say so plainly, then show what you understand:
+“I set it up with help from an AI assistant, then I studied each part until I could explain and troubleshoot it myself.”
+Interviewers will test your understanding anyway. Being honest, and then answering their follow-up questions well, beats
+pretending.</p>
+
+<h2>Part 2 · The GitHub write-up (README)</h2>
+<p>A <b>README</b> is the front page of a project on GitHub, the site where developers share code. A good one is often
+the first thing a recruiter or engineer reads about you. Copy this outline into a file called <code>README.md</code> and fill it in:</p>
+<pre># Palhaven: a self-hosted game server on Oracle Cloud
+
+## What it is
+One paragraph: what, for whom, how many players, since when.
+
+## Architecture
+(Your diagram: internet → security list → Ubuntu VM → iptables → Docker → Palworld,
+ plus the monitor and backups. Draw it at app.diagrams.net and export a PNG.)
+
+## How it works
+- Network: public vs private IP, NAT at the internet gateway, UDP 8211
+- Two firewalls: Oracle security list + iptables on the VM
+- Docker Compose: image, port mapping, volume for the world save
+
+## Operations
+- Monitoring: metrics every 5 s, 180-day history, dashboard
+- Alerting: phone notifications for problems only
+- Self-healing: automatic restart when memory runs low
+- Backups: daily at 04:45, kept 7 days; daily restart at 05:00
+
+## Security
+- SSH login with a key file, not a password
+- Monitor is never on the public internet: localhost + my private Tailscale network only
+- Passwords kept out of this repository
+
+## Problems I solved
+- (Your STAR stories from Part 3, two or three sentences each)
+
+## What I'd improve next
+- Off-site backup copies (3-2-1 rule)
+- Rebuild it on AWS (EC2, VPC, security group)
+- Describe the infrastructure as code (e.g. Terraform)</pre>
+
+<div class="sim" data-sim="builder" data-id="09-readme"><script type="application/json">
+{
+ "title": "Builder · your README",
+ "intro": "Fill in the boxes and your README writes itself. It’s saved in this browser, so you can come back to it.",
+ "fields": [
+  {
+   "id": "what",
+   "label": "What it is (one paragraph)",
+   "rows": 3,
+   "placeholder": "A Palworld server for my friends, running since October 2026…"
+  },
+  {
+   "id": "how",
+   "label": "How it works (network, two firewalls, Docker)",
+   "rows": 3
+  },
+  {
+   "id": "ops",
+   "label": "Operations (monitoring, alerts, self-healing, backups)",
+   "rows": 3
+  },
+  {
+   "id": "problems",
+   "label": "Problems I solved (short STAR stories)",
+   "rows": 3
+  },
+  {
+   "id": "next",
+   "label": "What I'd improve next",
+   "rows": 2,
+   "value": "- Off-site backup copies (3-2-1 rule)\n- Rebuild it on AWS (EC2, VPC, security group)\n- Describe the infrastructure as code (Terraform)"
+  }
+ ],
+ "template": "# Palhaven: a self-hosted game server on Oracle Cloud\n\n## What it is\n{what}\n\n## Architecture\n(diagram.png: internet → security list → Ubuntu VM → iptables → Docker → Palworld)\n\n## How it works\n{how}\n\n## Operations\n{ops}\n\n## Security\n- SSH login with a key file, not a password\n- Monitor is never on the public internet: localhost + my private Tailscale network only\n- Passwords kept out of this repository\n\n## Problems I solved\n{problems}\n\n## What I'd improve next\n{next}\n"
+}
+</script></div>
+
+<div class="callout warn">
+  <span class="label">Never publish these</span>
+  <p>Passwords (the server and admin passwords in the compose file), your SSH key file, your ntfy topic name, and Tailscale
+  machine names. When you share the compose file, replace secrets with <code>********</code>, as Lesson 05 does. Leaking a
+  secret on GitHub is a classic beginner mistake, and interviewers notice when you’ve avoided it.</p>
+</div>
+
+<h2>Part 3 · Stories that prove you can do the job: STAR</h2>
+<p>Many interview questions start with “Tell me about a time when…”. Answer with <b>STAR</b>:</p>
+<div class="table-wrap"><table><tbody>
+  <tr><td><b>S</b>ituation</td><td>the background, in one sentence</td></tr>
+  <tr><td><b>T</b>ask</td><td>what needed to happen</td></tr>
+  <tr><td><b>A</b>ction</td><td>what <em>you</em> did, step by step (the biggest part)</td></tr>
+  <tr><td><b>R</b>esult</td><td>what changed, and what you learned</td></tr>
+</tbody></table></div>
+
+<h3>Story 1 · “Tell me about a problem you troubleshot”</h3>
+<p><b>S:</b> After setting up the game server, friends couldn’t connect, even though I’d opened the port in Oracle’s
+firewall. <b>T:</b> Get the server reachable. <b>A:</b> I worked outside-in: the server was running and SSH worked,
+the security list allowed the port, then I checked the server’s own firewall and found iptables ending with a rule that
+rejected everything not explicitly allowed. I added a rule for UDP 8211 and checked the Docker port mapping. <b>R:</b>
+Players could join. Now I always check both firewall layers, and I wrote a checklist for it.</p>
+
+<h3>Story 2 · “Tell me about something you automated”</h3>
+<p><b>S:</b> The game server’s memory use crept up over time and caused lag. <b>T:</b> Keep it smooth without me
+watching it all day. <b>A:</b> I set up a daily scheduled backup and restart at 5 AM with an in-game warning, and built a
+monitor that samples memory every 5 seconds, alerts my phone, and restarts the server by itself if memory stays too high.
+<b>R:</b> <i>(Your real result, for example:)</i> the server stays smooth without me watching it, and I learned about metrics, alerting and self-healing, the same ideas companies use.</p>
+<p class="small">Use your own details. If a story didn’t happen exactly like this, change it to what really happened. Interviewers ask follow-up questions, and the truth is the easiest thing to defend.</p>
+
+<div class="sim" data-sim="builder" data-id="09-star"><script type="application/json">
+{
+ "title": "Builder · your pitch and a STAR story",
+ "intro": "Write it in your own words. The preview shows how it sounds put together.",
+ "fields": [
+  {
+   "id": "pitch",
+   "label": "Your one-sentence pitch",
+   "rows": 3
+  },
+  {
+   "id": "s",
+   "label": "Situation: the background, one sentence",
+   "rows": 2
+  },
+  {
+   "id": "t",
+   "label": "Task: what needed to happen",
+   "rows": 2
+  },
+  {
+   "id": "a",
+   "label": "Action: what YOU did, step by step",
+   "rows": 4
+  },
+  {
+   "id": "r",
+   "label": "Result: what changed and what you learned",
+   "rows": 2
+  }
+ ],
+ "template": "PITCH\n{pitch}\n\nSTAR STORY\nSituation: {s}\nTask: {t}\nAction: {a}\nResult: {r}\n"
+}
+</script></div>
+
+<h2>Part 4 · Questions you can now answer</h2>
+<div class="table-wrap"><table>
+  <thead><tr><th>Interview question</th><th>Review</th></tr></thead>
+  <tbody>
+    <tr><td>What’s the difference between a public and a private IP? What is NAT?</td><td><a href="0002-two-addresses.html">02</a></td></tr>
+    <tr><td>TCP vs UDP: when would you use each?</td><td><a href="0003-tcp-and-udp.html">03</a></td></tr>
+    <tr><td>How do you check disk space, memory and running processes on Linux?</td><td><a href="0004-linux-basics.html">04</a></td></tr>
+    <tr><td>What is a container? How is it different from a VM?</td><td><a href="0005-docker.html">05</a></td></tr>
+    <tr><td>A user can’t reach a service on a cloud server. Walk me through it.</td><td><a href="0006-follow-a-packet.html">06</a></td></tr>
+    <tr><td>How do you know a system is healthy? What would you alert on?</td><td><a href="0007-monitoring-and-backups.html">07</a></td></tr>
+    <tr><td>What are RPO and RTO? How are your backups set up?</td><td><a href="0007-monitoring-and-backups.html">07</a></td></tr>
+    <tr><td>Security group vs network ACL?</td><td><a href="0008-oracle-to-aws.html">08</a></td></tr>
+    <tr><td>Explain the shared responsibility model.</td><td><a href="0008-oracle-to-aws.html">08</a></td></tr>
+    <tr><td>What is least privilege?</td><td><a href="0008-oracle-to-aws.html">08</a></td></tr>
+  </tbody>
+</table></div>
+
+<hr>
+
+<h2>Practice 1 · Check yourself</h2>
+<div class="quiz" data-quiz="09-check"><script type="application/json">
+[
+ {"q": "In a STAR answer, which part should take the most time?", "options": ["Situation", "Task", "Action", "Result"], "answer": 2, "why": "Action: what YOU did, step by step. That's what shows your skills."},
+ {"q": "Which of these is safe to put in a public GitHub README?", "options": ["The admin password from the compose file", "Your SSH key file for the server", "The ntfy topic name for phone alerts", "A diagram showing the two firewall layers"], "answer": 3, "why": "Architecture diagrams are great to share. Passwords, keys and alert topics are secrets."},
+ {"q": "An interviewer asks how you built the server. What's the best approach?", "options": ["Say you built everything yourself, all alone", "Say AI helped, then show your understanding", "Avoid the question and change the subject", "Say a friend did it for you"], "answer": 1, "why": "Honesty plus real understanding is the strongest answer. They'll test your understanding either way."},
+ {"q": "What makes the one-sentence pitch effective?", "options": ["It names real tools, operations and users", "It uses as many acronyms as possible", "It hides that it's a game project", "It lists every command you have run"], "answer": 0, "why": "Real tools, real operations work (firewalls, backups, monitoring) and real users: each phrase invites a question you can answer."},
+ {"q": "Which item belongs under 'What I'd improve next' in your README?", "options": ["The server's admin password, in full", "Off-site backups and an AWS rebuild", "The list of players' Steam IDs", "A screenshot of your bank balance"], "answer": 1, "why": "Showing you know the next steps (3-2-1 backups, AWS, infrastructure as code) shows you think like an engineer."}
+]
+</script></div>
+
+<h2>Practice 2 · Build your portfolio pieces (40 min, can be split)</h2>
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><span>Write your own one-sentence pitch. Say it out loud until it flows in under 20 seconds.</span></li>
+  <li><input type="checkbox" aria-label="done"><span>Draw the architecture diagram at <a href="https://app.diagrams.net">app.diagrams.net</a> (free, in tracker Week 1 too). Use Lesson 06’s five checkpoints as the outline.</span></li>
+  <li><input type="checkbox" aria-label="done"><span>Fill in the README outline in a file on your laptop. Leave out every secret.</span></li>
+  <li><input type="checkbox" aria-label="done"><span>Write your two STAR stories in your own words, three or four sentences each.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>Mock interview:</b> ask me in Claude Code, “interview me for a junior cloud role using my Palhaven project”. I’ll ask follow-up questions like a real interviewer.</span></li>
+  <li><input type="checkbox" aria-label="done"><span>When it’s ready (tracker Week 11), I can help you publish it to GitHub. I’ll check it for secrets with you first.</span></li>
+</ul>
+
+<h2>Get real-world feedback</h2>
+<p>Lessons build skill; people who do the job give you judgement. When your write-up is ready, share it for feedback:</p>
+<ul>
+  <li><a href="https://www.reddit.com/r/homelab/">r/homelab</a> and <a href="https://www.reddit.com/r/selfhosted/">r/selfhosted</a>: people who run servers like Palhaven for fun; friendly to beginners.</li>
+  <li><a href="https://www.reddit.com/r/devops/">r/devops</a> and <a href="https://www.reddit.com/r/sysadmin/">r/sysadmin</a>: working professionals; good for “is this how it’s done at work?” and career questions.</li>
+  <li><a href="https://www.reddit.com/r/AWSCertifications/">r/AWSCertifications</a>: exam tips from people who just passed Cloud Practitioner.</li>
+</ul>
+
+<h2>Read next (10 min)</h2>
+<p><a href="https://aws.amazon.com/certification/certified-cloud-practitioner/"><b>AWS Certified Cloud Practitioner: official exam page</b></a>.
+Download the exam guide and skim its list of topics. You’ll recognise more of it than you expect. It’s also your map for
+tracker Weeks 7–12.</p>
+
+<div class="callout good">
+  <span class="label">Ask your teacher</span>
+  <p>This is the end of the course, not the end of learning. Ask me for a mock interview, a mixed review quiz across all
+  nine lessons, or the next skill to learn (Terraform, building on AWS, Linux scripting).</p>
+</div>
+
+<nav class="course">
+  <span>← <a href="0008-oracle-to-aws.html">08 · Same ideas, AWS names</a></span>
+  <span><a href="../index.html">Course home</a></span>
+  <span><a href="0010-subnetting.html">10 · Subnetting</a> →</span>
+</nav>
+</main>
+<script src="../assets/lab.js"></script>
+<script src="../assets/quiz.js"></script>
+<script src="../assets/sims.js"></script>
+<script src="../assets/match.js"></script>
+<script src="../assets/terminal.js"></script>
+
+</body>
+</html>

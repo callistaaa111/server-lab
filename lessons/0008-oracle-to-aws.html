@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>08 · Same Ideas, AWS Names</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/interactive.css">
+</head>
+<body>
+<main>
+<nav class="top"><a href="../index.html">Course home</a> · <a href="../reference/glossary.html">Word list</a></nav>
+
+<div class="eyebrow">Server Lab · Lesson 08 · bridge to Tracker Weeks 7–10 and the AWS Cloud Practitioner exam</div>
+<h1>Same ideas, AWS names</h1>
+<p class="lede">Most cloud job ads ask for AWS (Amazon Web Services), the biggest cloud provider, and your exam is
+AWS too. The good news: everything you’ve learned on Oracle carries over. The ideas are the same; only the names
+change. By the end you can describe Palhaven in AWS words, plus three ideas every AWS exam asks about: IAM, shared
+responsibility and pricing.</p>
+<div class="meta"><span>≈ 35 min</span><span>Builds on Lessons 01–07</span><span>No AWS account needed yet</span></div>
+
+<h2>Warm-up · from Lessons 01–07</h2>
+<div class="quiz" data-quiz="08-warm"><script type="application/json">
+[
+ {"q": "What does NAT do?", "options": ["Restarts the server on low memory", "Swaps public and private IP addresses", "Packs a program into a container", "Blocks every port that isn't listed"], "answer": 1, "why": "Network Address Translation: the receptionist swapping 203.0.113.84 and 10.0.0.84."},
+ {"q": "Which golden signal is 'number of players online'?", "options": ["Saturation", "Errors", "Traffic", "Latency"], "answer": 2, "why": "Traffic = how much the system is being used."},
+ {"q": "Daily backups mean your RPO (most data you could lose) is about…", "options": ["one day", "one hour", "one week", "one minute"], "answer": 0, "why": "If disaster strikes just before the next 4:45 AM backup, you lose up to a day."}
+]
+</script></div>
+
+<h2>Part 1 · Regions and Availability Zones</h2>
+<p>Every cloud provider has data centers all over the world. A <b>region</b> is one area of the world with its own set of
+data centers. Your Oracle server is in the Singapore region (<code>ap-singapore-1</code>). AWS also has a Singapore
+region, named <code>ap-southeast-1</code>.<sup class="cite"><a href="https://aws.amazon.com/about-aws/global-infrastructure/">1</a></sup></p>
+<p>Inside a region, AWS keeps several separate data centers called <b>Availability Zones</b> (AZs), far enough apart
+that a fire or flood in one doesn’t take down the others. Oracle calls them <b>availability domains</b>; yours is
+<code>AD-1</code>. Companies that can’t afford downtime run copies of their system in two or more zones. That’s called
+<b>high availability</b>. Palhaven runs in one zone, which is fine for a game server.</p>
+
+<h2>Part 2 · The translation table</h2>
+<div class="table-wrap"><table>
+  <thead><tr><th>Idea</th><th>On your Oracle server</th><th>On AWS</th></tr></thead>
+  <tbody>
+    <tr><td>Your account</td><td>Tenancy</td><td>AWS account</td></tr>
+    <tr><td>Area of the world</td><td>Region <code>ap-singapore-1</code></td><td>Region <code>ap-southeast-1</code></td></tr>
+    <tr><td>Separate data center in it</td><td>Availability domain</td><td>Availability Zone (AZ)</td></tr>
+    <tr><td>Your private network</td><td>VCN (Virtual Cloud Network)</td><td><b>VPC</b> (Virtual Private Cloud)</td></tr>
+    <tr><td>A street of addresses</td><td>Subnet <code>10.0.0.0/24</code></td><td>Subnet</td></tr>
+    <tr><td>The receptionist / door</td><td>Internet gateway</td><td>Internet gateway</td></tr>
+    <tr><td>A rented virtual computer</td><td>Compute instance</td><td><b>EC2</b> instance</td></tr>
+    <tr><td>Its size</td><td>Shape (<code>VM.Standard.A1.Flex</code>)</td><td>Instance type (e.g. <code>t4g.small</code>)</td></tr>
+    <tr><td>Its disk</td><td>Boot volume</td><td><b>EBS</b> volume</td></tr>
+    <tr><td>A public address that stays yours</td><td>Reserved public IP</td><td>Elastic IP</td></tr>
+    <tr><td>Firewall for one server</td><td>Network security group</td><td><b>Security group</b></td></tr>
+    <tr><td>Firewall for a whole subnet</td><td>Security list</td><td>Network ACL</td></tr>
+    <tr><td>Who may do what in the account</td><td>IAM (Oracle)</td><td><b>IAM</b></td></tr>
+  </tbody>
+</table></div>
+<p class="small">EC2 = Elastic Compute Cloud. EBS = Elastic Block Store. “Elastic” is AWS’s favourite word: it means you can grow or shrink it whenever you need.</p>
+
+<div class="match" data-match="08-aws"><script type="application/json">
+{
+ "title": "Oracle name → AWS name",
+ "left": "Oracle",
+ "right": "AWS",
+ "pairs": [
+  [
+   "Tenancy",
+   "AWS account"
+  ],
+  [
+   "VCN",
+   "VPC"
+  ],
+  [
+   "Compute instance",
+   "EC2 instance"
+  ],
+  [
+   "Shape",
+   "Instance type"
+  ],
+  [
+   "Boot volume",
+   "EBS volume"
+  ],
+  [
+   "Availability domain",
+   "Availability Zone"
+  ],
+  [
+   "Reserved public IP",
+   "Elastic IP"
+  ],
+  [
+   "Network security group",
+   "Security group"
+  ]
+ ]
+}
+</script></div>
+
+<h3>Amazon’s two firewalls</h3>
+<p>Amazon also has two kinds of cloud firewall, and the exam loves the difference:<sup class="cite"><a href="https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html">2</a></sup></p>
+<div class="table-wrap"><table>
+  <thead><tr><th></th><th>Security group</th><th>Network ACL</th></tr></thead>
+  <tbody>
+    <tr><td>Protects</td><td>one server (instance)</td><td>a whole subnet</td></tr>
+    <tr><td>Rules</td><td>“allow” rules only</td><td>“allow” and “deny” rules</td></tr>
+    <tr><td>Replies</td><td>automatically allowed back: it remembers the conversation (<b>stateful</b>)</td><td>need their own rule: it judges each packet alone (<b>stateless</b>)</td></tr>
+  </tbody>
+</table></div>
+<p>Amazon recommends security groups as the main tool. In the condo comparison, a security group is a guard posted at
+one building’s door, and a network ACL is the village gate.</p>
+
+<h2>Part 3 · IAM: key cards for your cloud account</h2>
+<p><b>IAM</b> (Identity and Access Management) controls <em>who</em> can do <em>what</em> in a cloud account: who may
+create servers, who may see the bills, who may delete things.<sup class="cite"><a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html">3</a></sup> Think of a company issuing key cards:</p>
+<ul>
+  <li>A <b>user</b> is one person (or program) with their own login.</li>
+  <li>A <b>group</b> is a set of users with the same job, like “all developers”.</li>
+  <li>A <b>policy</b> is the written list of what’s allowed, attached to users or groups.</li>
+  <li>A <b>role</b> is a key card that a program or service can borrow temporarily, instead of storing a password.</li>
+</ul>
+<p>Two rules every cloud engineer follows: give each person only the access their job needs (<b>least privilege</b>),
+and never use the <b>root user</b> (the account’s master key) day to day. Lock it with <b>MFA</b> (multi-factor
+authentication: a code from your phone on top of the password). Tracker Week 7 has you do exactly this on day one.</p>
+
+<h2>Part 4 · Shared responsibility: who protects what</h2>
+<p>Amazon puts it in one line: AWS is responsible for security <em>of</em> the cloud; you are responsible for security
+<em>in</em> the cloud.<sup class="cite"><a href="https://aws.amazon.com/compliance/shared-responsibility-model/">4</a></sup> For your server:</p>
+<div class="table-wrap"><table>
+  <thead><tr><th>The provider looks after…</th><th>You look after…</th></tr></thead>
+  <tbody>
+    <tr><td>the buildings, power and guards</td><td>keeping Ubuntu updated (<code>sudo apt upgrade</code>)</td></tr>
+    <tr><td>the physical computers and disks</td><td>both firewalls’ rules</td></tr>
+    <tr><td>the network between data centers</td><td>passwords, SSH keys and who has access</td></tr>
+    <tr><td>the virtual machine system itself</td><td>your apps, containers and backups</td></tr>
+  </tbody>
+</table></div>
+<p>If your Palworld admin password leaked, that would be your responsibility, not Oracle’s or Amazon’s.</p>
+
+<h2>Part 5 · How cloud pricing works</h2>
+<p>Cloud is <b>pay-as-you-go</b>: like an electricity meter, you pay for what you use, usually per second or hour.
+The main things on the bill:</p>
+<ul>
+  <li><b>Compute</b>: how long servers run, and how big they are.</li>
+  <li><b>Storage</b>: how much disk you keep, even while a server is switched off.</li>
+  <li><b>Data transfer</b>: data going <em>out</em> to the internet usually costs; data coming in is usually free. Amazon
+  notes the internet gateway itself is free, but data transfer through it is charged.<sup class="cite"><a href="https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html">5</a></sup></li>
+</ul>
+<p>Three habits that keep a learner’s bill at zero:</p>
+<ol>
+  <li>Set a <b>budget alert</b> before launching anything (a monitoring alert for money).</li>
+  <li>Stay inside the <b>Free Tier</b> limits, and read them, because they change.</li>
+  <li><b>Clean up</b> after every lab. Know the difference between <b>stop</b> (the server is off, but its disk still costs)
+  and <b>terminate</b> (deleted for good, disk included).</li>
+</ol>
+
+<div class="match" data-match="08-terms"><script type="application/json">
+{
+ "title": "AWS idea → plain meaning",
+ "left": "Idea",
+ "right": "Means",
+ "pairs": [
+  [
+   "IAM",
+   "Who can do what in the account"
+  ],
+  [
+   "Least privilege",
+   "Only the access a job needs"
+  ],
+  [
+   "Root user",
+   "The account's master key"
+  ],
+  [
+   "MFA",
+   "A phone code on top of the password"
+  ],
+  [
+   "Shared responsibility",
+   "Provider secures the cloud, you secure your stuff"
+  ],
+  [
+   "Pay-as-you-go",
+   "Pay only for what you use"
+  ],
+  [
+   "Budget alert",
+   "A warning when spending passes a limit"
+  ],
+  [
+   "Stateful",
+   "Remembers the conversation, lets replies back"
+  ]
+ ]
+}
+</script></div>
+
+<details class="recall">
+  <summary>Describe Palhaven in AWS words: say it yourself first, then open this</summary>
+  <p>“It’s like an EC2 instance in the Singapore region, ap-southeast-1, in one Availability Zone, in a public subnet of
+  a VPC with an internet gateway. A security group allows UDP 8211 for Palworld and TCP 22 for SSH. The OS is Ubuntu, and
+  the game runs in a Docker container with a volume for the save on the EBS disk. Under shared responsibility, AWS secures
+  the hardware, and I secure the OS, the firewall rules, access and backups.”</p>
+</details>
+
+<hr>
+
+<h2>Practice 1 · Check yourself</h2>
+<div class="quiz" data-quiz="08-check"><script type="application/json">
+[
+ {"q": "What is the AWS name for Oracle's VCN (your private network)?", "options": ["EC2", "S3", "VPC", "IAM"], "answer": 2, "why": "VCN ↔ VPC (Virtual Private Cloud). EC2 is the server, S3 is file storage, IAM is access control."},
+ {"q": "Why does AWS have several Availability Zones in each region?", "options": ["So one disaster can't take everything down", "So each country gets its own prices", "So servers can use more UDP ports", "So the root user logs in faster"], "answer": 0, "why": "AZs are separate data centers. Running copies in two zones keeps a system up if one zone fails (high availability)."},
+ {"q": "A security group allows inbound UDP 8211. Does it need a separate rule for the server's replies?", "options": ["Yes, every reply needs a rule", "Yes, but only for TCP replies", "No, replies are always blocked completely", "No, security groups are always stateful"], "answer": 3, "why": "Security groups remember conversations (stateful), so replies are allowed automatically. Network ACLs are stateless."},
+ {"q": "Under the shared responsibility model, who must install Ubuntu security updates on your server?", "options": ["You, the customer", "The cloud provider", "Ubuntu's parent company", "The Palworld developers"], "answer": 0, "why": "The provider secures the cloud itself. The OS, apps, firewall rules and access on your server are yours."},
+ {"q": "What does 'least privilege' mean in IAM?", "options": ["Give new staff the root user", "Give everyone full access at first", "Give each person only what's needed", "Give access only during office hours"], "answer": 2, "why": "Least privilege: each user or program gets only the permissions its job needs, and nothing more."},
+ {"q": "You 'stop' an EC2 server for the weekend. What are you still paying for?", "options": ["Nothing at all, everything is free", "Compute hours, at a lower rate", "Its disk storage (the EBS volume)", "Just the internet gateway, every hour"], "answer": 2, "why": "A stopped server doesn't charge compute, but its disk still exists and still costs. Terminate deletes it (and the cost)."}
+]
+</script></div>
+
+<h2>Practice 2 · Translate your own server (10 min, on paper)</h2>
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><span>Without looking at the table, write the AWS name next to each: VCN, compute instance, shape, security list, availability domain, boot volume. Check against Part 2.</span></li>
+  <li><input type="checkbox" aria-label="done"><span>Draw Palhaven as if it ran on AWS: region box → VPC box → subnet box → EC2 box → Docker container. Add the internet gateway and a security group. Keep this drawing: you’ll use it in Lesson 09.</span></li>
+  <li><input type="checkbox" aria-label="done"><span>List three things that are <em>your</em> responsibility on Palhaven under the shared responsibility model.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>Explain it.</b> Out loud, in under 90 seconds: describe Palhaven in AWS words (then compare with the box above).</span></li>
+</ul>
+
+<h2>New words from this lesson</h2>
+<div class="table-wrap"><table><tbody>
+  <tr><td><b>AWS</b></td><td>Amazon Web Services, the largest cloud provider.</td></tr>
+  <tr><td><b>Region / Availability Zone</b></td><td>An area of the world / a separate data center inside it.</td></tr>
+  <tr><td><b>High availability</b></td><td>Running copies in more than one zone so one failure doesn’t stop the service.</td></tr>
+  <tr><td><b>VPC / EC2 / EBS</b></td><td>AWS’s private network / virtual server / disk.</td></tr>
+  <tr><td><b>Security group / network ACL</b></td><td>Stateful firewall for a server / stateless firewall for a subnet.</td></tr>
+  <tr><td><b>Stateful / stateless</b></td><td>Remembers the conversation and lets replies back / judges each packet alone.</td></tr>
+  <tr><td><b>IAM</b></td><td>Who can do what in the account: users, groups, policies, roles.</td></tr>
+  <tr><td><b>Least privilege / root user / MFA</b></td><td>Only the access needed / the master key / a phone code on top of the password.</td></tr>
+  <tr><td><b>Shared responsibility</b></td><td>Provider secures the cloud; you secure what you put in it.</td></tr>
+  <tr><td><b>Pay-as-you-go / Free Tier</b></td><td>Pay for what you use / free usage limits for learners.</td></tr>
+</tbody></table></div>
+
+<h2>Read next (10 min)</h2>
+<p><a href="https://aws.amazon.com/compliance/shared-responsibility-model/"><b>AWS: Shared Responsibility Model</b></a>.
+Short, official, and on every Cloud Practitioner exam. When tracker Week 7 starts, the free <b>AWS Cloud Practitioner
+Essentials</b> course on Skill Builder covers this whole lesson again from Amazon’s side. Seeing it twice is good for remembering it.</p>
+
+<div class="callout good">
+  <span class="label">Ask your teacher</span>
+  <p>Ask me anything: “what’s S3?”, “what would Palhaven cost per month on AWS?”, “give me 10 Cloud Practitioner-style questions on this lesson”.</p>
+</div>
+
+<nav class="course">
+  <span>← <a href="0007-monitoring-and-backups.html">07 · Monitoring &amp; backups</a></span>
+  <span>Next: <a href="0009-tell-the-story.html">09 · Tell the story</a> →</span>
+</nav>
+
+<ol class="small" style="margin-top:32px">
+  <li><a href="https://aws.amazon.com/about-aws/global-infrastructure/">AWS Global Infrastructure</a></li>
+  <li><a href="https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html">Amazon VPC: Compare security groups and network ACLs</a></li>
+  <li><a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html">AWS IAM User Guide: What is IAM?</a></li>
+  <li><a href="https://aws.amazon.com/compliance/shared-responsibility-model/">AWS Shared Responsibility Model</a></li>
+  <li><a href="https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html">Amazon VPC: internet gateways (pricing note)</a></li>
+</ol>
+</main>
+<script src="../assets/lab.js"></script>
+<script src="../assets/quiz.js"></script>
+<script src="../assets/sims.js"></script>
+<script src="../assets/match.js"></script>
+<script src="../assets/terminal.js"></script>
+
+</body>
+</html>

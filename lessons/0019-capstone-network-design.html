@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>19 · Capstone: from your takeoff to a network design</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/interactive.css">
+</head>
+<body>
+<main>
+<nav class="top"><a href="../index.html">Course home</a></nav>
+
+<div class="eyebrow">Server Lab · Lesson 19 · Part 2 · Capstone</div>
+<h1>Capstone: from your takeoff to a network design</h1>
+<p class="lede">This is your interview story no IT graduate can tell. You'll take one building you've estimated and design its network: drops, telecom rooms, switches, PoE, VLANs and IPs, Packet Tracer, rack and UPS, and a bill of quantities.</p>
+<div class="meta"><span data-k="Time">≈ 4–6 h over a week</span><span data-k="Builds on">Lessons 10–15</span><span data-k="Exam">CCNA 1.0–3.0 · Network+ 1.0–2.0</span><span data-k="Tools">Excel/Sheets, Packet Tracer, diagrams.net</span></div>
+
+
+<div class="callout "><span class="label">Why this lesson</span><p>It joins your estimating skill (Job Ads #16, #21–23) with data center and network skills (Lessons 10–15). It works for data center, NOC, network and ELV estimator applications.</p></div>
+
+<h2>Part 1 · Pick the building and protect your employer</h2>
+<p>Choose one project you've estimated: an office floor, a small mall wing or a school. Before anything leaves your laptop, remove client names, addresses, logos and prices. Call it “Project A, 3-storey commercial building”. Your employer's drawings are not yours to publish. The design you produce from them is your own work.</p>
+<h2>Part 2 · Deliverables</h2>
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><div><b>Device count table:</b> data drops, Wi-Fi access points, CCTV cameras, access-control readers, IP phones, printers, per floor. (You do takeoffs: this part is fast for you.)</div></li>
+  <li><input type="checkbox" aria-label="done"><div><b>Telecom rooms:</b> where the MDF (main room) and IDFs (floor rooms) go. Check: no cable run longer than 90 m (Lesson 14). If a drop is further, you need another IDF.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><b>Switch ports:</b> count ports per room, add 20% spare, choose switch sizes (24 or 48 ports).</div></li>
+  <li><input type="checkbox" aria-label="done"><div><b>PoE budget per switch:</b> add up device watts from datasheets (or class maximums to be conservative) and compare with the switch's PoE budget (Lesson 12).</div></li>
+  <li><input type="checkbox" aria-label="done"><div><b>VLAN and IP plan:</b> VLANs for staff, CCTV, guest Wi-Fi, management, voice. Subnets sized with Lesson 10's method, each with at least 25% spare addresses. Gateways on the first usable address.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag lab">lab only</span><b>Packet Tracer model:</b> at least the MDF plus one IDF, all VLANs, router-on-a-stick or a layer-3 switch, and ping tests (Lessons 12–13).</div></li>
+  <li><input type="checkbox" aria-label="done"><div><b>Rack elevation</b> for the MDF (what sits in which U) and a one-line power diagram for the rack: UPS size, A/B feeds where possible (Lesson 14).</div></li>
+  <li><input type="checkbox" aria-label="done"><div><b>A one-page summary:</b> assumptions, what you'd improve, and the bill of quantities. You're an estimator: include rough costs from real supplier price lists. Very few network candidates can do this.</div></li>
+</ul>
+
+<h2>Part 3 · Worked example (yours will differ)</h2>
+<p>Floor 2: 40 drops, 4 APs at 25.5 W, 10 cameras at 7 W.</p>
+<ul>
+  <li>Ports: 54 × 1.2 = 64.8 → 65 ports → one 48-port + one 24-port PoE switch (72 ports).</li>
+  <li>PoE: 4 × 25.5 + 10 × 7 = 102 + 70 = 172 W. Against a 370 W budget = 46% used. Comfortable.</li>
+  <li>UPS for the MDF rack (rule of thumb): add up all equipment watts, divide by a 0.9 power factor to get VA, then add 25% headroom. 1,276 W ÷ 0.9 ≈ 1,418 VA × 1.25 ≈ 1,772 VA → choose a 2 kVA or 3 kVA UPS.</li>
+</ul>
+<p>The checker starts with these numbers. Change them to your building's.</p>
+<div class="sim" data-sim2="design"></div>
+
+<p>And the IP plan, now with five VLANs and 25% spare on every street:</p>
+<div class="sim" data-sim2="vlsm" data-id="vlsm19"><script type="application/json">{
+ "base": "10.20.0.0/23",
+ "spare": 25,
+ "goal": true,
+ "intro": "Five groups, 25% spare each, biggest street first. Make it fit: change the block or the counts. 15 XP the first time a plan with at least four groups fits with 25% or more spare.",
+ "groups": [
+  [
+   "Staff PCs",
+   120
+  ],
+  [
+   "Guest Wi-Fi",
+   60
+  ],
+  [
+   "CCTV",
+   40
+  ],
+  [
+   "Voice (IP phones)",
+   40
+  ],
+  [
+   "Management",
+   10
+  ]
+ ]
+}</script></div>
+
+<h2>Practice 1 · Check yourself</h2>
+<div class="quiz" data-quiz="19-check"><script type="application/json">
+[
+ {
+  "q": "A floor has 30 drops, 3 APs and 6 cameras. Ports needed with 20% spare?",
+  "options": [
+   "39",
+   "45",
+   "47",
+   "48"
+  ],
+  "answer": 2,
+  "why": "39 devices × 1.2 = 46.8 → 47. One 48-port switch covers it."
+ },
+ {
+  "q": "6 APs at 25.5 W and 20 cameras at 7 W, on a 370 W PoE budget. Does it pass the ≤ 80% rule?",
+  "options": [
+   "No: 102%",
+   "Yes: about 79%",
+   "Yes: about 46%",
+   "No: 85%"
+  ],
+  "answer": 1,
+  "why": "153 + 140 = 293 W; 293 ÷ 370 = 79.2%. It passes, just."
+ },
+ {
+  "q": "MDF equipment totals 900 W. Which UPS by the rule of thumb?",
+  "options": [
+   "750 VA",
+   "900 VA",
+   "1 kVA",
+   "1.5 kVA"
+  ],
+  "answer": 3,
+  "why": "900 ÷ 0.9 = 1,000 VA × 1.25 = 1,250 VA → next size up, 1.5 kVA."
+ },
+ {
+  "q": "One drop is 104 m of cable from its IDF. What do you do?",
+  "options": [
+   "Use Cat6A to reach it",
+   "Add an IDF or move the existing one closer",
+   "Nothing, 100 m is the limit",
+   "Use PoE+"
+  ],
+  "answer": 1,
+  "why": "TIA-568 allows 90 m of permanent link. Cable category doesn't change that."
+ },
+ {
+  "q": "Guest Wi-Fi needs 40 addresses plus 25% spare. Smallest subnet?",
+  "options": [
+   "/27",
+   "/26",
+   "/25",
+   "/28"
+  ],
+  "answer": 1,
+  "why": "40 × 1.25 = 50; /27 gives 30, /26 gives 62."
+ }
+]
+</script></div>
+
+<h2>PASS/FAIL CHECK</h2>
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><div>Every drop is within 90 m of its telecom room (show the longest run).</div></li>
+  <li><input type="checkbox" aria-label="done"><div>Every switch has ≥ 20% spare ports and uses ≤ 80% of its PoE budget.</div></li>
+  <li><input type="checkbox" aria-label="done"><div>Every subnet has ≥ 25% spare addresses, and no two subnets overlap (check with the Lesson 10 Python command).</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag lab">lab only</span>In Packet Tracer, a ping matrix (like Lesson 12's) matches your security intent: guest can't reach CCTV (use Lesson 21's ACL).</div></li>
+  <li><input type="checkbox" aria-label="done"><div>The MDF rack's UPS covers the full load with headroom, and every single-corded device is marked.</div></li>
+  <li><input type="checkbox" aria-label="done"><div>One practitioner (network engineer, data center tech or ELV engineer) has reviewed it, and you've written down their feedback. Post a redacted version on r/networking or r/homelab, or send it to someone on LinkedIn.</div></li>
+</ul>
+
+<h2>How you'll use it</h2>
+<ul>
+  <li><b>Resume “Projects” section:</b> “Designed the network for a 3-storey commercial building from electrical takeoffs: 162 ports, 5 VLANs, PoE and UPS sizing, verified in Packet Tracer.” (Use your real numbers.)</li>
+  <li><b>Interview:</b> bring the one-page summary and the rack drawing. Walk through one decision (why that IDF location).</li>
+</ul>
+<div class="lab-gloss" data-id="words"><script type="application/json">
+{
+ "words": [
+  [
+   "MDF",
+   "Main distribution frame: the building's main telecom room."
+  ],
+  [
+   "IDF",
+   "Intermediate distribution frame: a floor's telecom room."
+  ],
+  [
+   "Rack elevation",
+   "A drawing of what sits in each U of a rack."
+  ],
+  [
+   "Bill of quantities",
+   "Every item, quantity and cost: your home ground."
+  ],
+  [
+   "VA",
+   "Volt-amperes: how UPS size is rated. Watts ÷ power factor."
+  ]
+ ]
+}
+</script></div>
+
+
+<nav class="course">
+  <span>← <a href="0018-scripts-and-github.html">18 · Scripts and GitHub</a></span>
+  <span><a href="../index.html">Course home</a></span>
+  <span><a href="0020-getting-hired.html">20 · Getting hired</a> →</span>
+</nav>
+</main>
+<script src="../assets/lab.js"></script>
+<script src="../assets/quiz.js"></script>
+<script src="../assets/sims.js"></script>
+<script src="../assets/sims2.js"></script>
+<script src="../assets/match.js"></script>
+</body>
+</html>

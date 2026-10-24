@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>20 · Getting hired: target list, resume, interviews</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/interactive.css">
+</head>
+<body>
+<main>
+<nav class="top"><a href="../index.html">Course home</a></nav>
+
+<div class="eyebrow">Server Lab · Lesson 20 · Part 2 · Job search</div>
+<h1>Getting hired: target list, resume, interviews</h1>
+<p class="lede">The goal is a job, not a certificate. This lesson turns the evidence sheet into action: who to apply to, what the top of your resume says, how many applications a week, and the ten questions to rehearse.</p>
+<div class="meta"><span data-k="Time">≈ 60 min, then ongoing</span><span data-k="Tools">evidence sheet: Application Tracker, Readiness Checks</span><span data-k="Applies">5 a week for 6 weeks</span></div>
+
+
+<h2>Part 1 · What the ads told us</h2>
+<p>October 2026, 68 ads, Metro Manila + remote.</p>
+<ul>
+  <li><b>Cloud/DevOps:</b> of the ads that state experience, almost all ask for 1+ years. The only 0-year one was a software-developer role. But some accept “1–2 years cloud support OR related IT”. So the plan is right: 1–2 years in a bridge job, then move.</li>
+  <li><b>Data center:</b> ads ask for exactly what electricians know: UPS, generators, transformers, cooling, technical drawings, RME/NCII. Median listed pay is around ₱30k–₱40k a month.</li>
+  <li><b>NOC/network:</b> the most open to fresh entrants, but often asks for a degree (engineering/IT) and CCNA. CCNA was the most-named cert. You already have the degree and a licence whose legal scope includes networking.</li>
+  <li><b>ELV/estimator:</b> data center and mission-critical estimating roles exist, some remote, at ₱50k–₱90k a month. That's a side door that keeps your pay.</li>
+  <li><b>Honest limits:</b> ads came from search-result summaries, not full postings; counts undercount; snapshot dates vary. Treat the numbers as direction, not precision.</li>
+</ul>
+<h2>Part 2 · Your target list, in priority order</h2>
+<ol class="gates">
+  <li><b>NOC / network engineer</b> at telcos, ISPs and IT providers (Job Ads #24, #31, #33–36, #62–66, #68). A degree in engineering is the filter that blocks most career shifters; it doesn't block you. Apply with “CCNA in progress” once Lessons 10–13 and 15 pass. The CCNA itself turns callbacks into offers.</li>
+  <li><b>Data center NOC / operations ENGINEER</b> (Job Ads #6, #7, #67): electronics + electrical drawings + NOC skills. Aim for engineer titles, not technician roles that ask for RME/NCII (#1).</li>
+  <li><b>ELV / auxiliary-systems engineer</b> (Job Ads #60, #61): your licence is the stated requirement, and your takeoff experience is a bonus. This is also the long-term ladder toward data centre telecom engineering (#17) and, later, PECE.</li>
+</ol>
+<p>Also check company career pages directly: PLDT / ePLDT VITRO, Globe, Converge, ST Telemedia GDC, Eastern Communications, KMC, CBRE, and the MEP consultancies and system integrators that design and build data centers.</p>
+<h2>Part 3 · Translate your experience</h2>
+<p>Only claim what's true. <b>Headline</b> (top of the resume): “&lt;your licence&gt; · &lt;your degree&gt; · Network &amp; data center operations (CCNA in progress)”. Recruiters scan the top line first.</p>
+<div class="table-wrap"><table class=""><thead><tr><th>Estimator language</th><th>Data center / network language</th></tr></thead><tbody><tr><td>Electrical takeoffs</td><td>Quantity takeoffs and estimates for power distribution: panelboards, transformers, UPS feeders, generator connections (if those were in your projects)</td></tr><tr><td>Read plans</td><td>Interpret single-line diagrams, panel schedules and ELV/structured-cabling drawings</td></tr><tr><td>BOQ</td><td>Bills of quantities and cost estimates for N projects worth ₱X total (numbers make it real)</td></tr></tbody></table></div>
+
+<p><b>Projects section:</b> Palhaven (Lesson 09 pitch), capstone network design (Lesson 19), S3 backups + Terraform VPC (Lessons 16–17), palhaven-ops repo (Lesson 18), ACL + hardening lab (Lesson 21). <b>Certs:</b> list in-progress certs with a target month only if you've booked the exam or are actively studying, e.g. “CCNA (in progress, exam booked Feb 2027)”. <b>AI honesty</b> (Lesson 09): “I built it with AI help, then learned every part. Ask me anything about it.”</p>
+<h2>Part 4 · Application rhythm</h2>
+<ul>
+  <li>5 targeted applications per week for 6 weeks = 30. Log every one in the Application Tracker the same day.</li>
+  <li>Every second Sunday, review the Readiness Checks tab with me: fewer than 10% callbacks after 30 applications → change the resume or the job family, not just study more · callbacks but no interviews → the phone screen is the issue: practise the 20-second pitch · interviews but no offers → mock interviews on the questions below until 8 out of 10 are smooth.</li>
+</ul>
+<div class="sim" data-sim2="callbacks"></div>
+
+<h2>Part 5 · Interview questions</h2>
+<div class="lab-cards" data-id="interview"><script type="application/json">
+{
+ "title": "answer out loud, then compare",
+ "intro": "Say your answer out loud first. Then open the model answer and be honest: did you have it?",
+ "cards": [
+  {
+   "q": "Walk me through the power path from the utility to a server.",
+   "a": "Utility → switchgear/transformer → ATS with generator → UPS → PDU → rack PDU → dual power supplies on A/B feeds. Mention that each side must carry the full load."
+  },
+  {
+   "q": "N+1 vs 2N?",
+   "a": "One spare unit vs two complete independent systems."
+  },
+  {
+   "q": "A rack inlet temperature alarm fires. What do you do?",
+   "a": "Acknowledge and log; verify on site; check blanking panels, doors, tiles and nearby cooling alarms; follow the EOP; escalate if rising."
+  },
+  {
+   "q": "A user can ping 8.8.8.8 but can't open websites.",
+   "a": "DNS. Check the DNS server settings (`ipconfig /all`), test with Resolve-DnsName/nslookup, check the DHCP DNS option."
+  },
+  {
+   "q": "What is a VLAN and why use one?",
+   "a": "One switch split into separate virtual networks; separates groups like CCTV and guests for security and less broadcast traffic."
+  },
+  {
+   "q": "Split 192.168.1.0/24 into four equal subnets.",
+   "a": "/26 each: .0, .64, .128, .192, with 62 usable hosts each."
+  },
+  {
+   "q": "It's 3 AM and you get a P1 alarm. Walk me through it.",
+   "a": "Acknowledge, open a ticket, assess impact, follow the runbook, troubleshoot with a method, escalate on time per the SLA, write timestamped notes, verify, close, postmortem."
+  },
+  {
+   "q": "Tell me about something you troubleshot.",
+   "a": "A STAR story from Lesson 09, from Palhaven: Situation, Task, Action (the checks, in order), Result (with a number)."
+  },
+  {
+   "q": "Why leave estimating?",
+   "a": "Positive and specific: “I've worked on the drawings for these systems; now I want to operate them. I built and run a real server to test that I enjoy this work, and I do.”"
+  },
+  {
+   "q": "Are you OK with shifts and on-call?",
+   "a": "Decide honestly before you apply. Most data center and NOC entry roles are 24x7."
+  }
+ ]
+}
+</script></div>
+
+<h2>Practice 1 · Check yourself</h2>
+<div class="quiz" data-quiz="20-check"><script type="application/json">
+[
+ {
+  "q": "After 30 applications you have 2 callbacks and no interviews. What do you change?",
+  "options": [
+   "Study for another certificate first",
+   "The resume headline or the job family",
+   "Nothing, apply to 30 more",
+   "Only the cover letter font"
+  ],
+  "answer": 1,
+  "why": "2 ÷ 30 ≈ 7%: under 10% callbacks means the resume or the target, not more study."
+ },
+ {
+  "q": "Which family goes first on your target list?",
+  "options": [
+   "Cloud/DevOps engineer",
+   "NOC / network engineer",
+   "IT support",
+   "Data center technician (RME/NCII)"
+  ],
+  "answer": 1,
+  "why": "Your degree and licence pass the NOC filter; the missing piece is the CCNA."
+ },
+ {
+  "q": "When may “CCNA (in progress)” go on your resume with a target month?",
+  "options": [
+   "Any time",
+   "Only after you pass",
+   "When the exam is booked or you're actively studying",
+   "Never"
+  ],
+  "answer": 2,
+  "why": "Only claim what's true."
+ },
+ {
+  "q": "How many targeted applications per week does the plan use?",
+  "options": [
+   "1",
+   "5",
+   "15",
+   "30"
+  ],
+  "answer": 1,
+  "why": "Five a week for six weeks = 30."
+ }
+]
+</script></div>
+
+<h2>PASS/FAIL CHECK</h2>
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><div>30 applications logged in the Application Tracker.</div></li>
+  <li><input type="checkbox" aria-label="done"><div>A callback rate measured (target ≥ 10%).</div></li>
+  <li><input type="checkbox" aria-label="done"><div>At least one interview.</div></li>
+  <li><input type="checkbox" aria-label="done"><div>8 of the 10 questions above answered smoothly in a mock interview with me (“interview me for a data center technician role in Makati”).</div></li>
+</ul>
+
+<h2>Read next</h2>
+<p>Your own evidence sheet, every second Sunday. The market is the final exam.</p>
+
+<nav class="course">
+  <span>← <a href="0019-capstone-network-design.html">19 · Capstone</a></span>
+  <span><a href="../index.html">Course home</a></span>
+  <span><a href="0021-acls-and-hardening.html">21 · ACLs and hardening</a> →</span>
+</nav>
+</main>
+<script src="../assets/lab.js"></script>
+<script src="../assets/quiz.js"></script>
+<script src="../assets/sims.js"></script>
+<script src="../assets/sims2.js"></script>
+<script src="../assets/match.js"></script>
+</body>
+</html>

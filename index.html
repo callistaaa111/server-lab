@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Server Lab</title>
+<link rel="stylesheet" href="assets/course.css">
+</head>
+<body>
+<main>
+<header class="titleblock">
+  <div class="tb-main">
+    <div class="eyebrow">A hands-on networking, data center &amp; cloud course</div>
+    <h1>Server Lab</h1>
+    <p class="lede">Learn networking and cloud from zero on a real server you already run: Palhaven, the Palworld server on Oracle Cloud. Twenty-one hands-on lessons, from what an IP address is to locking down a Cisco router and getting hired.</p>
+  </div>
+  <div class="tb-cells">
+    <div><b>Lessons</b>21 · about 35–75 min each</div>
+    <div><b>Goal</b>NOC / network engineer, then cloud</div>
+    <div><b>Certs</b>CCNA first, then AWS CLF-C02</div>
+    <div><b>Your rank</b><span id="home-rank">Visitor</span></div>
+    <div><b>Your XP</b><span id="home-xp">0</span></div>
+  </div>
+</header>
+
+<div class="callout">
+  <span class="label">How to use this course</span>
+  <p>One lesson per study night is plenty. Every lesson starts with a warm-up on earlier lessons, because recalling something days later is what makes it stick. Each page is a stack of numbered sheets with an XP bar at the top: quizzes, simulators, drills, sorting games and break/fix tickets all earn XP. Practise in the page first, then do it for real.</p>
+  <p>Nothing on these pages can touch the real server. Lab steps say <span class="tag look">look only</span> or <span class="tag change">changes the server</span> so you always know.</p>
+</div>
+
+<details class="recall">
+  <summary>Suggested order with your 12-week tracker</summary>
+  <p>Weeks 1–4 networking: Lessons 01–03, then 10–13 · Week 5: Lessons 04 and 14 · Week 6: Lessons 05–07 and 15 · Week 7: Lessons 19, 20 and 21, and <b>start applying</b> · Weeks 8–10 AWS: Lessons 08, 16, 17 · Week 11: Lessons 09 and 18 · Week 12: exam, mock interviews, review the Application Tracker. Bridge jobs (data center, NOC, ELV) don't need AWS, so applying starts before the AWS weeks. Book the CCNA when you score 85% or more on two Boson ExSim practice exams.</p>
+</details>
+
+<p class="part-label">Part 1 · How the internet finds your server</p>
+<ol class="lessons">
+  <li><a class="card" href="lessons/0001-decode-your-join-address.html" data-quizzes="0001b-check 0001b-decode"><span class="num">01</span><span><span class="t">Decode your join address</span><span class="d">Server, cloud, IP address, port, firewall, SSH</span></span><span class="st">not started</span></a></li>
+  <li><a class="card" href="lessons/0002-two-addresses.html" data-quizzes="02-warm 02-check"><span class="num">02</span><span><span class="t">Your server has two addresses</span><span class="d">Public vs private IPs, your home network, the receptionist (NAT)</span></span><span class="st">not started</span></a></li>
+  <li><a class="card" href="lessons/0003-tcp-and-udp.html" data-quizzes="03-warm 03-check"><span class="num">03</span><span><span class="t">Two ways to send data: TCP and UDP</span><span class="d">Why Palworld uses UDP, SSH uses TCP, and what “localhost” means</span></span><span class="st">not started</span></a></li>
+</ol>
+
+<p class="part-label">Part 2 · Inside the server</p>
+<ol class="lessons">
+  <li><a class="card" href="lessons/0004-linux-basics.html" data-quizzes="04-warm 04-check"><span class="num">04</span><span><span class="t">Finding your way around Linux</span><span class="d">The terminal, folders, sudo, reading files and logs</span></span><span class="st">not started</span></a></li>
+  <li><a class="card" href="lessons/0005-docker.html" data-quizzes="05-warm 05-check"><span class="num">05</span><span><span class="t">Docker: the sealed room Palworld lives in</span><span class="d">Images, containers, the compose file, volumes</span></span><span class="st">not started</span></a></li>
+  <li><a class="card" href="lessons/0006-follow-a-packet.html" data-quizzes="06-warm 06-gates"><span class="num">06</span><span><span class="t">Follow a packet: the five checkpoints</span><span class="d">Troubleshoot “I can’t connect” like an engineer</span></span><span class="st">not started</span></a></li>
+</ol>
+
+<p class="part-label">Part 3 · Running it like a professional</p>
+<ol class="lessons">
+  <li><a class="card" href="lessons/0007-monitoring-and-backups.html" data-quizzes="07-warm 07-check"><span class="num">07</span><span><span class="t">How you know it’s healthy: monitoring &amp; backups</span><span class="d">Your monitor explained: metrics, alerts, auto-restart, backups</span></span><span class="st">not started</span></a></li>
+  <li><a class="card" href="lessons/0008-oracle-to-aws.html" data-quizzes="08-warm 08-check"><span class="num">08</span><span><span class="t">Same ideas, AWS names</span><span class="d">Regions, EC2, VPC, security groups, IAM, shared responsibility, pricing</span></span><span class="st">not started</span></a></li>
+  <li><a class="card" href="lessons/0009-tell-the-story.html" data-quizzes="09-warm 09-check"><span class="num">09</span><span><span class="t">Tell the story: portfolio &amp; interview</span><span class="d">Turn Palhaven into a project write-up and interview answers</span></span><span class="st">not started</span></a></li>
+</ol>
+
+<p class="part-label">Part 4 · Networking core (CCNA)</p>
+<ol class="lessons">
+  <li><a class="card" href="lessons/0010-subnetting.html" data-quizzes="10-warm 10-check"><span class="num">10</span><span><span class="t">Subnetting: cutting a village into streets</span><span class="d">/24, masks, block sizes, planning an office’s addresses</span></span><span class="st">not started</span></a></li>
+  <li><a class="card" href="lessons/0011-dns-and-dhcp.html" data-quizzes="11-warm 11-check"><span class="num">11</span><span><span class="t">DNS and DHCP: the directory and the leasing office</span><span class="d">Records, DORA, 169.254, the two classic tickets</span></span><span class="st">not started</span></a></li>
+  <li><a class="card" href="lessons/0012-switches-and-vlans.html" data-quizzes="12-warm 12-check"><span class="num">12</span><span><span class="t">Switches and VLANs: hallways and locked doors</span><span class="d">MAC tables, access vs trunk, PoE budgets, Packet Tracer</span></span><span class="st">not started</span></a></li>
+  <li><a class="card" href="lessons/0013-routing.html" data-quizzes="13-warm 13-check"><span class="num">13</span><span><span class="t">Routing: the junction with signposts</span><span class="d">Gateways, router-on-a-stick, static routes, the return-route mistake</span></span><span class="st">not started</span></a></li>
+</ol>
+
+<p class="part-label">Part 5 · Bridge jobs: data center and NOC</p>
+<ol class="lessons">
+  <li><a class="card" href="lessons/0014-inside-a-data-center.html" data-quizzes="14-warm 14-check"><span class="num">14</span><span><span class="t">Inside a data center</span><span class="d">Power chain, A/B feeds, N+1 vs 2N, cooling, PUE, MOPs</span></span><span class="st">not started</span></a></li>
+  <li><a class="card" href="lessons/0015-noc-work.html" data-quizzes="15-warm 15-check"><span class="num">15</span><span><span class="t">NOC work: alarms, tickets and calm nights</span><span class="d">SNMP, syslog, severity, ITIL, the CompTIA method, PRTG drill</span></span><span class="st">not started</span></a></li>
+</ol>
+
+<p class="part-label">Part 6 · Hands-on cloud and automation</p>
+<ol class="lessons">
+  <li><a class="card" href="lessons/0016-hands-on-aws.html" data-quizzes="16-warm 16-check"><span class="num">16</span><span><span class="t">Hands-on AWS: safety first, then off-site backups</span><span class="d">Root MFA, budgets, least-privilege IAM, S3 backups, restore test</span></span><span class="st">not started</span></a></li>
+  <li><a class="card" href="lessons/0017-terraform.html" data-quizzes="17-warm 17-check"><span class="num">17</span><span><span class="t">Terraform: build a network from a text file</span><span class="d">VPC, subnets, route table, security group, plan/apply/drift/destroy</span></span><span class="st">not started</span></a></li>
+  <li><a class="card" href="lessons/0018-scripts-and-github.html" data-quizzes="18-warm 18-check"><span class="num">18</span><span><span class="t">Scripts and GitHub: prove you can automate</span><span class="d">healthcheck.sh, exit codes, Git over SSH, GitHub Actions</span></span><span class="st">not started</span></a></li>
+</ol>
+
+<p class="part-label">Part 7 · Capstone and job search</p>
+<ol class="lessons">
+  <li><a class="card" href="lessons/0019-capstone-network-design.html" data-quizzes="19-check"><span class="num">19</span><span><span class="t">Capstone: from your takeoff to a network design</span><span class="d">Drops, IDFs within 90 m, ports +20%, PoE, IP plan, UPS, BOQ</span></span><span class="st">not started</span></a></li>
+  <li><a class="card" href="lessons/0020-getting-hired.html" data-quizzes="20-check"><span class="num">20</span><span><span class="t">Getting hired: target list, resume, interviews</span><span class="d">What the ads say, your headline, application rhythm, 10 questions</span></span><span class="st">not started</span></a></li>
+</ol>
+
+<p class="part-label">Part 8 · Network security</p>
+<ol class="lessons">
+  <li><a class="card" href="lessons/0021-acls-and-hardening.html" data-quizzes="21-warm 21-check"><span class="num">21</span><span><span class="t">ACLs and hardening: the guard gets a clipboard</span><span class="d">Block guest → staff, wildcard masks, ACL simulator, SSH-only routers</span></span><span class="st">not started</span></a></li>
+</ol>
+
+<h2>Reference sheets</h2>
+<ul>
+  <li><a href="reference/glossary.html">Word list</a>: every term in plain language, with its AWS name</li>
+  <li><a href="reference/commands.html">Command cheat sheet</a>: every command from the lessons, what it does, and whether it’s safe</li>
+  <li><a href="reference/connectivity-checklist.html">“Can’t connect” checklist</a>: the five checkpoints on one printable page</li>
+</ul>
+
+<div class="callout good">
+  <span class="label">Your teacher is one message away</span>
+  <p>Ask me anything in Claude Code: “explain lesson 13 differently”, “quiz me on lessons 10–13 mixed”, “I don’t get wildcard masks”. Tell me your scores and PASS/FAIL results too: I’ll adjust the lessons and update your Readiness Checks tab.</p>
+</div>
+<p class="small">Progress and XP are saved in this browser only. Clearing site data resets them.</p>
+<p class="small">The real server’s public and Tailscale addresses are replaced with example addresses (203.0.113.84 and 100.64.0.10), and the server’s name is changed to Palhaven. Passwords in the compose file are hidden.</p>
+</main>
+<script src="assets/progress.js"></script>
+</body>
+</html>

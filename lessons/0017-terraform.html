@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>17 · Terraform: build a network from a text file</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/interactive.css">
+</head>
+<body>
+<main>
+<nav class="top"><a href="../index.html">Course home</a></nav>
+
+<div class="eyebrow">Server Lab · Lesson 17 · Part 2 · Cloud</div>
+<h1>Terraform: build a network from a text file</h1>
+<p class="lede">Clicking in a console works once. Terraform lets you describe infrastructure in a text file and make reality match it: the step from “I clicked it” to “I can rebuild it in minutes”.</p>
+<div class="meta"><span data-k="Time">≈ 75 min</span><span data-k="Builds on">Lessons 10, 13, 16</span><span data-k="Exam">SAA Domain 1 · CLF Domain 3</span><span data-k="Cost">₱0: no servers, no NAT gateway</span></div>
+
+
+<div class="callout "><span class="label">Why this lesson</span><p>Infrastructure as code is named in Manila cloud ads (Terraform in Job Ads #47–50, #53). VPCs, subnets, route tables, internet gateways and security groups are free; this lab creates no servers.</p></div>
+
+<h2>Warm-up</h2>
+<div class="quiz" data-quiz="17-warm"><script type="application/json">
+[
+ {
+  "q": "How many usable addresses does AWS give you in a /24 subnet?",
+  "options": [
+   "254",
+   "251",
+   "256",
+   "250"
+  ],
+  "answer": 1,
+  "why": "AWS reserves 5."
+ },
+ {
+  "q": "What is the route 0.0.0.0/0 called?",
+  "options": [
+   "Loopback",
+   "Default route",
+   "Broadcast",
+   "Private range"
+  ],
+  "answer": 1,
+  "why": "“Everything else” (Lesson 13)."
+ }
+]
+</script></div>
+
+<h2>Part 1 · Why write infrastructure as text</h2>
+<p>Clicking in a console works once. But can you build the same thing again, exactly, after a disaster? Can a teammate review it before it happens? <b>Terraform</b> lets you describe infrastructure in text files. Terraform then makes reality match the file.</p>
+<p>The loop: write → <code>terraform plan</code> (preview: what will change) → <code>terraform apply</code> (do it) → <code>terraform destroy</code> (remove it all). Terraform remembers what it built in a <b>state file</b>.</p>
+<p>Condo comparison: the console is telling workers what to build, out loud, one wall at a time. Terraform is handing them the approved drawing. You've worked from drawings for years.</p>
+<div class="sim" data-sim2="terraform"></div>
+
+<h2>Part 2 · What we'll build</h2>
+<p>The AWS version of Palhaven's network. Oracle VCN = AWS VPC 10.40.0.0/16:</p>
+<ul>
+  <li>public subnet 10.40.1.0/24 in ap-southeast-1a (where a game server would go)</li>
+  <li>private subnet 10.40.2.0/24 in ap-southeast-1b (where a database would go; no internet route)</li>
+  <li>internet gateway + route table with 0.0.0.0/0 → internet gateway, attached to the public subnet only</li>
+  <li>security group “palhaven-game” allowing UDP 8211 in</li>
+</ul>
+<div class="sim" data-sim="explain"><script type="application/json">
+{
+ "title": "Explorer · read main.tf",
+ "intro": "Click any line with a marker to see what it does. Seven resource blocks = “7 to add” in the plan.",
+ "lines": [
+  {
+   "code": "terraform {",
+   "note": "Settings for Terraform itself: which providers (plug-ins) this project needs."
+  },
+  {
+   "code": "  required_providers {"
+  },
+  {
+   "code": "    aws = {"
+  },
+  {
+   "code": "      source  = \"hashicorp/aws\"",
+   "note": "Download the official AWS provider from HashiCorp's registry."
+  },
+  {
+   "code": "      version = \">= 5.0\"",
+   "note": "Any version 5.0 or newer."
+  },
+  {
+   "code": "    }"
+  },
+  {
+   "code": "  }"
+  },
+  {
+   "code": "}"
+  },
+  {
+   "code": ""
+  },
+  {
+   "code": "provider \"aws\" {",
+   "note": "How to connect to AWS: which region, and which saved login (profile) to use."
+  },
+  {
+   "code": "  region  = \"ap-southeast-1\""
+  },
+  {
+   "code": "  profile = \"lab\"",
+   "note": "The terraform-lab key you saved with `aws configure --profile lab`."
+  },
+  {
+   "code": "}"
+  },
+  {
+   "code": ""
+  },
+  {
+   "code": "resource \"aws_vpc\" \"lab\" {",
+   "note": "Resource 1 of 7: the VPC, your private network. Oracle calls this a VCN."
+  },
+  {
+   "code": "  cidr_block = \"10.40.0.0/16\"",
+   "note": "65,536 addresses to cut into subnets (Lesson 10)."
+  },
+  {
+   "code": "  tags       = { Name = \"palhaven-lab\" }"
+  },
+  {
+   "code": "}"
+  },
+  {
+   "code": ""
+  },
+  {
+   "code": "resource \"aws_subnet\" \"public\" {",
+   "note": "Resource 2: the public street, where a game server would go."
+  },
+  {
+   "code": "  vpc_id                  = aws_vpc.lab.id",
+   "note": "A reference: “the ID of the VPC above”. Terraform works out the build order from these."
+  },
+  {
+   "code": "  cidr_block              = \"10.40.1.0/24\""
+  },
+  {
+   "code": "  availability_zone       = \"ap-southeast-1a\""
+  },
+  {
+   "code": "  map_public_ip_on_launch = true",
+   "note": "Servers started here get a public IP automatically."
+  },
+  {
+   "code": "  tags                    = { Name = \"public-a\" }"
+  },
+  {
+   "code": "}"
+  },
+  {
+   "code": ""
+  },
+  {
+   "code": "resource \"aws_subnet\" \"private\" {",
+   "note": "Resource 3: the private street in a second AZ. No route to the internet."
+  },
+  {
+   "code": "  vpc_id            = aws_vpc.lab.id"
+  },
+  {
+   "code": "  cidr_block        = \"10.40.2.0/24\""
+  },
+  {
+   "code": "  availability_zone = \"ap-southeast-1b\""
+  },
+  {
+   "code": "  tags              = { Name = \"private-b\" }"
+  },
+  {
+   "code": "}"
+  },
+  {
+   "code": ""
+  },
+  {
+   "code": "resource \"aws_internet_gateway\" \"igw\" {",
+   "note": "Resource 4: the VPC's door to the internet."
+  },
+  {
+   "code": "  vpc_id = aws_vpc.lab.id"
+  },
+  {
+   "code": "}"
+  },
+  {
+   "code": ""
+  },
+  {
+   "code": "resource \"aws_route_table\" \"public\" {",
+   "note": "Resource 5: the signposts for the public street."
+  },
+  {
+   "code": "  vpc_id = aws_vpc.lab.id"
+  },
+  {
+   "code": "  route {"
+  },
+  {
+   "code": "    cidr_block = \"0.0.0.0/0\"",
+   "note": "The default route: “everything else” (Lesson 13)…"
+  },
+  {
+   "code": "    gateway_id = aws_internet_gateway.igw.id",
+   "note": "…goes out through the internet gateway. THIS is what makes a subnet public."
+  },
+  {
+   "code": "  }"
+  },
+  {
+   "code": "}"
+  },
+  {
+   "code": ""
+  },
+  {
+   "code": "resource \"aws_route_table_association\" \"public\" {",
+   "note": "Resource 6: attach those signposts to the public subnet only."
+  },
+  {
+   "code": "  subnet_id      = aws_subnet.public.id"
+  },
+  {
+   "code": "  route_table_id = aws_route_table.public.id"
+  },
+  {
+   "code": "}"
+  },
+  {
+   "code": ""
+  },
+  {
+   "code": "resource \"aws_security_group\" \"game\" {",
+   "note": "Resource 7: the firewall for game servers. Oracle's security list = AWS security group."
+  },
+  {
+   "code": "  name   = \"palhaven-game\""
+  },
+  {
+   "code": "  vpc_id = aws_vpc.lab.id"
+  },
+  {
+   "code": ""
+  },
+  {
+   "code": "  ingress {"
+  },
+  {
+   "code": "    from_port   = 8211"
+  },
+  {
+   "code": "    to_port     = 8211"
+  },
+  {
+   "code": "    protocol    = \"udp\"",
+   "note": "Palworld uses UDP 8211 (Lesson 03)."
+  },
+  {
+   "code": "    cidr_blocks = [\"0.0.0.0/0\"]"
+  },
+  {
+   "code": "  }"
+  },
+  {
+   "code": ""
+  },
+  {
+   "code": "  egress {",
+   "note": "Outbound: allow everything. Security groups are stateful, so replies to allowed traffic go out anyway."
+  },
+  {
+   "code": "    from_port   = 0"
+  },
+  {
+   "code": "    to_port     = 0"
+  },
+  {
+   "code": "    protocol    = \"-1\"",
+   "note": "-1 means all protocols."
+  },
+  {
+   "code": "    cidr_blocks = [\"0.0.0.0/0\"]"
+  },
+  {
+   "code": "  }"
+  },
+  {
+   "code": "}"
+  }
+ ]
+}
+</script></div>
+
+<h2>Part 3 · Set up (laptop, PowerShell)</h2>
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span><code>winget install Hashicorp.Terraform</code> and <code>winget install Amazon.AWSCLI</code>. Close and reopen PowerShell.</div></li>
+  <li><input type="checkbox" aria-label="done"><div>In IAM, create user “terraform-lab”, attach the AWS managed policy AmazonVPCFullAccess, create an access key.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span><code>aws configure --profile lab</code> (region ap-southeast-1).</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>Make a folder <code>palhaven-tf</code> and a file <code>main.tf</code> with the code from the explorer above (type it; it's how it sticks).</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>Also create <code>.gitignore</code> containing three lines: <code>.terraform/</code>, <code>*.tfstate</code>, <code>*.tfstate.*</code> (state files can contain secrets: never put them on GitHub).</div></li>
+</ul>
+
+<h2>Part 4 · Run it</h2>
+<div class="lab-order" data-id="tfcmd"><script type="application/json">
+{
+ "title": "the Terraform loop",
+ "intro": "Put the commands in the order you'd run them on a fresh folder.",
+ "items": [
+  "terraform init",
+  "terraform fmt",
+  "terraform validate",
+  "terraform plan",
+  "terraform apply",
+  "terraform destroy"
+ ],
+ "rules": [
+  [
+   0,
+   2,
+   "`validate` needs the providers that `init` downloads."
+  ],
+  [
+   0,
+   3,
+   "`plan` needs `init` first."
+  ],
+  [
+   3,
+   4,
+   "Always read the `plan` before you `apply`."
+  ],
+  [
+   4,
+   5,
+   "You can't destroy what you haven't built."
+  ],
+  [
+   1,
+   3,
+   "Format before you plan, so the file you review is tidy."
+  ],
+  [
+   2,
+   3,
+   "Catch typos with `validate` before you plan."
+  ]
+ ],
+ "win": "init → fmt → validate → plan → apply → (later) destroy."
+}
+</script></div>
+
+<pre>terraform init
+terraform fmt
+terraform validate
+terraform plan
+terraform apply      (type yes)</pre>
+
+<p>Then check from the AWS side, not Terraform's:</p>
+<pre>aws ec2 describe-subnets --profile lab --filters &quot;Name=tag:Name,Values=public-a,private-b&quot; --query &quot;Subnets[].CidrBlock&quot;</pre>
+
+<h2>PASS/FAIL CHECK</h2>
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span><code>terraform plan</code> ends with “Plan: 7 to add, 0 to change, 0 to destroy.”</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>The describe-subnets command returns 10.40.1.0/24 and 10.40.2.0/24.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>Drift drill: in the AWS console, delete the “palhaven-game” security group by hand. Run <code>terraform plan</code> again: it must show “1 to add”. Run <code>terraform apply</code> to repair it. (That's how teams detect manual changes.)</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span><code>terraform destroy</code> ends with “Destroy complete! Resources: 7 destroyed.” and <code>terraform state list</code> prints nothing.</div></li>
+  <li><input type="checkbox" aria-label="done"><div>Next day, Billing shows $0.00 for this lab.</div></li>
+</ul>
+
+<h2>Break/fix drill</h2>
+<div class="lab-cases" data-id="bf"><script type="application/json">
+{
+ "cases": [
+  {
+   "sev": "P4",
+   "sym": "You change the private subnet to 10.40.1.128/25 and apply. It fails with a CIDR conflict.",
+   "o": [
+    "/25 is too small for AWS",
+    "10.40.1.128/25 sits inside the public subnet 10.40.1.0/24",
+    "Private subnets can't use .128",
+    "The VPC must be destroyed first"
+   ],
+   "a": 1,
+   "steps": [
+    "Work out both ranges: 10.40.1.0/24 is .0–.255; 10.40.1.128/25 is .128–.255.",
+    "They overlap, and subnets in one VPC can't overlap.",
+    "Pick a range outside it, e.g. 10.40.2.0/24 (Lesson 10 thinking).",
+    "Run <code>terraform plan<\/code> again before applying."
+   ]
+  }
+ ]
+}
+</script></div>
+
+<h2>Practice 1 · Check yourself</h2>
+<div class="quiz" data-quiz="17-check"><script type="application/json">
+[
+ {
+  "q": "Which command previews changes without making them?",
+  "options": [
+   "terraform apply",
+   "terraform plan",
+   "terraform init",
+   "terraform destroy"
+  ],
+  "answer": 1,
+  "why": "Plan is the preview."
+ },
+ {
+  "q": "What makes a subnet “public” in AWS?",
+  "options": [
+   "Its name",
+   "A route to an internet gateway",
+   "A /24 size",
+   "A security group"
+  ],
+  "answer": 1,
+  "why": "The route table, not the name."
+ },
+ {
+  "q": "Why keep tfstate out of GitHub?",
+  "options": [
+   "It's too big",
+   "It can contain secrets and real resource details",
+   "GitHub blocks it",
+   "Terraform deletes it"
+  ],
+  "answer": 1,
+  "why": "Treat state like a password file."
+ },
+ {
+  "q": "A security group is most like…",
+  "options": [
+   "The receptionist (NAT)",
+   "A guard at each unit door that remembers who you let in",
+   "The street address",
+   "The directory"
+  ],
+  "answer": 1,
+  "why": "Security groups are stateful firewalls attached to resources: replies to allowed traffic are let back out automatically."
+ }
+]
+</script></div>
+
+<h2>New words from this lesson</h2>
+<div class="lab-gloss" data-id="words"><script type="application/json">
+{
+ "words": [
+  [
+   "Infrastructure as code (IaC)",
+   "Infrastructure described in text files."
+  ],
+  [
+   "Terraform",
+   "Tool that makes cloud resources match your files."
+  ],
+  [
+   "Provider",
+   "Terraform's plug-in for one platform (here, AWS)."
+  ],
+  [
+   "plan / apply / destroy",
+   "Preview / build / remove."
+  ],
+  [
+   "State file",
+   "Terraform's memory of what it built."
+  ],
+  [
+   "Drift",
+   "Real infrastructure changed outside the code."
+  ],
+  [
+   "VPC",
+   "Your private network in AWS (Oracle: VCN)."
+  ],
+  [
+   "Internet gateway",
+   "The VPC's door to the internet."
+  ],
+  [
+   "Security group",
+   "Stateful firewall on a resource."
+  ]
+ ]
+}
+</script></div>
+
+<h2>Read next (20 min)</h2>
+<p><a href="https://developer.hashicorp.com/terraform/tutorials/aws-get-started">HashiCorp's free tutorial “Get Started – AWS”</a>.</p>
+
+<nav class="course">
+  <span>← <a href="0016-hands-on-aws.html">16 · Hands-on AWS</a></span>
+  <span><a href="../index.html">Course home</a></span>
+  <span><a href="0018-scripts-and-github.html">18 · Scripts and GitHub</a> →</span>
+</nav>
+</main>
+<script src="../assets/lab.js"></script>
+<script src="../assets/quiz.js"></script>
+<script src="../assets/sims.js"></script>
+<script src="../assets/sims2.js"></script>
+<script src="../assets/match.js"></script>
+</body>
+</html>

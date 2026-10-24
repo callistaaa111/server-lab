@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>04 · Linux Basics</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/interactive.css">
+</head>
+<body>
+<main>
+<nav class="top"><a href="../index.html">Course home</a> · <a href="../reference/commands.html">Command cheat sheet</a></nav>
+
+<div class="eyebrow">Server Lab · Lesson 04 · pairs with Tracker Week 5, “Linux basics”</div>
+<h1>Finding your way around Linux</h1>
+<p class="lede">When you type <code>ssh gameserver</code>, you land in front of a black screen with a blinking
+cursor. That’s where most cloud work happens. By the end of this lesson you can move around the server, look
+inside files, check its health, and you’ll know why some commands need <code>sudo</code>.</p>
+<div class="meta"><span>≈ 35 min</span><span>Builds on Lessons 01–03</span><span>Every command here only looks; nothing changes</span></div>
+
+<h2>Warm-up · from Lessons 01–03</h2>
+<div class="quiz" data-quiz="04-warm"><script type="application/json">
+[
+ {"q": "Palworld's packets use which protocol?", "options": ["TCP", "UDP", "SSH", "NAT"], "answer": 1, "why": "UDP: fast, no confirmations, because a late game update is useless. SSH rides on TCP."},
+ {"q": "Which address means 'this computer itself'?", "options": ["0.0.0.0", "10.0.0.1", "203.0.113.84", "127.0.0.1"], "answer": 3, "why": "127.0.0.1 is localhost. A program listening there can only be reached from inside the same machine."},
+ {"q": "Which one is a private address range?", "options": ["Addresses starting with 192.168.", "Addresses ending with .84", "Addresses that include ports", "Addresses starting with 203."], "answer": 0, "why": "192.168.x.x, 10.x.x.x and 172.16–31.x.x are the private ranges."}
+]
+</script></div>
+
+<h2>Part 1 · What Linux is</h2>
+<p>Every computer needs an <b>operating system</b> (OS): the base software that runs everything else. Your laptop
+runs Windows. Most servers in the world run <b>Linux</b>, which is free and very stable. Linux comes in different
+flavours called <b>distributions</b>. Your server runs <b>Ubuntu 24.04 LTS</b> (LTS = Long Term Support, so it gets
+security updates for years).</p>
+<p>Servers usually have no desktop, mouse or icons. You control them by typing commands into a <b>terminal</b>
+(the text window), and a program called the <b>shell</b> reads and runs what you type. That’s why learning the
+command line is the single most useful skill for cloud jobs.<sup class="cite"><a href="https://ubuntu.com/tutorials/command-line-for-beginners">1</a></sup></p>
+
+<h2>Part 2 · Reading the prompt</h2>
+<p>After you log in, each line starts with a <b>prompt</b> like this:</p>
+<pre>ubuntu@en:~$</pre>
+<div class="table-wrap"><table><tbody>
+  <tr><td><code>ubuntu</code></td><td>who you are (your username)</td></tr>
+  <tr><td><code>en</code></td><td>which computer you’re on (the server’s name, left over from the Enshrouded days)</td></tr>
+  <tr><td><code>~</code></td><td>which folder you’re in. <code>~</code> is short for your <b>home folder</b>, <code>/home/ubuntu</code></td></tr>
+  <tr><td><code>$</code></td><td>“ready, type a command”</td></tr>
+</tbody></table></div>
+<p>If the prompt shows your laptop’s name instead, your commands are running on your laptop, not the server. Always glance at the prompt first.</p>
+
+<h2>Part 3 · Folders: a tree that starts at <code>/</code></h2>
+<p>Windows starts at <code>C:\</code>. Linux starts at a single <code>/</code> (called “root”) and everything else
+branches off it. Folders are called <b>directories</b>, and a location like <code>/opt/palworld</code> is a
+<b>path</b>: “start at /, go into opt, then into palworld”. Linux uses <code>/</code> where Windows uses <code>\</code>.</p>
+<div class="table-wrap"><table>
+  <thead><tr><th>Path</th><th>What lives there</th><th>On your server</th></tr></thead>
+  <tbody>
+    <tr><td><code>/home/ubuntu</code></td><td>your personal folder</td><td>where you land after <code>ssh</code></td></tr>
+    <tr><td><code>/opt</code></td><td>extra software you installed</td><td><code>palworld</code>, <code>palworld-monitor</code></td></tr>
+    <tr><td><code>/etc</code></td><td>system settings files</td><td>e.g. <code>/etc/os-release</code></td></tr>
+    <tr><td><code>/var/log</code></td><td>logs: diaries programs write</td><td>system events</td></tr>
+  </tbody>
+</table></div>
+
+<h3>The first five commands</h3>
+<div class="table-wrap"><table>
+  <thead><tr><th>Command</th><th>Means</th><th>Like…</th></tr></thead>
+  <tbody>
+    <tr><td><code>pwd</code></td><td>print working directory: where am I?</td><td>checking the “you are here” map</td></tr>
+    <tr><td><code>ls</code></td><td>list what’s in this folder</td><td>opening a folder in File Explorer</td></tr>
+    <tr><td><code>cd /opt</code></td><td>change directory: go to /opt</td><td>double-clicking a folder</td></tr>
+    <tr><td><code>cd ..</code></td><td>go up one folder</td><td>the “back up” arrow</td></tr>
+    <tr><td><code>cat file</code></td><td>show a file’s contents</td><td>opening it in Notepad (read-only)</td></tr>
+  </tbody>
+</table></div>
+<p>Most commands accept <b>options</b> (also called flags) that start with a dash and change what they do.
+<code>ls -l</code> shows a <b>l</b>ong list with details; <code>ls -la</code> also shows hidden files (<b>a</b>ll).
+You’ve already used options: the <code>-4 -br</code> in <code>ip -4 -br a</code>.</p>
+
+<h2>Part 4 · Permissions and <code>sudo</code></h2>
+<p>Linux protects files by owner. Here’s the <code>ls -l</code> line for your Palworld settings file:</p>
+<pre>-rw-------  1 root root  1051 Oct 17 03:16 docker-compose.yml</pre>
+<p><code>root</code> is the owner: the all-powerful administrator account. <code>rw-------</code> means only the owner
+can <b>r</b>ead and <b>w</b>rite it; everyone else gets nothing. That’s deliberate, because this file holds the server
+and admin passwords.</p>
+<p>You log in as <code>ubuntu</code>, an ordinary user. To do something only root may do, you put <code>sudo</code>
+(“superuser do”) in front of the command. Think of it as the building manager’s key card: it opens everything, so you
+use it only when needed and only for commands you understand. That’s why your cheat sheet has <code>sudo</code> in front of the
+Docker and firewall commands.</p>
+
+<h2>Part 5 · Checking the server’s health</h2>
+<div class="table-wrap"><table>
+  <thead><tr><th>Command</th><th>Shows</th><th>Yours, 17 Oct</th></tr></thead>
+  <tbody>
+    <tr><td><code>uptime -p</code></td><td>how long since the last reboot</td><td>up 1 day, 2 hours</td></tr>
+    <tr><td><code>free -h</code></td><td>memory (RAM): total, used, available. <code>-h</code> = human-readable (GB not bytes)</td><td>23 GB total, ~3 GB used</td></tr>
+    <tr><td><code>df -h /</code></td><td>disk space (<b>d</b>isk <b>f</b>ree)</td><td>96 GB disk, 12% used</td></tr>
+    <tr><td><code>nproc</code></td><td>number of processor cores</td><td>4</td></tr>
+    <tr><td><code>top</code></td><td>live list of busy programs. Press <kbd>q</kbd> to quit</td><td>PalServer near the top</td></tr>
+  </tbody>
+</table></div>
+<p><b>RAM</b> (memory) is the server’s short-term working space: fast, but wiped on reboot. The <b>disk</b> is long-term
+storage: the world save, backups and programs live there.</p>
+
+<h2>Part 6 · Keys that save you</h2>
+<div class="table-wrap"><table><tbody>
+  <tr><td><kbd>Tab</kbd></td><td>auto-completes file and folder names. Type <code>cd /op</code> + Tab → <code>cd /opt/</code></td></tr>
+  <tr><td><kbd>↑</kbd> arrow</td><td>brings back your previous commands</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>C</kbd></td><td>stops whatever is running right now (it does <em>not</em> copy here)</td></tr>
+  <tr><td><kbd>q</kbd></td><td>quits viewers like <code>top</code> or <code>systemctl status</code></td></tr>
+  <tr><td><code>clear</code></td><td>wipes the screen (nothing else)</td></tr>
+  <tr><td><code>exit</code></td><td>logs out, back to your laptop</td></tr>
+</tbody></table></div>
+
+<div class="match" data-match="04-commands"><script type="application/json">
+{
+ "title": "command → what it does",
+ "left": "Command",
+ "right": "What it does",
+ "pairs": [
+  [
+   "pwd",
+   "Shows which folder you're in"
+  ],
+  [
+   "ls -l",
+   "Lists files with details"
+  ],
+  [
+   "cd ..",
+   "Goes up one folder"
+  ],
+  [
+   "cat file",
+   "Shows a file's contents"
+  ],
+  [
+   "sudo",
+   "Runs one command as administrator"
+  ],
+  [
+   "free -h",
+   "Shows memory (RAM)"
+  ],
+  [
+   "df -h",
+   "Shows disk space"
+  ],
+  [
+   "Ctrl+C",
+   "Stops the running command"
+  ]
+ ]
+}
+</script></div>
+
+<details class="recall">
+  <summary>Say it yourself first, then open this</summary>
+  <p>“My server runs Ubuntu Linux, controlled by typing commands in a terminal. The prompt tells me who I am, which machine
+  and which folder. Folders start at /, and I move with cd, look with ls and read files with cat. Some files belong to
+  root, the administrator, so I use sudo, the manager’s key card, for those. For health I check uptime, free -h for memory,
+  df -h for disk and top for busy programs.”</p>
+</details>
+
+<hr>
+
+<h2>Practice 1 · Check yourself</h2>
+<div class="quiz" data-quiz="04-check"><script type="application/json">
+[
+ {"q": "Your prompt says `ubuntu@en:/opt$`. Where are you?", "options": ["On your laptop, in the C drive", "On the server, in the /opt folder", "On the server, in your home folder", "On Oracle's website, in the settings page"], "answer": 1, "why": "`en` is the server's name, and the part after the colon (`/opt`) is the current folder. `~` would mean your home folder."},
+ {"q": "Which command shows what's inside the current folder?", "options": ["pwd", "cd", "ls", "df"], "answer": 2, "why": "`ls` lists the contents. `pwd` shows where you are, `cd` moves you, and `df` shows disk space."},
+ {"q": "`cat /opt/palworld/docker-compose.yml` says 'Permission denied'. Why?", "options": ["It belongs to root; you need sudo", "The file was deleted during the restart", "The cat command only works on Windows", "The server's disk is completely full now"], "answer": 0, "why": "Its permissions are `rw-------` with owner root, because it holds passwords. Only root (via `sudo`) can read it."},
+ {"q": "Which command shows how much memory (RAM) is free?", "options": ["df -h", "uptime -p", "nproc --all", "free -h"], "answer": 3, "why": "`free -h` shows memory. `df -h` shows disk space, `uptime -p` time since reboot, and `nproc` the number of cores."},
+ {"q": "A command is printing endlessly and won't stop. What do you press?", "options": ["Ctrl+Z to undo it", "Ctrl+C to stop it", "Tab to finish it", "Esc to close it"], "answer": 1, "why": "Ctrl+C stops the running command in a terminal. (It doesn't copy, unlike in Windows apps.)"},
+ {"q": "What is the difference between RAM and the disk?", "options": ["RAM is short-term working space; the disk keeps files", "RAM keeps files forever; disk is wiped on reboot", "RAM is for Windows; disk is for Linux only", "RAM is the network; the disk is the firewall"], "answer": 0, "why": "RAM is fast working memory that's wiped on reboot. The disk keeps the world save, backups and programs."}
+]
+</script></div>
+
+<h2>Practise · safe terminal</h2>
+<p class="small">Practise in this safe copy first: it behaves like your server, using real output captured from it. Then do the real thing below.</p>
+<div class="terminal" data-term="04"><script type="application/json">
+{
+ "start": "server",
+ "tasks": [
+  {
+   "text": "Where are you? (pwd)",
+   "cmd": "^pwd$"
+  },
+  {
+   "text": "Let the server describe itself: cat /etc/os-release",
+   "cmd": "^(sudo )?cat /etc/os-release$"
+  },
+  {
+   "text": "Go to /opt and list it (cd /opt, then ls). Try the Tab key!",
+   "cmd": "^ls$",
+   "note": "palworld and palworld-monitor live here."
+  },
+  {
+   "text": "Go into palworld and show details: cd palworld, then ls -l",
+   "cmd": "^ls -l"
+  },
+  {
+   "text": "Try to read docker-compose.yml without sudo (cat docker-compose.yml)",
+   "cmd": "^cat (\\S*/)?docker-compose\\.yml$",
+   "note": "Permission denied: the lock works. Only root may read it."
+  },
+  {
+   "text": "Read just the server name with the key card: sudo grep SERVER_NAME docker-compose.yml",
+   "cmd": "^sudo grep \\S+ (\\S*/)?docker-compose\\.yml$"
+  },
+  {
+   "text": "Check memory: free -h",
+   "cmd": "^free -h$"
+  },
+  {
+   "text": "How much memory does the server have in total? (as shown, e.g. 23Gi)",
+   "ask": true,
+   "answers": [
+    "23Gi",
+    "23",
+    "23 gi",
+    "23gb",
+    "23 gb"
+   ]
+  },
+  {
+   "text": "Check the disk: df -h /",
+   "cmd": "^df -h"
+  },
+  {
+   "text": "What percentage of the disk is used?",
+   "ask": true,
+   "answers": [
+    "13%",
+    "13"
+   ]
+  },
+  {
+   "text": "Check the monitor service: systemctl status palworld-monitor",
+   "cmd": "^(sudo )?systemctl status palworld-monitor$"
+  }
+ ]
+}
+</script></div>
+
+<h2>Practice 2 · Walk around your server (15 min)</h2>
+<p>Every command here only <em>reads</em>. Tick each one off.</p>
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><span><code>ssh gameserver</code>, then read your prompt aloud: who, where, which folder.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><code>pwd</code>: you should see <code>/home/ubuntu</code>.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><code>cat /etc/os-release</code>: the server describes itself. Find <code>Ubuntu 24.04</code>.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><code>cd /opt</code> then <code>ls</code>. Spot <code>palworld</code> and <code>palworld-monitor</code>. Try the Tab key while typing.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><code>cd palworld</code> then <code>ls -l</code>. Find <code>docker-compose.yml</code>, owned by root with <code>rw-------</code>.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><code>cat docker-compose.yml</code> → “Permission denied”. That’s the lock working. Now read just the server name with the key card:
+    <code>sudo grep SERVER_NAME docker-compose.yml</code> (<b>grep</b> = show only the lines that contain a word).</span></li>
+  <li><input type="checkbox" aria-label="done"><span>Health check: <code>uptime -p</code>, <code>free -h</code>, <code>df -h /</code>. Write the three answers down.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><code>top</code>: watch it for 10 seconds, find the busiest program, then press <kbd>q</kbd>.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><code>systemctl status palworld-monitor</code>: look for <code>active (running)</code>. That’s your monitor running as a background <b>service</b> (Lesson 07). Press <kbd>q</kbd>, then <code>exit</code>.</span></li>
+</ul>
+<p class="small">Tip: tracker Week 5 has you practise these on a practice virtual machine too. Doing them on both is how they become automatic.</p>
+
+<h2>New words from this lesson</h2>
+<div class="table-wrap"><table><tbody>
+  <tr><td><b>Operating system (OS)</b></td><td>The base software that runs everything else (Windows, Linux).</td></tr>
+  <tr><td><b>Linux / Ubuntu</b></td><td>The free OS most servers run / the Linux distribution your server uses.</td></tr>
+  <tr><td><b>Terminal / shell</b></td><td>The text window / the program that runs what you type.</td></tr>
+  <tr><td><b>Prompt</b></td><td><code>user@machine:folder$</code>: who and where you are.</td></tr>
+  <tr><td><b>Directory / path</b></td><td>A folder / its location, like <code>/opt/palworld</code>.</td></tr>
+  <tr><td><b>root / sudo</b></td><td>The administrator account / run one command as administrator.</td></tr>
+  <tr><td><b>Permissions</b></td><td>Who may read (r), write (w) or run (x) a file.</td></tr>
+  <tr><td><b>RAM / disk</b></td><td>Short-term working memory / long-term storage.</td></tr>
+  <tr><td><b>Service</b></td><td>A program that runs in the background all the time (your monitor).</td></tr>
+</tbody></table></div>
+
+<h2>Read next (20 min, hands-on)</h2>
+<p><a href="https://ubuntu.com/tutorials/command-line-for-beginners"><b>Ubuntu: The Linux command line for beginners</b></a>.
+The official tutorial from the company that makes Ubuntu. It covers the same commands with more practice. Do it on
+your server (it only creates practice files in your home folder) or on the practice VM from tracker Week 5.</p>
+
+<div class="callout good">
+  <span class="label">Ask your teacher</span>
+  <p>Ask me anything: “what does chmod do?”, “what’s the difference between a terminal and PowerShell?”, “give me a
+  Linux scavenger hunt on my server”.</p>
+</div>
+
+<nav class="course">
+  <span>← <a href="0003-tcp-and-udp.html">03 · TCP and UDP</a></span>
+  <span>Next: <a href="0005-docker.html">05 · Docker</a> →</span>
+</nav>
+
+<ol class="small" style="margin-top:32px">
+  <li><a href="https://ubuntu.com/tutorials/command-line-for-beginners">Ubuntu tutorials: The Linux command line for beginners</a></li>
+</ol>
+</main>
+<script src="../assets/lab.js"></script>
+<script src="../assets/quiz.js"></script>
+<script src="../assets/sims.js"></script>
+<script src="../assets/match.js"></script>
+<script src="../assets/terminal.js"></script>
+
+</body>
+</html>

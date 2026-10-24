@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Command Cheat Sheet</title>
+<link rel="stylesheet" href="../assets/course.css">
+<style>.safe{color:var(--good);font:600 13px var(--sans);white-space:nowrap}.care{color:var(--warn);font:600 13px var(--sans);white-space:nowrap}</style>
+</head>
+<body>
+<main class="wide">
+<nav class="top"><a href="../index.html">Course home</a> · <a href="glossary.html">Word list</a></nav>
+<div class="eyebrow">Server Lab · Reference · print me</div>
+<h1>Command cheat sheet</h1>
+<p class="lede">Every command from the lessons. <span class="safe">LOOK</span> = only reads, always safe.
+<span class="care">CHANGES</span> = does something; check who’s online first.</p>
+
+<h2>On your laptop (PowerShell)</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Command</th><th>What it does</th><th></th><th>Lesson</th></tr></thead>
+<tbody>
+<tr><td><code>ssh gameserver</code></td><td>Log in to the server (remote control). <code>exit</code> to leave.</td><td class="safe">LOOK</td><td>01</td></tr>
+<tr><td><code>Test-NetConnection 203.0.113.84 -Port 22 -InformationLevel Quiet</code></td><td>Knock on a TCP port. <code>True</code> = answered. Can’t test UDP (8211).</td><td class="safe">LOOK</td><td>01, 03</td></tr>
+<tr><td><code>ipconfig</code></td><td>Your laptop’s private IP and default gateway (router).</td><td class="safe">LOOK</td><td>02</td></tr>
+</tbody></table></div>
+
+<h2>On the server: getting around (Linux)</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Command</th><th>What it does</th><th></th><th>Lesson</th></tr></thead>
+<tbody>
+<tr><td><code>pwd</code></td><td>Where am I?</td><td class="safe">LOOK</td><td>04</td></tr>
+<tr><td><code>ls</code> · <code>ls -l</code> · <code>ls -la</code></td><td>List folder contents · with details · including hidden files</td><td class="safe">LOOK</td><td>04</td></tr>
+<tr><td><code>cd /opt</code> · <code>cd ..</code> · <code>cd ~</code></td><td>Go to /opt · up one folder · back home</td><td class="safe">LOOK</td><td>04</td></tr>
+<tr><td><code>cat file</code></td><td>Show a file’s contents</td><td class="safe">LOOK</td><td>04</td></tr>
+<tr><td><code>grep WORD file</code></td><td>Show only the lines containing WORD</td><td class="safe">LOOK</td><td>04</td></tr>
+<tr><td><code>sudo …</code></td><td>Run one command as root (administrator)</td><td>depends</td><td>04</td></tr>
+<tr><td><kbd>Tab</kbd> · <kbd>↑</kbd> · <kbd>Ctrl</kbd>+<kbd>C</kbd> · <kbd>q</kbd></td><td>Auto-complete · previous command · stop · quit a viewer</td><td></td><td>04</td></tr>
+</tbody></table></div>
+
+<h2>On the server: health and network</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Command</th><th>What it does</th><th></th><th>Lesson</th></tr></thead>
+<tbody>
+<tr><td><code>uptime -p</code></td><td>Time since last reboot</td><td class="safe">LOOK</td><td>04</td></tr>
+<tr><td><code>free -h</code></td><td>Memory (RAM): total, used, available</td><td class="safe">LOOK</td><td>01, 04</td></tr>
+<tr><td><code>df -h /</code></td><td>Disk space</td><td class="safe">LOOK</td><td>04</td></tr>
+<tr><td><code>nproc</code></td><td>Number of CPU cores</td><td class="safe">LOOK</td><td>01</td></tr>
+<tr><td><code>top</code></td><td>Live list of busy programs (<kbd>q</kbd> quits)</td><td class="safe">LOOK</td><td>04</td></tr>
+<tr><td><code>ip -4 -br a</code></td><td>The server’s IP addresses (private only!)</td><td class="safe">LOOK</td><td>02</td></tr>
+<tr><td><code>ip route</code></td><td>Routes; <code>default via 10.0.0.1</code> = default gateway</td><td class="safe">LOOK</td><td>02</td></tr>
+<tr><td><code>sudo ss -tulpn</code></td><td>Every program listening, with protocol and port</td><td class="safe">LOOK</td><td>03</td></tr>
+<tr><td><code>sudo iptables -L INPUT -n --line-numbers</code></td><td>The server’s own firewall rules (the lobby guard)</td><td class="safe">LOOK</td><td>06</td></tr>
+<tr><td><code>systemctl status palworld-monitor</code></td><td>Is the monitor service running? (<kbd>q</kbd> quits)</td><td class="safe">LOOK</td><td>04, 07</td></tr>
+</tbody></table></div>
+
+<h2>On the server: Docker</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Command</th><th>What it does</th><th></th><th>Lesson</th></tr></thead>
+<tbody>
+<tr><td><code>sudo docker ps</code></td><td>Running containers and their health</td><td class="safe">LOOK</td><td>05</td></tr>
+<tr><td><code>sudo docker images</code></td><td>Downloaded images (kits)</td><td class="safe">LOOK</td><td>05</td></tr>
+<tr><td><code>sudo docker port palworld</code></td><td>The port mapping</td><td class="safe">LOOK</td><td>05, 06</td></tr>
+<tr><td><code>sudo docker stats --no-stream</code></td><td>CPU and memory per container</td><td class="safe">LOOK</td><td>05</td></tr>
+<tr><td><code>sudo docker logs --tail 20 palworld</code></td><td>Last 20 lines of Palworld’s log</td><td class="safe">LOOK</td><td>05</td></tr>
+<tr><td><code>sudo docker exec palworld rest-cli players</code></td><td>Who’s online right now</td><td class="safe">LOOK</td><td>—</td></tr>
+<tr><td><code>sudo ls -lh /opt/palworld/data/backups</code></td><td>List the backups</td><td class="safe">LOOK</td><td>05, 07</td></tr>
+<tr><td><code>sudo docker restart palworld</code></td><td>Restart the game server (kicks everyone briefly)</td><td class="care">CHANGES</td><td>—</td></tr>
+<tr><td><code>cd /opt/palworld &amp;&amp; sudo docker compose up -d</code></td><td>Apply compose file changes (recreates the container)</td><td class="care">CHANGES</td><td>05</td></tr>
+</tbody></table></div>
+<p class="small">The full operating cheat sheet for running the server is <code>palworld-server-commands.md</code> in your projects folder.</p>
+</main>
+</body>
+</html>

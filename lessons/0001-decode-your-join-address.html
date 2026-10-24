@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>01 · Decode Your Join Address</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/interactive.css">
+</head>
+<body>
+<main>
+<nav class="top"><a href="../index.html">Course home</a> · <a href="../reference/glossary.html">Word list</a></nav>
+
+<div class="eyebrow">Server Lab · Lesson 01 · start here, no experience needed</div>
+<h1>What does <code>203.0.113.84:8211</code> mean?</h1>
+<p class="lede">You’ve typed this into Palworld to join Palhaven. It looks like random numbers, but every part
+has a meaning. By the end of this page you’ll be able to explain all of it to a friend, and you’ll know what
+people mean by “the cloud”.</p>
+<div class="meta"><span>≈ 25 min</span><span>No experience needed</span><span>Nothing you do here can break the server</span></div>
+
+<div class="callout">
+  <span class="label">How to use this page</span>
+  <p>Read one part at a time. Every new word is explained the first time it appears, in <b>bold</b>. You don’t
+  need to memorise anything yet: the quizzes at the end do that job.</p>
+</div>
+
+<h2>Part 1 · What is a server?</h2>
+<p>A <b>server</b> is just a computer that stays switched on and waits for other computers to ask it for something.
+The computer doing the asking is called the <b>client</b>.</p>
+<p>When you play on Palhaven, your laptop is the <b>client</b>. It keeps asking things like “where is my character?”
+and “did that Pal hatch?”. The <b>server</b> holds the Palworld world and answers everyone who is playing. That’s
+why the world keeps existing even after you log off: the server is still on.</p>
+<p class="small">Same idea elsewhere: when you open Facebook, your phone is the client and Facebook’s computers are the servers.</p>
+
+<h2>Part 2 · What is “the cloud”?</h2>
+<p>Your server isn’t in your house. It’s a computer in a huge building full of computers in <b>Singapore</b>, owned by
+Oracle. A building like that is called a <b>data center</b>.</p>
+<p>You never touch that computer. You <em>rent</em> it, and control it over the internet from your laptop. That is all
+“the cloud” really means: <b>renting computers in someone else’s building and using them over the internet</b>.
+Amazon puts it this way: cloud computing is “the on-demand delivery of IT resources over the Internet with
+pay-as-you-go pricing.”<sup class="cite"><a href="https://aws.amazon.com/what-is-cloud-computing/">1</a></sup></p>
+<p>Why do companies do this instead of buying their own computers? Same reason you might rent a condo instead of
+building a house. You can move in within minutes, pay only for what you use, and someone else fixes the building.
+Oracle, Amazon (AWS) and Microsoft (Azure) are the big “landlords”.</p>
+<p>When you type <code>ssh gameserver</code> on your laptop, you’re using <b>SSH</b>: a remote control that lets you
+type commands on that computer in Singapore as if you were sitting in front of it.</p>
+
+<h2>Part 3 · The IP address: <code>203.0.113.84</code></h2>
+<p>For data to reach a computer, the computer needs an address, like a building needs a street address so the
+delivery rider can find it. On the internet, that address is called an <b>IP address</b>.</p>
+<p>Your server’s IP address is <code>203.0.113.84</code>. This kind of address is always <b>four numbers separated by
+dots</b>, and each number is between <b>0 and 255</b>. So <code>203.0.113.84</code> is a real address, but
+<code>203.0.113.300</code> can’t be (300 is too big).</p>
+<p class="small">Your own laptop and phone have IP addresses too. Every device that uses the internet needs one.</p>
+
+<h2>Part 4 · The port: <code>:8211</code></h2>
+<p>One computer can run many programs at the same time. Your server runs Palworld, but it also runs the SSH
+remote control and your monitor. So once data reaches the right computer, it still needs to know <em>which program</em>
+it is for.</p>
+<p>That’s what the <b>port</b> is: a number that picks the program. If the IP address is the condo building’s
+address, the port is the <b>unit number</b>.<sup class="cite"><a href="https://www.cloudflare.com/learning/network-layer/what-is-a-computer-port/">2</a></sup></p>
+<div class="table-wrap"><table>
+  <thead><tr><th>Port (unit number)</th><th>Program behind it on your server</th></tr></thead>
+  <tbody>
+    <tr><td><code>8211</code></td><td>Palworld: where players join</td></tr>
+    <tr><td><code>22</code></td><td>SSH: your remote control</td></tr>
+  </tbody>
+</table></div>
+<p>The <code>:</code> just separates the two. So <code>203.0.113.84:8211</code> reads as
+“the computer at 203.0.113.84, the program at port 8211.”</p>
+
+<h2>Part 5 · The firewall: the guard at the lobby</h2>
+<p>Strangers on the internet constantly try random ports, hoping to find one left open, like a thief trying car
+doors in a parking lot.<sup class="cite"><a href="https://www.cloudflare.com/learning/network-layer/what-is-a-computer-port/">2</a></sup>
+So servers have a <b>firewall</b>: a set of rules saying which ports visitors are allowed to reach. Everything
+else is turned away.</p>
+<p>Think of it as the guard in the condo lobby with a list. Your server’s guard list currently allows only unit
+<code>22</code> (SSH) and unit <code>8211</code> (Palworld). That’s why, when we set the server up, we had to “open
+port 8211”: we were adding Palworld to the guard’s list.</p>
+
+<h2>All together</h2>
+<figure>
+<svg viewBox="0 0 500 470" role="img" aria-labelledby="bTitle bDesc">
+  <title id="bTitle">A player reaching the Palworld server, drawn as a condo building</title>
+  <desc id="bDesc">A friend's laptop sends data over the internet to the building at 203.0.113.84. A guard (the firewall) lets visitors through only to unit 22 (SSH) and unit 8211 (Palworld). Unit 80 is turned away.</desc>
+  <rect class="box" x="120" y="10" width="260" height="56" rx="6"/>
+  <text x="250" y="34" font-size="15" font-weight="600" text-anchor="middle">Your friend’s laptop (client)</text>
+  <text class="muted" x="250" y="54" font-size="12.5" text-anchor="middle">wants 203.0.113.84 : 8211</text>
+  <line class="wire" x1="250" y1="66" x2="250" y2="150"/>
+  <text class="muted" x="262" y="112" font-size="12.5">the internet</text>
+
+  <rect x="30" y="150" width="440" height="306" rx="10" fill="none" stroke="currentColor" stroke-opacity=".5" stroke-width="1.4"/>
+  <text x="46" y="176" font-size="14" font-weight="600">Oracle data center, Singapore</text>
+  <text class="muted" x="46" y="196" font-size="12.5">your rented computer (server) · address 203.0.113.84</text>
+
+  <rect class="box" x="120" y="214" width="260" height="56" rx="6"/>
+  <text x="250" y="238" font-size="15" font-weight="600" text-anchor="middle">Lobby guard (firewall)</text>
+  <text class="muted" x="250" y="258" font-size="12.5" text-anchor="middle">list: unit 22 ✓ · unit 8211 ✓ · others ✗</text>
+  <line class="wire" x1="250" y1="270" x2="250" y2="300"/>
+  <line class="wire" x1="110" y1="300" x2="390" y2="300"/>
+  <line class="wire" x1="110" y1="300" x2="110" y2="330"/>
+  <line class="wire" x1="250" y1="300" x2="250" y2="330"/>
+  <line x1="390" y1="300" x2="390" y2="330" stroke="currentColor" stroke-opacity=".35" stroke-width="2" stroke-dasharray="4 4"/>
+
+  <rect class="box" x="50" y="330" width="120" height="96" rx="6"/>
+  <text x="110" y="358" font-size="13" class="muted" text-anchor="middle">Unit (port)</text>
+  <text x="110" y="384" font-size="22" font-weight="600" text-anchor="middle">22</text>
+  <text x="110" y="410" font-size="13" text-anchor="middle">SSH remote</text>
+
+  <rect class="box" x="190" y="330" width="120" height="96" rx="6" stroke-width="2.5" style="stroke:var(--accent)"/>
+  <text x="250" y="358" font-size="13" class="muted" text-anchor="middle">Unit (port)</text>
+  <text x="250" y="384" font-size="22" font-weight="600" text-anchor="middle" class="accent">8211</text>
+  <text x="250" y="410" font-size="13" text-anchor="middle">Palworld</text>
+
+  <rect x="330" y="330" width="120" height="96" rx="6" fill="none" stroke="currentColor" stroke-opacity=".35" stroke-dasharray="4 4"/>
+  <text x="390" y="358" font-size="13" class="muted" text-anchor="middle">Unit (port)</text>
+  <text x="390" y="384" font-size="22" font-weight="600" text-anchor="middle" class="muted">80</text>
+  <text x="390" y="410" font-size="13" class="muted" text-anchor="middle">turned away</text>
+</svg>
+<figcaption>The whole lesson in one picture. Your friend asks for 203.0.113.84 (the building), port 8211
+(the unit). The guard checks the list, lets them in, and Palworld answers.</figcaption>
+</figure>
+
+<details class="recall">
+  <summary>Say it yourself first, then open this</summary>
+  <p>“Palhaven runs on a computer we rent from Oracle in Singapore. That’s the cloud. Its IP address,
+  203.0.113.84, is like the building’s address. The port, 8211, is like the unit number, and it picks the Palworld
+  program. A firewall acts like a lobby guard and only lets visitors through to the ports on its list: 8211 for
+  Palworld and 22 for SSH, my remote control.”</p>
+</details>
+
+<h2>Try it · be the guard, decode addresses</h2>
+<div class="sim" data-sim="guard"></div>
+<div class="sim" data-sim="address"></div>
+<div class="match" data-match="01-words"><script type="application/json">
+{
+ "title": "words from this lesson",
+ "left": "Word",
+ "right": "Means",
+ "pairs": [
+  [
+   "Server",
+   "A computer that stays on and answers"
+  ],
+  [
+   "Client",
+   "The computer that asks"
+  ],
+  [
+   "Cloud",
+   "Renting computers in someone else's building"
+  ],
+  [
+   "IP address",
+   "Which computer (the street address)"
+  ],
+  [
+   "Port",
+   "Which program (the unit number)"
+  ],
+  [
+   "Firewall",
+   "The guard with a list of allowed ports"
+  ],
+  [
+   "SSH",
+   "A remote control for the server"
+  ]
+ ]
+}
+</script></div>
+
+<hr>
+
+<h2>Practice 1 · Quick check</h2>
+<p class="small">Pick an answer and you’ll see right away whether it’s correct, with an explanation.</p>
+<div class="quiz" data-quiz="0001b-check"><script type="application/json">
+[
+ {"q": "In plain words, what is “the cloud”?", "options": ["A wireless network that covers everything", "Storage that floats on the internet", "Renting computers in someone else's building", "Software installed only on your phone"], "answer": 2, "why": "The cloud is renting computers (like your Oracle server in Singapore) and using them over the internet."},
+ {"q": "You join Palhaven from your laptop. Which one is the server?", "options": ["Your laptop running the game", "The Oracle computer in Singapore", "Your home Wi-Fi router box", "The Steam store's download page"], "answer": 1, "why": "Your laptop asks, so it's the client. The computer in Singapore holds the world and answers, so it's the server."},
+ {"q": "In `203.0.113.84:8211`, what is `8211`?", "options": ["The address of the server's building", "The password needed to join it", "The maximum number of allowed players", "The port: which program to reach"], "answer": 3, "why": "The port is like the unit number. It tells the server computer which program the data is for: 8211 means Palworld."},
+ {"q": "What does a firewall do?", "options": ["Decides which ports visitors are allowed through", "Makes the internet connection run much faster", "Saves a backup copy of the world", "Gives each computer its own IP address"], "answer": 0, "why": "Like a lobby guard with a list: ports on the list (22 and 8211) are allowed, and everything else is turned away."},
+ {"q": "What does typing `ssh gameserver` on your laptop do?", "options": ["Downloads Palworld onto your own laptop", "Restarts the Palworld server right away", "Remote-controls the server from your laptop", "Checks how fast your internet is"], "answer": 2, "why": "SSH is a remote control. After it connects, the commands you type run on the computer in Singapore."},
+ {"q": "Why does a computer need port numbers at all?", "options": ["To make the internet cheaper for everyone", "To hide the computer's address from strangers", "To count how many players are online", "Ports tell programs apart on one address"], "answer": 3, "why": "One computer, one address, many programs. The port number says which program gets the data."}
+]
+</script></div>
+
+<h2>Practice 2 · Decode a new address</h2>
+<p class="small">These use a different server, to check that you can apply the idea, not just remember Palhaven.</p>
+<div class="quiz" data-quiz="0001b-decode"><script type="application/json">
+[
+ {"q": "A friend shares a Minecraft server: `203.0.113.7:25565`. Which part is the IP address?", "options": ["203.0.113.7", "25565", "113.7:25565", "203.0"], "answer": 0, "why": "Everything before the `:` is the IP address (four numbers with dots). After the `:` comes the port."},
+ {"q": "Same address, `203.0.113.7:25565`. Which part makes sure you reach Minecraft and not some other program on that computer?", "options": ["203", "113.7", "25565", "0.113"], "answer": 2, "why": "The port (25565, after the `:`) picks the program, like a unit number in a building."},
+ {"q": "Which of these can NOT be a real IP address?", "options": ["10.0.0.84", "192.168.1.300", "8.8.8.8", "203.0.113.84"], "answer": 1, "why": "Each of the four numbers must be between 0 and 255. 300 is too big."},
+ {"q": "Players reach that server's building, but the guard's list doesn't include port 25565. What happens?", "options": ["They get in, but the game lags", "They are sent to a different door", "They join a brand new empty world", "They are turned away at the lobby"], "answer": 3, "why": "A port that isn't on the firewall's list is blocked. This is the most common reason a new game server “doesn't work”."}
+]
+</script></div>
+
+<h2>Practise · safe terminal</h2>
+<p class="small">Practise in this safe copy first: it behaves like your server, using real output captured from it. Then do the real thing below.</p>
+<div class="terminal" data-term="01"><script type="application/json">
+{
+ "start": "laptop",
+ "tasks": [
+  {
+   "text": "Knock on unit 22: Test-NetConnection 203.0.113.84 -Port 22 -InformationLevel Quiet",
+   "cmd": "test-netconnection 203\\.0\\.113\\.84 -port 22",
+   "note": "True: port 22 is on the guard's list and SSH answered."
+  },
+  {
+   "text": "Now knock on unit 80 (same command, -Port 80)",
+   "cmd": "test-netconnection 203\\.0\\.113\\.84 -port 80",
+   "note": "False: port 80 isn't on the list, so nothing answers."
+  },
+  {
+   "text": "Step inside: ssh gameserver",
+   "cmd": "^ssh gameserver$",
+   "note": "Look: the prompt changed to ubuntu@en. You're on the server now."
+  },
+  {
+   "text": "How many processor cores do you rent? (nproc)",
+   "cmd": "^nproc$"
+  },
+  {
+   "text": "Type the number of cores you saw",
+   "ask": true,
+   "answers": [
+    "4"
+   ]
+  },
+  {
+   "text": "How much memory? (free -h)",
+   "cmd": "^free -h$"
+  },
+  {
+   "text": "Leave the server: exit",
+   "cmd": "^(exit|logout)$"
+  }
+ ]
+}
+</script></div>
+
+<h2>Practice 3 · Try it on the real server (10 min)</h2>
+<p>These only <em>look</em>; none of them change anything. Open <b>PowerShell</b> on your laptop (Start menu → type
+“PowerShell”) and tick each step off.</p>
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><span><b>Knock on unit 22.</b> Type this and press Enter:<br>
+    <code>Test-NetConnection 203.0.113.84 -Port 22 -InformationLevel Quiet</code><br>
+    It should print <code>True</code>: port 22 is on the guard’s list, and SSH answered.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>Knock on unit 80.</b> Same command, but <code>-Port 80</code>. Wait about 20 seconds.
+    It prints <code>False</code>: port 80 isn’t on the list, so the guard ignores you.
+    <span class="small">(Why not test 8211? Palworld talks in a different “style” that this command can’t test. That’s a later lesson.)</span></span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>Step inside.</b> Type <code>ssh gameserver</code>. When the start of the line changes to
+    <code>ubuntu@…</code>, you’re typing on the computer in Singapore.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>Look around.</b> Type <code>nproc</code>: how many processor cores (the computer’s “brains”) you rent. Then
+    <code>free -h</code>: how much memory (RAM) it has. Look at the <code>total</code> column.</span></li>
+  <li><input type="checkbox" aria-label="done"><span>Type <code>exit</code> to leave. You’re back on your laptop.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>Explain it.</b> Without looking, explain <code>203.0.113.84:8211</code> out loud to someone (or your phone camera) in under a minute: cloud, IP address, port, firewall.</span></li>
+</ul>
+
+<h2>New words from this lesson</h2>
+<div class="table-wrap"><table>
+  <tbody>
+    <tr><td><b>Server</b></td><td>A computer that stays on and answers requests.</td></tr>
+    <tr><td><b>Client</b></td><td>The computer that asks (your laptop).</td></tr>
+    <tr><td><b>Cloud</b></td><td>Renting computers in someone else’s building, used over the internet.</td></tr>
+    <tr><td><b>Data center</b></td><td>The building full of rented computers.</td></tr>
+    <tr><td><b>IP address</b></td><td>A computer’s address on the internet: four numbers, 0–255 each.</td></tr>
+    <tr><td><b>Port</b></td><td>The number that picks which program on that computer.</td></tr>
+    <tr><td><b>Firewall</b></td><td>Rules for which ports visitors may reach.</td></tr>
+    <tr><td><b>SSH</b></td><td>A remote control for typing commands on a server.</td></tr>
+  </tbody>
+</table></div>
+<p class="small">These are also in the <a href="../reference/glossary.html">word list</a> for later.</p>
+
+<h2>Read next (10 min)</h2>
+<p><a href="https://www.cloudflare.com/learning/network-layer/what-is-a-computer-port/"><b>Cloudflare: What is a computer port?</b></a>
+A short, clear page from a big internet company. Read the first three sections. You’ll recognise IP addresses,
+ports and firewalls from this lesson. Skip the part about the “OSI model” for now; your tracker covers that this week.</p>
+<p class="small">How this fits your plan: do this lesson before Monday. Then tracker Week 1, Day 1 (Jeremy’s IT Lab,
+“Network Devices”) will feel much less foreign.</p>
+
+<div class="callout good">
+  <span class="label">Ask your teacher</span>
+  <p>Anything unclear, even something that feels “too basic”, just ask me in Claude Code. For example: “what’s the
+  difference between the internet and Wi-Fi?”, “why 255?”, or “explain the firewall again differently.” No question
+  is too small at this stage. When you’re done, tell me your quiz scores so I can adjust the course to fit you.</p>
+</div>
+
+<nav class="course">
+  <span>Reference: <a href="../reference/glossary.html">Word list</a></span>
+  <span>Next: <a href="0002-two-addresses.html">02 · Your server has two addresses</a> →</span>
+</nav>
+
+<ol class="small" style="margin-top:32px">
+  <li><a href="https://aws.amazon.com/what-is-cloud-computing/">AWS: What is cloud computing?</a></li>
+  <li><a href="https://www.cloudflare.com/learning/network-layer/what-is-a-computer-port/">Cloudflare Learning Center: What is a computer port?</a></li>
+</ol>
+</main>
+<script src="../assets/lab.js"></script>
+<script src="../assets/quiz.js"></script>
+<script src="../assets/sims.js"></script>
+<script src="../assets/match.js"></script>
+<script src="../assets/terminal.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>18 · Scripts and GitHub: prove you can automate</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/interactive.css">
+</head>
+<body>
+<main>
+<nav class="top"><a href="../index.html">Course home</a></nav>
+
+<div class="eyebrow">Server Lab · Lesson 18 · Part 2 · Cloud</div>
+<h1>Scripts and GitHub: prove you can automate</h1>
+<p class="lede">A small script you wrote and can explain beats a long list of buzzwords. You'll write a one-command health report for Palhaven, put it on GitHub, and add a robot that checks every change.</p>
+<div class="meta"><span data-k="Time">≈ 75 min</span><span data-k="Builds on">Lessons 04, 07</span><span data-k="Exam">CCNA 6.0 (light)</span><span data-k="Needs">a free GitHub account</span></div>
+
+
+<div class="callout "><span class="label">Why this lesson</span><p>Cloud and DevOps ads ask for Linux, scripting (Bash/Python), Git and CI/CD (Job Ads #53, #54, #58, #59).</p></div>
+
+<h2>Warm-up</h2>
+<div class="quiz" data-quiz="18-warm"><script type="application/json">
+[
+ {
+  "q": "`free -h` shows…",
+  "options": [
+   "Disk space",
+   "Memory",
+   "CPU cores",
+   "Network speed"
+  ],
+  "answer": 1,
+  "why": "(`df -h` shows disk, `nproc` shows cores.)"
+ },
+ {
+  "q": "What does “(healthy)” in docker ps mean, beyond “Up”?",
+  "options": [
+   "The container exists",
+   "The program inside answers its health check",
+   "It has backups",
+   "It uses little memory"
+  ],
+  "answer": 1,
+  "why": "Running ≠ healthy (Lesson 07)."
+ }
+]
+</script></div>
+
+<h2>Part 1 · The script: a one-command health report</h2>
+<p>On the server: <code>mkdir -p ~/palhaven-ops &amp;&amp; cd ~/palhaven-ops</code>, then <code>nano healthcheck.sh</code> and type it in (typing it yourself is the point). Read it line by line first:</p>
+<div class="sim" data-sim="explain"><script type="application/json">
+{
+ "title": "Explorer · healthcheck.sh, line by line",
+ "intro": "Click each line. Then try the simulator below before running it for real.",
+ "lines": [
+  {
+   "code": "#!/usr/bin/env bash",
+   "note": "Run this file with Bash. The #! line is called a shebang."
+  },
+  {
+   "code": "# healthcheck.sh - quick health report for Palhaven",
+   "note": "A comment: Bash ignores lines starting with #."
+  },
+  {
+   "code": "set -u",
+   "note": "Stop if I use a variable I never set. Catches typos."
+  },
+  {
+   "code": "status=0",
+   "note": "Start by assuming all is good. Any WARN below changes it to 1."
+  },
+  {
+   "code": ""
+  },
+  {
+   "code": "disk=$(df --output=pcent / | tail -1 | tr -dc '0-9')",
+   "note": "$( … ) runs a command and keeps its output. df prints disk use of / ; tail -1 keeps the last line; tr -dc '0-9' deletes everything except digits, so “ 41%” becomes 41."
+  },
+  {
+   "code": "if [ \"$disk\" -ge 85 ]; then echo \"WARN disk ${disk}% used\"; status=1; else echo \"OK   disk ${disk}% used\"; fi",
+   "note": "-ge = greater than or equal. 85% or more → WARN and status 1."
+  },
+  {
+   "code": ""
+  },
+  {
+   "code": "avail=$(free -m | awk '/^Mem:/ {print $7}')",
+   "note": "free -m shows memory in MB. awk finds the line starting with Mem: and prints column 7, “available”."
+  },
+  {
+   "code": "if [ \"$avail\" -lt 2048 ]; then echo \"WARN only ${avail} MB memory available\"; status=1; else echo \"OK   ${avail} MB memory available\"; fi",
+   "note": "-lt = less than. Under 2 GB available → WARN."
+  },
+  {
+   "code": ""
+  },
+  {
+   "code": "if docker ps --format '{{.Status}}' | grep -q '(healthy)'; then echo \"OK   a container reports healthy\"; else echo \"WARN no healthy container\"; status=1; fi",
+   "note": "List only each container's status. grep -q quietly checks for the exact text “(healthy)”. The brackets matter: plain “healthy” would also match “unhealthy”."
+  },
+  {
+   "code": ""
+  },
+  {
+   "code": "recent=$(find /opt/palworld/data/backups -type f -mmin -1500 2>/dev/null | head -n 1)",
+   "note": "Find files changed in the last 1,500 minutes (25 h). 2>/dev/null hides error messages; head -n 1 keeps the first match."
+  },
+  {
+   "code": "if [ -n \"$recent\" ]; then echo \"OK   backup newer than 25 h\"; else echo \"WARN no backup in the last 25 h\"; status=1; fi",
+   "note": "-n = “is not empty”. Found a recent file → OK."
+  },
+  {
+   "code": ""
+  },
+  {
+   "code": "exit $status",
+   "note": "0 means all good, 1 means a warning. Monitoring tools read this exit code."
+  }
+ ]
+}
+</script></div>
+
+<p>Run it: <code>chmod +x healthcheck.sh</code>, then <code>./healthcheck.sh</code>, then <code>echo $?</code> (shows the exit code).</p>
+<div class="sim" data-sim2="health"></div>
+
+<h2>Part 2 · Git and GitHub</h2>
+<p><b>Git</b> records every version of your files. <b>GitHub</b> stores them online, where employers can see them.</p>
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><div>On GitHub, create a PUBLIC repo “palhaven-ops” with nothing in it.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag change">changes the server</span>On the server, make an SSH key for GitHub: <code>ssh-keygen -t ed25519 -C "palhaven-ops"</code> (press Enter for the defaults), then <code>cat ~/.ssh/id_ed25519.pub</code> and paste that ONE line into GitHub → Settings → SSH keys. (.pub is the public half. The other file is private and never leaves the server.)</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">look only</span><code>ssh -T git@github.com</code> should greet you by username.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag change">changes the server</span>Then:<pre>git config --global user.name &quot;Your Name&quot;
+git config --global user.email &quot;&lt;the email on your GitHub account&gt;&quot;
+git init
+git add healthcheck.sh
+git commit -m &quot;Add health check script&quot;
+git branch -M main
+git remote add origin git@github.com:&lt;your-username&gt;/palhaven-ops.git
+git push -u origin main</pre>
+</div></li>
+</ul>
+
+<div class="lab-order" data-id="git"><script type="application/json">
+{
+ "title": "first push",
+ "intro": "Put the Git commands in a working order.",
+ "items": [
+  "git init",
+  "git add healthcheck.sh",
+  "git commit -m \"Add health check script\"",
+  "git branch -M main",
+  "git remote add origin git@github.com:<you>/palhaven-ops.git",
+  "git push -u origin main"
+ ],
+ "rules": [
+  [
+   0,
+   1,
+   "`git add` needs a repository: `git init` first."
+  ],
+  [
+   1,
+   2,
+   "You commit what you've added (staged)."
+  ],
+  [
+   2,
+   5,
+   "There's nothing to push until you've committed."
+  ],
+  [
+   4,
+   5,
+   "Push needs to know where `origin` is."
+  ],
+  [
+   0,
+   4,
+   "A remote is added to an existing repository."
+  ]
+ ],
+ "win": "init → add → commit → branch → remote → push. Your script is public."
+}
+</script></div>
+
+<div class="lab-sort" data-id="commit"><script type="application/json">
+{
+ "title": "commit or never commit?",
+ "intro": "Rule: NEVER add the compose file, passwords, access keys, your ntfy topic or the server's public IP. When unsure, ask me to check before you push.",
+ "choices": [
+  "Commit it",
+  "Never commit"
+ ],
+ "items": [
+  {
+   "t": "healthcheck.sh",
+   "a": 0,
+   "why": "The point of the repo."
+  },
+  {
+   "t": "~/.ssh/id_ed25519 (the private key)",
+   "a": 1,
+   "why": "The private half never leaves the server."
+  },
+  {
+   "t": "README.md explaining exit codes",
+   "a": 0,
+   "why": "Employers read this first."
+  },
+  {
+   "t": "docker-compose.yml with SERVER_PASSWORD and ADMIN_PASSWORD",
+   "a": 1,
+   "why": "Passwords in public = anyone can admin your server."
+  },
+  {
+   "t": ".github/workflows/lint.yml",
+   "a": 0,
+   "why": "The CI robot's instructions."
+  },
+  {
+   "t": "A monitor config with your ntfy topic name",
+   "a": 1,
+   "why": "Anyone who knows the topic can read or spam your alerts."
+  }
+ ]
+}
+</script></div>
+
+<h2>Part 3 · CI: a robot that checks every push</h2>
+<p>Create <code>.github/workflows/lint.yml</code> (in GitHub's web editor: Add file → Create new file, type that path):</p>
+<pre>name: lint
+on: [push]
+jobs:
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: shellcheck healthcheck.sh</pre>
+
+<p><b>ShellCheck</b> finds common Bash mistakes. <b>GitHub Actions</b> runs it on every push. That's <b>CI</b> (continuous integration) in its smallest form. Afterwards, run <code>git pull</code> on the server to bring that file down.</p>
+<h2>PASS/FAIL CHECK</h2>
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">look only</span><code>./healthcheck.sh</code> prints four OK lines and <code>echo $?</code> prints 0.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag change">changes the server</span>Break it on purpose: change 85 to 1 in the disk line. Now it prints WARN and <code>echo $?</code> prints 1. Change it back.</div></li>
+  <li><input type="checkbox" aria-label="done"><div>The repo's Actions tab shows a green check for your latest push.</div></li>
+  <li><input type="checkbox" aria-label="done"><div>A README.md explains what the script does, how to run it, and what the exit codes mean (write it yourself).</div></li>
+  <li><input type="checkbox" aria-label="done"><div>At least 5 commits with clear messages by the end of the week (add a check, improve the README, and so on).</div></li>
+  <li><input type="checkbox" aria-label="done"><div>You can explain every line of the script out loud without notes.</div></li>
+</ul>
+
+<h2>Practice 1 · Check yourself</h2>
+<div class="quiz" data-quiz="18-check"><script type="application/json">
+[
+ {
+  "q": "What does exit code 0 conventionally mean?",
+  "options": [
+   "Error",
+   "Success",
+   "Warning",
+   "Unknown"
+  ],
+  "answer": 1,
+  "why": "0 = success; anything else = something to look at."
+ },
+ {
+  "q": "Why `grep -q '(healthy)'` and not `grep -q healthy`?",
+  "options": [
+   "It's faster",
+   "“healthy” also matches “unhealthy”",
+   "Docker requires brackets",
+   "-q needs brackets"
+  ],
+  "answer": 1,
+  "why": "Try it in the simulator: an unhealthy container passes the bracket-less check."
+ },
+ {
+  "q": "Which file must never go to GitHub?",
+  "options": [
+   "healthcheck.sh",
+   "README.md",
+   "~/.ssh/id_ed25519 (the private key)",
+   "lint.yml"
+  ],
+  "answer": 2,
+  "why": "The private key stays on the server."
+ },
+ {
+  "q": "What does CI do here?",
+  "options": [
+   "Deploys to production",
+   "Automatically checks the code on every push",
+   "Backs up the server",
+   "Monitors players"
+  ],
+  "answer": 1,
+  "why": "ShellCheck runs on every push."
+ }
+]
+</script></div>
+
+<h2>New words from this lesson</h2>
+<div class="lab-gloss" data-id="words"><script type="application/json">
+{
+ "words": [
+  [
+   "Bash script",
+   "A text file of commands run in order."
+  ],
+  [
+   "Exit code",
+   "A number a program returns: 0 = success."
+  ],
+  [
+   "Git / commit / push",
+   "Version control / a saved version / upload to GitHub."
+  ],
+  [
+   "Repository (repo)",
+   "A project's folder with its full history."
+  ],
+  [
+   "SSH key pair",
+   "Public half shared, private half kept secret."
+  ],
+  [
+   "CI",
+   "Automatic checks on every change."
+  ],
+  [
+   "GitHub Actions",
+   "GitHub's CI robot."
+  ],
+  [
+   "ShellCheck",
+   "A checker for Bash mistakes."
+  ]
+ ]
+}
+</script></div>
+
+<h2>Read next (15 min)</h2>
+<p><a href="https://docs.github.com/en/get-started/start-your-journey/hello-world">GitHub Docs: “Hello World” quickstart</a>. Then <a href="https://www.shellcheck.net/">shellcheck.net</a>: paste your script and read every suggestion.</p>
+
+<nav class="course">
+  <span>← <a href="0017-terraform.html">17 · Terraform</a></span>
+  <span><a href="../index.html">Course home</a></span>
+  <span><a href="0019-capstone-network-design.html">19 · Capstone</a> →</span>
+</nav>
+</main>
+<script src="../assets/lab.js"></script>
+<script src="../assets/quiz.js"></script>
+<script src="../assets/sims.js"></script>
+<script src="../assets/sims2.js"></script>
+<script src="../assets/match.js"></script>
+</body>
+</html>

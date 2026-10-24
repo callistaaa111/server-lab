@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>13 · Routing: the junction with signposts</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/interactive.css">
+</head>
+<body>
+<main>
+<nav class="top"><a href="../index.html">Course home</a></nav>
+
+<div class="eyebrow">Server Lab · Lesson 13 · Part 2 · Networking core</div>
+<h1>Routing: the junction with signposts</h1>
+<p class="lede">Routing is how separate networks reach each other, including your laptop reaching Singapore. You'll let the VLANs talk through one router, add a second router with a server room, and learn the #1 beginner mistake.</p>
+<div class="meta"><span data-k="Time">≈ 60 min</span><span data-k="Builds on">Lessons 10, 12</span><span data-k="Exam">CCNA 3.1–3.4 · Network+ 2.0</span><span data-k="Tool">Packet Tracer, lesson12-vlans.pkt</span></div>
+
+
+<div class="callout "><span class="label">Why this lesson</span><p>NOC ads list routing and Cisco gear (Job Ads #28, #35–36, #40).</p></div>
+
+<h2>Warm-up</h2>
+<div class="quiz" data-quiz="13-warm"><script type="application/json">
+[
+ {
+  "q": "PC1 (VLAN 10) and PC3 (VLAN 20) are on the same switch. Can they ping each other with no router?",
+  "options": [
+   "Yes",
+   "No"
+  ],
+  "answer": 1,
+  "why": "Different VLANs are separate hallways. You need a router."
+ },
+ {
+  "q": "Smallest subnet for 50 guests?",
+  "options": [
+   "/27",
+   "/26",
+   "/25",
+   "/28"
+  ],
+  "answer": 1,
+  "why": "/26 gives 62 usable; /27 gives only 30."
+ },
+ {
+  "q": "A PC shows 169.254.3.3. What failed?",
+  "options": [
+   "DNS",
+   "DHCP",
+   "The firewall",
+   "The VLAN"
+  ],
+  "answer": 1,
+  "why": "169.254 means no DHCP lease."
+ }
+]
+</script></div>
+
+<h2>Part 1 · What a router does</h2>
+<p>A <b>router</b> connects different networks (different streets) and decides where to send each packet next. It keeps a <b>routing table</b>: a list of signposts like “to reach 10.30.0.0/24, go via 172.16.0.2”.</p>
+<p>Every device has a <b>default gateway</b>: the router address it uses for anything not on its own street. In the village comparison, the gateway is the junction at the end of your street. Anything leaving the street goes there first.</p>
+<p>Your server has one too. On the server, <code>ip route</code> shows something like <code>default via 10.0.0.1</code>: the first address on the server's street is Oracle's router.</p>
+<h2>Part 2 · How routes get into the table</h2>
+<ul>
+  <li><b>Connected routes:</b> networks plugged directly into the router. It knows them automatically.</li>
+  <li><b>Static routes:</b> typed in by hand by an engineer. Simple, but they don't adapt if a link breaks.</li>
+  <li><b>Dynamic routing:</b> routers tell each other what they can reach. <b>OSPF</b> is the one CCNA tests. It finds the best path and reroutes automatically when a link fails. <b>BGP</b> is the routing protocol between big networks (ISPs), named in senior ads (Job Ads #40). You only need to know what it is for now.</li>
+</ul>
+<p>The <b>default route</b> (0.0.0.0/0) means “everything else”: the signpost to the internet.</p>
+<div class="lab-sort" data-id="routes"><script type="application/json">
+{
+ "title": "read the routing table",
+ "intro": "In `show ip route`, each line starts with a letter. What is each one?",
+ "choices": [
+  "C connected",
+  "S static",
+  "O OSPF",
+  "S* default"
+ ],
+ "items": [
+  {
+   "t": "`C 172.16.0.0/30 is directly connected, GigabitEthernet0/1`",
+   "a": 0,
+   "why": "Plugged straight into the router."
+  },
+  {
+   "t": "`S 10.30.0.0/24 [1/0] via 172.16.0.2`",
+   "a": 1,
+   "why": "Typed by hand with `ip route`."
+  },
+  {
+   "t": "`O 10.50.0.0/24 [110/2] via 172.16.0.2`",
+   "a": 2,
+   "why": "Learned from a neighbour router by OSPF (administrative distance 110)."
+  },
+  {
+   "t": "`S* 0.0.0.0/0 [1/0] via 203.0.113.1`",
+   "a": 3,
+   "why": "The star marks the candidate default: “everything else”."
+  }
+ ]
+}
+</script></div>
+
+<h2>Part 3 · Packet Tracer lab, part A: let the VLANs talk</h2>
+<p><b>Router-on-a-stick</b>: one router port, one sub-interface per VLAN. Open <code>lesson12-vlans.pkt</code>. Add a 2911 router. Connect router G0/0 to switch G0/1.</p>
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><div><span class="tag lab">lab only</span>Switch CLI, make the link a trunk:<pre>enable
+configure terminal
+interface g0/1
+ switchport mode trunk
+end</pre>
+</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag lab">lab only</span>Router CLI, one sub-interface per VLAN, using the Lesson 10 office plan:<pre>enable
+configure terminal
+interface g0/0
+ no shutdown
+interface g0/0.10
+ encapsulation dot1Q 10
+ ip address 10.20.0.1 255.255.255.128
+interface g0/0.20
+ encapsulation dot1Q 20
+ ip address 10.20.0.193 255.255.255.192
+interface g0/0.30
+ encapsulation dot1Q 30
+ ip address 10.20.0.129 255.255.255.192
+end
+show ip route</pre>
+</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag lab">lab only</span>Re-address the PCs to the real plan: PC1 10.20.0.10 /25 gw 10.20.0.1 · PC2 10.20.0.11 /25 gw 10.20.0.1 · PC3 10.20.0.200 /26 gw 10.20.0.193 · PC4 10.20.0.201 /26 gw 10.20.0.193 · PC5 10.20.0.140 /26 gw 10.20.0.129 · PC6 10.20.0.141 /26 gw 10.20.0.129. (CCTV is 10.20.0.192/26 and guest is 10.20.0.128/26, from Lesson 10.)</div></li>
+</ul>
+
+<h2>Part 4 · Packet Tracer lab, part B: a server room on another router</h2>
+<p>Add a second 2911 router (R2) and a “server” PC. Connect R1 G0/1 to R2 G0/0. The link between routers is a tiny /30 street: 172.16.0.0/30 (R1 = .1, R2 = .2). R2's server room is 10.30.0.0/24 (R2 G0/1 = 10.30.0.1, server = 10.30.0.10, gateway 10.30.0.1).</p>
+<div class="table-wrap"><table><thead><tr><th>R1</th><th>R2</th></tr></thead><tbody><tr><td><pre>interface g0/1
+ ip address 172.16.0.1 255.255.255.252
+ no shutdown
+exit
+ip route 10.30.0.0 255.255.255.0 172.16.0.2</pre></td><td><pre>interface g0/0
+ ip address 172.16.0.2 255.255.255.252
+ no shutdown
+interface g0/1
+ ip address 10.30.0.1 255.255.255.0
+ no shutdown
+exit
+ip route 10.20.0.0 255.255.255.0 172.16.0.1</pre></td></tr></tbody></table></div>
+<p><b>Why R2 needs a route back:</b> a reply has to find its way home too. Forgetting the return route is the #1 beginner mistake in real networks. Try it in the simulator: each mission hides one missing line.</p>
+<div class="sim" data-sim2="routing"></div>
+
+<h2>PASS/FAIL CHECK</h2>
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><div><span class="tag lab">lab only</span>PC1 → PC3 ping succeeds (STAFF to CCTV now goes through the router).</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag lab">lab only</span>PC5 → PC1 ping succeeds. (Yes, guests can now reach staff. Lesson 21 blocks that with an access list.)</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag lab">lab only</span>PC1 → server 10.30.0.10 succeeds.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag lab">lab only</span><code>tracert 10.30.0.10</code> from PC1 shows 10.20.0.1 → 172.16.0.2 → 10.30.0.10.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag lab">lab only</span><code>show ip route</code> on R1 shows C (connected) lines for its networks and an S (static) line for 10.30.0.0/24. Save as <code>lesson13-routing.pkt</code>.</div></li>
+</ul>
+
+<h2>Practice 2 · Real world</h2>
+<p>10 minutes, look only.</p>
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">look only</span>Server: <code>ip route</code>. Find your default gateway.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>PowerShell: <code>tracert 8.8.8.8</code>. Count the hops. Lines with * * * are routers that don't answer traceroute. That's normal, not a fault.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span><code>tracert</code> to your server's public IP. Notice where the path leaves the Philippines (the delay usually jumps).</div></li>
+</ul>
+
+<h2>Break/fix drill</h2>
+<div class="lab-cases" data-id="bf"><script type="application/json">
+{
+ "cases": [
+  {
+   "sev": "P3",
+   "sym": "PC1 can ping R2's 172.16.0.2, but not the server 10.30.0.10. R1's routing table looks correct.",
+   "o": [
+    "R2 has no return route to 10.20.0.0/24",
+    "The server's gateway isn't 10.30.0.1 (or the server is off)",
+    "The switch trunk is down",
+    "PC1 is in the wrong VLAN"
+   ],
+   "a": 1,
+   "steps": [
+    "R2 answered PC1, so R2 already has a route back to 10.20.0.0/24. Cross that off.",
+    "Next hop of the reply is the server: check its IP, mask and gateway 10.30.0.1.",
+    "From R2, <code>ping 10.30.0.10<\/code>: if that works, the server just can't send replies off its own street.",
+    "Fix the gateway, then re-run tracert from PC1."
+   ]
+  },
+  {
+   "sev": "P3",
+   "sym": "PC1 can't ping R2's 172.16.0.2 or the server, but PC1 → PC3 works.",
+   "o": [
+    "R2 has no route back to 10.20.0.0/24",
+    "The trunk is down",
+    "PC1 has the wrong gateway",
+    "DNS is broken"
+   ],
+   "a": 0,
+   "steps": [
+    "PC1 → PC3 works, so the trunk, sub-interfaces and PC1's gateway are fine.",
+    "From R1, <code>ping 172.16.0.2<\/code>: it works (both ends are on the /30).",
+    "So R2 gets PC1's packets but can't answer 10.20.0.10: check <code>show ip route<\/code> on R2.",
+    "Fix: <code>ip route 10.20.0.0 255.255.255.0 172.16.0.1<\/code> on R2."
+   ]
+  }
+ ]
+}
+</script></div>
+
+<h2>Practice 1 · Check yourself</h2>
+<div class="quiz" data-quiz="13-check"><script type="application/json">
+[
+ {
+  "q": "What is a default gateway?",
+  "options": [
+   "The DNS server",
+   "The router a device uses to leave its own subnet",
+   "The switch port it's plugged into",
+   "The DHCP server"
+  ],
+  "answer": 1,
+  "why": "Anything not on its own street goes to the gateway."
+ },
+ {
+  "q": "Which route means “everything else”?",
+  "options": [
+   "10.0.0.0/8",
+   "255.255.255.255/32",
+   "0.0.0.0/0",
+   "127.0.0.1/8"
+  ],
+  "answer": 2,
+  "why": "The default route."
+ },
+ {
+  "q": "Why prefer OSPF over static routes in a big network?",
+  "options": [
+   "It's encrypted",
+   "It adapts automatically when links fail",
+   "It needs no IP addresses",
+   "It's faster to type"
+  ],
+  "answer": 1,
+  "why": "Dynamic routing reroutes around failures; static routes don't."
+ },
+ {
+  "q": "In `show ip route`, what does S mean?",
+  "options": [
+   "Switch",
+   "Secure",
+   "Static route",
+   "Subnet"
+  ],
+  "answer": 2,
+  "why": "S = static, C = connected, O = OSPF."
+ },
+ {
+  "q": "Why does a router-to-router link often use a /30?",
+  "options": [
+   "It's faster",
+   "It has exactly 2 usable addresses, one per router",
+   "Cisco requires it",
+   "It blocks guests"
+  ],
+  "answer": 1,
+  "why": "No wasted addresses on a link that only ever has two ends."
+ }
+]
+</script></div>
+
+<h2>New words from this lesson</h2>
+<div class="lab-gloss" data-id="words"><script type="application/json">
+{
+ "words": [
+  [
+   "Router",
+   "Connects different networks and picks the next hop."
+  ],
+  [
+   "Routing table",
+   "The router's list of signposts."
+  ],
+  [
+   "Default gateway",
+   "A device's way out of its own subnet."
+  ],
+  [
+   "Default route (0.0.0.0/0)",
+   "“Everything else”, usually toward the internet."
+  ],
+  [
+   "Static route",
+   "A route typed in by hand."
+  ],
+  [
+   "OSPF",
+   "A dynamic routing protocol inside one organisation."
+  ],
+  [
+   "BGP",
+   "The routing protocol between big networks (ISPs)."
+  ],
+  [
+   "Router-on-a-stick",
+   "One router port with sub-interfaces, routing between VLANs."
+  ],
+  [
+   "Traceroute (tracert)",
+   "Shows each router on the path."
+  ]
+ ]
+}
+</script></div>
+
+<h2>Read next (15 min)</h2>
+<p>Jeremy's IT Lab: Day 11 (routing fundamentals and static routes), then Days 16–18 (VLANs, including router-on-a-stick).</p>
+
+<nav class="course">
+  <span>← <a href="0012-switches-and-vlans.html">12 · Switches and VLANs</a></span>
+  <span><a href="../index.html">Course home</a></span>
+  <span><a href="0014-inside-a-data-center.html">14 · Inside a data center</a> →</span>
+</nav>
+</main>
+<script src="../assets/lab.js"></script>
+<script src="../assets/quiz.js"></script>
+<script src="../assets/sims.js"></script>
+<script src="../assets/sims2.js"></script>
+<script src="../assets/match.js"></script>
+</body>
+</html>

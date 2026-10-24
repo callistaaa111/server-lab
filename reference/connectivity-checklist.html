@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connectivity Checklist</title>
+<link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<main class="wide">
+<nav class="top"><a href="../index.html">Course home</a> · <a href="../lessons/0006-follow-a-packet.html">Lesson 06</a></nav>
+<div class="eyebrow">Server Lab · Reference · print me</div>
+<h1>“I can’t connect” checklist</h1>
+<p class="lede">Go from the outside in. Stop at the first checkpoint that fails: that’s where the problem is.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>Checkpoint</th><th>Question</th><th>How to check</th><th>Good answer</th><th>On AWS</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>The road</td><td>Is the server on and reachable?</td>
+  <td>Oracle website → Instances; laptop: <code>Test-NetConnection 203.0.113.84 -Port 22 -InformationLevel Quiet</code></td>
+  <td>Running · <code>True</code></td><td>EC2 instance running, public IP, route to the internet gateway</td></tr>
+<tr><td>2</td><td>Village gate guard</td><td>Does Oracle’s security list allow it?</td>
+  <td>Oracle website → gameserver-vcn → Security → Default Security List</td>
+  <td>Rule: UDP 8211 from 0.0.0.0/0</td><td>Security group (and network ACL)</td></tr>
+<tr><td>3</td><td>Lobby guard</td><td>Does the server’s own firewall allow it?</td>
+  <td><code>sudo iptables -L INPUT -n --line-numbers</code></td>
+  <td><code>ACCEPT udp dpt:8211</code> above <code>REJECT</code></td><td>The OS firewall, if the image has one</td></tr>
+<tr><td>4</td><td>Forwarding desk</td><td>Is the port mapped into the container?</td>
+  <td><code>sudo docker port palworld</code></td>
+  <td><code>8211/udp -&gt; 0.0.0.0:8211</code></td><td>The same with Docker</td></tr>
+<tr><td>5</td><td>Someone home</td><td>Is Palworld running and healthy?</td>
+  <td><code>sudo docker ps</code> · <code>sudo docker logs --tail 100 palworld</code></td>
+  <td><code>Up … (healthy)</code></td><td>The same</td></tr>
+</tbody></table></div>
+
+<h2>Clues</h2>
+<ul>
+  <li><b>Even SSH fails</b> → checkpoint 1.</li>
+  <li><b>Works from inside the server, not from outside</b> → a guard: checkpoint 2 or 3.</li>
+  <li><b>Broke right after editing the compose file</b> → checkpoint 4 or 5.</li>
+</ul>
+
+<h2>The 90-second interview answer</h2>
+<ol>
+  <li>“First I check the server is running and reachable at all, for example by testing SSH.”</li>
+  <li>“Then the cloud firewall: is the port and protocol allowed in the security list or security group?”</li>
+  <li>“Then the server’s own firewall, like iptables. Both must allow it.”</li>
+  <li>“If it runs in a container, is the port mapped from the server into the container?”</li>
+  <li>“Finally, is the program running and healthy? I check its status and logs.”</li>
+  <li>“Going outside-in, each check rules out a whole layer.”</li>
+</ol>
+</main>
+</body>
+</html>

@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>05 · Docker</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/interactive.css">
+</head>
+<body>
+<main>
+<nav class="top"><a href="../index.html">Course home</a> · <a href="../reference/commands.html">Command cheat sheet</a></nav>
+
+<div class="eyebrow">Server Lab · Lesson 05 · the tool almost every DevOps job ad mentions</div>
+<h1>Docker: the sealed room Palworld lives in</h1>
+<p class="lede">Palworld doesn’t run loose on your server. It runs inside a <b>container</b>, a sealed room with
+everything it needs. By the end you’ll be able to read your Palworld settings file line by line, and explain why
+companies package nearly all their software this way.</p>
+<div class="meta"><span>≈ 30 min</span><span>Builds on Lessons 01–04</span><span>Every command here only looks</span></div>
+
+<h2>Warm-up · from Lessons 01–04</h2>
+<div class="quiz" data-quiz="05-warm"><script type="application/json">
+[
+ {"q": "Why do some commands on your server need `sudo` in front?", "options": ["They change the server's public address", "They run faster with administrator rights", "They need root, the administrator account", "They only work over UDP traffic"], "answer": 2, "why": "`sudo` runs one command as root. Docker and firewall commands need it, and so do root-only files like docker-compose.yml."},
+ {"q": "Which command lists the contents of the current folder?", "options": ["ls", "pwd", "top", "cat"], "answer": 0, "why": "`ls` lists. `pwd` = where am I, `top` = busy programs, `cat` = show a file's contents."},
+ {"q": "`tcp 127.0.0.1:8797` in the listener list means…", "options": ["Anyone online can open the monitor directly", "The monitor only accepts SSH connections now", "Port 8797 is blocked by Oracle's firewall", "Only the server itself can reach it"], "answer": 3, "why": "127.0.0.1 is localhost: only programs on the server itself can reach it."}
+]
+</script></div>
+
+<h2>Part 1 · The problem Docker solves</h2>
+<p>Installing software the old way is messy. A program needs the right versions of dozens of other pieces, and two
+programs on the same server can need different versions and break each other. People used to say: “It works on my
+computer!” Then it didn’t work on the server.</p>
+<p><b>Docker</b> fixes this by packing a program together with <em>everything</em> it needs into one sealed package.
+Docker’s own definition of a container: “an isolated process with all of the files it needs to run.”<sup class="cite"><a href="https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/">1</a></sup>
+(A <b>process</b> is just a running program.) The same package runs the same way on your laptop, on Oracle, or on Amazon.</p>
+
+<h3>In the condo comparison</h3>
+<p>Your server is the building. A <b>container</b> is a sealed, self-contained room inside it, with its own furniture
+(software), its own private address, and only the doors you choose to connect to the outside. Palworld lives in a
+room called <code>palworld</code>, and its private address inside the server is <code>172.18.0.2</code>. Remember the
+<code>172.</code> private range from Lesson 02? This is it.</p>
+
+<h3>Container or virtual machine?</h3>
+<p>Your Oracle server is itself a <b>virtual machine</b> (VM): a whole pretend computer, with its own complete operating
+system, carved out of a much bigger real one. A container is lighter. It doesn’t carry a whole operating system; it
+shares the server’s. That’s why you can run many containers on one server.<sup class="cite"><a href="https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/">1</a></sup>
+VM = a whole house; container = a room inside one.</p>
+
+<h2>Part 2 · Image and container</h2>
+<p>Two words you must not mix up:</p>
+<ul>
+  <li>An <b>image</b> is the packed kit: the blueprint plus all the materials, frozen and ready to use. Yours is
+  <code>thijsvanloef/palworld-server-docker</code> (about 2 GB), made by a community developer and downloaded from
+  Docker Hub, a public library of images.<sup class="cite"><a href="https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-an-image/">2</a></sup></li>
+  <li>A <b>container</b> is a room actually built from that kit, and running. One image can be used to build many identical containers.</li>
+</ul>
+<p>Updating works by building a fresh room from the newest kit: throw away the old container, start a new one. That
+sounds scary for a game world, until you meet volumes (Part 4).</p>
+
+<h2>Part 3 · The compose file: your written order form</h2>
+<p>Instead of typing a long command to start the container, you write the instructions down once in a file. That’s
+<b>Docker Compose</b>, and the file is <code>/opt/palworld/docker-compose.yml</code>.<sup class="cite"><a href="https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-docker-compose/">3</a></sup>
+Writing setup down in files instead of clicking or typing it each time is a core DevOps habit, often called
+“configuration as code”. Here’s yours, shortened, with passwords hidden:</p>
+<pre>services:
+  palworld:
+    image: thijsvanloef/palworld-server-docker:latest   <span class="c"># which kit to build from</span>
+    container_name: palworld                            <span class="c"># the room's name</span>
+    restart: unless-stopped                             <span class="c"># if it crashes or the server reboots, start it again</span>
+    ports:
+      - 8211:8211/udp                                   <span class="c"># building door 8211 → room door 8211, UDP</span>
+    environment:                                        <span class="c"># settings handed to Palworld</span>
+      SERVER_NAME: "Palhaven"
+      PLAYERS: 16
+      SERVER_PASSWORD: "********"
+      BACKUP_CRON_EXPRESSION: "45 4 * * *"              <span class="c"># back up at 4:45 every day</span>
+      AUTO_REBOOT_CRON_EXPRESSION: "55 4 * * *"         <span class="c"># restart at 4:55 every day</span>
+    volumes:
+      - ./data:/palworld                                <span class="c"># world save kept OUTSIDE the room</span></pre>
+<p>The file format is called <b>YAML</b>. It’s a list of <code>name: value</code> settings, and the <b>indentation
+(spaces at the start of a line) matters</b>: it shows what belongs to what. One wrongly indented line can break the
+whole file, and that’s a classic real-world mistake.</p>
+<p class="small">The <code>45 4 * * *</code> style is called a <b>cron expression</b>: minute 45, hour 4, every day, every month, every weekday. You’ll meet cron again in Lesson 07.</p>
+
+<div class="sim" data-sim="explain"><script type="application/json">
+{
+ "title": "Explorer · your compose file, line by line",
+ "intro": "This is your real compose file (passwords hidden). Click each highlighted line.",
+ "lines": [
+  {
+   "code": "services:",
+   "note": "The list of containers this file runs. You have one."
+  },
+  {
+   "code": "  palworld:",
+   "note": "The name of this service inside the file. Everything indented under it belongs to it. That’s why indentation matters."
+  },
+  {
+   "code": "    image: thijsvanloef/palworld-server-docker:latest",
+   "note": "Which kit (image) to build the container from. “latest” = the newest version on Docker Hub."
+  },
+  {
+   "code": "    container_name: palworld",
+   "note": "The room’s name. It’s what you type in docker logs palworld or docker port palworld."
+  },
+  {
+   "code": "    restart: unless-stopped",
+   "note": "Restart rule: if Palworld crashes or the server reboots, Docker starts it again, unless you stopped it on purpose."
+  },
+  {
+   "code": "    ports:",
+   "note": "Port mappings: doors from the server into the container."
+  },
+  {
+   "code": "      - 8211:8211/udp",
+   "note": "Server port 8211 → container port 8211, UDP only (Palworld’s protocol, Lesson 03). Left = server side, right = container side."
+  },
+  {
+   "code": "    environment:",
+   "note": "Settings handed to Palworld when it starts. Change one, run docker compose up -d, and the container is rebuilt with it."
+  },
+  {
+   "code": "      SERVER_NAME: \"Palhaven\"",
+   "note": "The name players see in the server list."
+  },
+  {
+   "code": "      PLAYERS: 16",
+   "note": "Maximum players at once."
+  },
+  {
+   "code": "      SERVER_PASSWORD: \"********\"",
+   "note": "The join password. Hidden here. This is why the file is readable by root only."
+  },
+  {
+   "code": "      BACKUP_CRON_EXPRESSION: \"45 4 * * *\"",
+   "note": "A cron schedule: minute 45, hour 4, every day, every month, every weekday. Daily backup at 4:45 AM."
+  },
+  {
+   "code": "      AUTO_REBOOT_CRON_EXPRESSION: \"55 4 * * *\"",
+   "note": "Daily restart warning at 4:55 AM; the restart happens at 5:00 after a 5-minute countdown."
+  },
+  {
+   "code": "    volumes:",
+   "note": "Storage connected from outside the container."
+  },
+  {
+   "code": "      - ./data:/palworld",
+   "note": "Server folder /opt/palworld/data (left) is connected to the container’s /palworld folder (right). The world save lives here and survives container rebuilds."
+  }
+ ]
+}
+</script></div>
+
+<h2>Part 4 · Two doors out of the room: ports and volumes</h2>
+<p><b>Port mapping</b> (<code>ports:</code>). The room has its own address, <code>172.18.0.2</code>, which the internet
+can’t reach. The line <code>8211:8211/udp</code> tells Docker: “anything arriving at the <em>server’s</em> port 8211 over
+UDP, forward it to the <em>room’s</em> port 8211.” Docker sets up the forwarding automatically, and keeps every
+port you <em>didn’t</em> list blocked.<sup class="cite"><a href="https://docs.docker.com/engine/network/port-publishing/">4</a></sup>
+This is another NAT, like the receptionist from Lesson 02.</p>
+<p><b>Volume</b> (<code>volumes:</code>). Anything saved inside a container disappears when the container is thrown
+away. So the world save isn’t kept in the room. It’s kept in a storage room outside, <code>/opt/palworld/data</code>
+on the server, connected to the container’s <code>/palworld</code> folder. When the container is replaced during an update
+or a settings change, the world stays put.</p>
+
+<figure>
+<svg viewBox="0 0 500 300" role="img" aria-labelledby="t5 d5">
+  <title id="t5">The Palworld container inside the server</title>
+  <desc id="d5">The server at 10.0.0.84 forwards port 8211 to the container at 172.18.0.2. The container's /palworld folder is connected to /opt/palworld/data on the server.</desc>
+  <rect x="10" y="10" width="480" height="280" rx="10" fill="none" stroke="currentColor" stroke-opacity=".5" stroke-width="1.4"/>
+  <text x="26" y="34" font-size="14" font-weight="600">Your server (the building) · 10.0.0.84</text>
+  <rect class="box" x="26" y="56" width="150" height="50" rx="6" stroke-width="2.5" style="stroke:var(--accent)"/>
+  <text x="101" y="78" font-size="13" font-weight="600" text-anchor="middle">server door</text>
+  <text x="101" y="96" font-size="13" text-anchor="middle" class="accent">UDP 8211</text>
+  <line class="wire" x1="176" y1="81" x2="270" y2="81"/>
+  <text class="muted" x="223" y="72" font-size="11.5" text-anchor="middle">ports:</text>
+  <rect x="270" y="56" width="200" height="140" rx="8" fill="none" stroke="var(--accent)" stroke-width="2"/>
+  <text x="370" y="80" font-size="14" font-weight="600" text-anchor="middle">Container “palworld”</text>
+  <text class="muted" x="370" y="98" font-size="12.5" text-anchor="middle">172.18.0.2 · sealed room</text>
+  <text x="370" y="132" font-size="13" text-anchor="middle">PalServer on 8211</text>
+  <text class="muted" x="370" y="172" font-size="12.5" text-anchor="middle">folder: /palworld</text>
+  <rect class="box" x="26" y="214" width="250" height="56" rx="6"/>
+  <text x="151" y="238" font-size="13" font-weight="600" text-anchor="middle">Storage room (volume)</text>
+  <text class="muted" x="151" y="257" font-size="12.5" text-anchor="middle">/opt/palworld/data · world save, backups</text>
+  <path class="wire" d="M370 196 V242 H276"/>
+  <text class="muted" x="380" y="232" font-size="11.5">volumes:</text>
+</svg>
+<figcaption>Two connections out of the sealed room: a door for players (port mapping) and a storage room that outlives the container (volume).</figcaption>
+</figure>
+
+<details class="recall">
+  <summary>Say it yourself first, then open this</summary>
+  <p>“Palworld runs in a Docker container: a sealed room with everything it needs, sharing the server’s operating system.
+  It’s built from an image, the packed kit. The compose file is the written order form: which image, the restart rule,
+  the settings, the port mapping that forwards server port 8211 UDP to the container, and a volume that keeps the world
+  save outside the container so it survives updates.”</p>
+</details>
+
+<hr>
+
+<h2>Practice 1 · Check yourself</h2>
+<div class="quiz" data-quiz="05-check"><script type="application/json">
+[
+ {"q": "What is the difference between an image and a container?", "options": ["Image: running copy. Container: packed kit.", "Image: packed kit. Container: running copy.", "Image: for Windows. Container: for Linux.", "Image: holds passwords. Container: holds saves."], "answer": 1, "why": "Image = the frozen kit (blueprint + materials). Container = a room built from it, actually running."},
+ {"q": "Why is the world save kept in a volume (`./data:/palworld`)?", "options": ["Volumes make the game run much faster", "Volumes are required for all UDP traffic", "It survives when the container is replaced", "It hides the save from the admin"], "answer": 2, "why": "Containers are thrown away and rebuilt for updates and setting changes. The volume lives outside, so the world stays."},
+ {"q": "What does `8211:8211/udp` under `ports:` do?", "options": ["Forwards server UDP 8211 into the container", "Opens port 8211 in Oracle's cloud firewall", "Limits the server to 8211 players maximum", "Changes the server's public IP address forever"], "answer": 0, "why": "It's port mapping: server door 8211 → container door 8211. Oracle's firewall is a separate thing (Lesson 06)."},
+ {"q": "What does `restart: unless-stopped` mean?", "options": ["Restart the container once every single hour", "Never restart unless a player requests it", "Restart only when the image is updated", "Start it again after crashes or reboots"], "answer": 3, "why": "Docker brings the container back automatically after a crash or a server reboot, unless you stopped it on purpose."},
+ {"q": "How is a container different from a virtual machine?", "options": ["A container needs its own monitor", "A container shares the server's OS", "A container cannot use any ports", "A container only runs on Windows"], "answer": 1, "why": "A VM carries a whole operating system; a container shares the host's, which makes it much lighter."},
+ {"q": "In a YAML file like docker-compose.yml, what is a classic mistake that breaks everything?", "options": ["Using lowercase letters for setting names", "Writing numbers without any quote marks", "Adding comments after a # sign", "Indenting a line with wrong spaces"], "answer": 3, "why": "In YAML, indentation shows what belongs to what. One line indented wrongly can break the whole file."}
+]
+</script></div>
+
+<h2>Practise · safe terminal</h2>
+<p class="small">Practise in this safe copy first: it behaves like your server, using real output captured from it. Then do the real thing below.</p>
+<div class="terminal" data-term="05"><script type="application/json">
+{
+ "start": "server",
+ "tasks": [
+  {
+   "text": "List running containers: sudo docker ps",
+   "cmd": "^(sudo )?docker ps"
+  },
+  {
+   "text": "What word in brackets shows Palworld passed its health check?",
+   "ask": true,
+   "answers": [
+    "healthy",
+    "(healthy)"
+   ]
+  },
+  {
+   "text": "List the downloaded images: sudo docker images",
+   "cmd": "^(sudo )?docker images$"
+  },
+  {
+   "text": "How big is the Palworld image?",
+   "ask": true,
+   "answers": [
+    "1.98GB",
+    "1.98 gb",
+    "1.98",
+    "2gb",
+    "2 gb"
+   ]
+  },
+  {
+   "text": "Show the port mapping: sudo docker port palworld",
+   "cmd": "^(sudo )?docker port palworld$"
+  },
+  {
+   "text": "See its CPU and memory: sudo docker stats --no-stream",
+   "cmd": "^(sudo )?docker stats"
+  },
+  {
+   "text": "Read Palworld's log: sudo docker logs --tail 20 palworld",
+   "cmd": "^(sudo )?docker logs"
+  },
+  {
+   "text": "Look in the storage room: ls /opt/palworld/data/backups",
+   "cmd": "^(sudo )?ls( -\\w+)? /opt/palworld/data/backups/?$"
+  },
+  {
+   "text": "Try sudo docker restart palworld (it's blocked here, see what happens)",
+   "cmd": "^(sudo )?docker restart",
+   "note": "Good habit: anything that changes the server is checked first. Here it's blocked."
+  }
+ ]
+}
+</script></div>
+
+<h2>Practice 2 · Look inside Docker (10 min)</h2>
+<p>All of these only <em>look</em>. Don’t run <code>docker compose up</code> or <code>restart</code> here: real players may be online.</p>
+<ul class="steps">
+  <li><input type="checkbox" aria-label="done"><span><code>ssh gameserver</code></span></li>
+  <li><input type="checkbox" aria-label="done"><span><code>sudo docker ps</code>: running containers. Find <code>palworld</code>, its STATUS (<code>Up … (healthy)</code>) and PORTS.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><code>sudo docker images</code>: the kits downloaded onto the server, and their size.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><code>sudo docker port palworld</code>: the port mapping, straight from Docker.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><code>sudo docker stats --no-stream</code>: how much CPU and memory the room is using right now.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><code>sudo docker logs --tail 20 palworld</code>: the last 20 lines of Palworld’s diary. Lines with <code>BOX64</code> are normal noise.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><code>sudo ls /opt/palworld/data</code>: the storage room (volume). Then <code>sudo ls /opt/palworld/data/backups</code> to see the daily backups. <code>exit</code>.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>Explain it.</b> Out loud: image vs container, and what the <code>ports:</code> and <code>volumes:</code> lines do.</span></li>
+</ul>
+
+<h2>New words from this lesson</h2>
+<div class="table-wrap"><table><tbody>
+  <tr><td><b>Docker</b></td><td>The tool that packages and runs programs in containers.</td></tr>
+  <tr><td><b>Container</b></td><td>An isolated running program with all the files it needs: a sealed room.</td></tr>
+  <tr><td><b>Image</b></td><td>The packed kit a container is built from.</td></tr>
+  <tr><td><b>Virtual machine (VM)</b></td><td>A whole pretend computer with its own OS, carved out of a real one.</td></tr>
+  <tr><td><b>Docker Compose / compose file</b></td><td>Writing a container’s setup down in a YAML file.</td></tr>
+  <tr><td><b>Port mapping</b></td><td>Forwarding a server port to a container port (<code>8211:8211/udp</code>).</td></tr>
+  <tr><td><b>Volume</b></td><td>Storage outside the container that survives when it’s replaced.</td></tr>
+  <tr><td><b>Configuration as code</b></td><td>Keeping setup in files instead of clicks, so it can be repeated and reviewed.</td></tr>
+</tbody></table></div>
+
+<h2>Read next (15 min)</h2>
+<p><a href="https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/"><b>Docker docs: What is a container?</b></a>
+The official explanation, with a short video. Then click through to “What is an image?”. Docker’s getting-started
+guide is how most professionals learned it.</p>
+
+<div class="callout good">
+  <span class="label">Ask your teacher</span>
+  <p>Ask me anything: “what is Kubernetes?”, “how would I run my own website in a container?”, “why does the image say <code>latest</code>?”.</p>
+</div>
+
+<nav class="course">
+  <span>← <a href="0004-linux-basics.html">04 · Linux basics</a></span>
+  <span>Next: <a href="0006-follow-a-packet.html">06 · Follow a packet</a> →</span>
+</nav>
+
+<ol class="small" style="margin-top:32px">
+  <li><a href="https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/">Docker docs: What is a container?</a></li>
+  <li><a href="https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-an-image/">Docker docs: What is an image?</a></li>
+  <li><a href="https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-docker-compose/">Docker docs: What is Docker Compose?</a></li>
+  <li><a href="https://docs.docker.com/engine/network/port-publishing/">Docker docs: Port publishing and mapping</a></li>
+</ol>
+</main>
+<script src="../assets/lab.js"></script>
+<script src="../assets/quiz.js"></script>
+<script src="../assets/sims.js"></script>
+<script src="../assets/match.js"></script>
+<script src="../assets/terminal.js"></script>
+
+</body>
+</html>
