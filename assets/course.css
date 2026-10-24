@@ -193,6 +193,17 @@ nav.top a { text-decoration: none; }
   h2 { break-after: avoid; } table, pre, figure, .callout { break-inside: avoid; }
 }
 
+/* ---- move my progress (index.html, assets/sync.js) ---- */
+.sync { background: var(--paper); border: 1.5px solid var(--ink); padding: 16px 18px; display: grid; gap: 10px; }
+.sync p, .sync ol { margin: 0; }
+.sync-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.sync-btn { appearance: none; font: 600 14px var(--sans); padding: 8px 14px; border: 1.5px solid var(--ink); background: var(--amber); color: #1b1300; cursor: pointer; }
+.sync-btn:hover { background: var(--ink); color: var(--paper); }
+.sync-btn.ghost { background: var(--paper); color: var(--ink); }
+.sync-text { width: 100%; font: 13px/1.4 var(--mono); padding: 8px 10px; border: 1.5px solid var(--ink); background: var(--code-bg); color: var(--ink); resize: vertical; word-break: break-all; }
+.sync-status { font: 600 13.5px var(--mono); min-height: 1.4em; }
+.sync-status.ok { color: var(--good); } .sync-status.bad { color: var(--bad); }
+
 /* ---- course home (index.html) ---- */
 ol.lessons { list-style: none; padding: 0; margin: 1em 0 0; display: grid; gap: 8px; }
 ol.lessons li { max-width: none; }

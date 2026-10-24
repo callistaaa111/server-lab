@@ -87,6 +87,23 @@
   <li><a class="card" href="lessons/0021-acls-and-hardening.html" data-quizzes="21-warm 21-check"><span class="num">21</span><span><span class="t">ACLs and hardening: the guard gets a clipboard</span><span class="d">Block guest → staff, wildcard masks, ACL simulator, SSH-only routers</span></span><span class="st">not started</span></a></li>
 </ol>
 
+<h2 id="move">Move my progress</h2>
+<div class="sync" id="sync">
+  <p>Your XP, quiz scores and ticks are saved in this browser only. To carry on with another device:</p>
+  <ol>
+    <li>On the device with your progress, tap <b>Make my progress code</b>, then <b>Copy</b>.</li>
+    <li>Send the code to yourself (Messenger, email, notes).</li>
+    <li>On the other device, open this page, paste the code below and tap <b>Add to this device</b>.</li>
+  </ol>
+  <p class="small">The two are combined: the better result for each quiz, game and tick is kept, so nothing on either device is lost. Do it both ways to keep them the same. The code stays with you; nothing is sent anywhere.</p>
+  <div class="sync-row"><button type="button" class="sync-btn" id="sync-make">Make my progress code</button><button type="button" class="sync-btn ghost" id="sync-copy" hidden>Copy</button></div>
+  <textarea id="sync-code" class="sync-text" rows="3" readonly hidden aria-label="Your progress code"></textarea>
+  <label class="sim-label" for="sync-paste">Paste a code from your other device</label>
+  <textarea id="sync-paste" class="sync-text" rows="3" spellcheck="false" autocomplete="off" placeholder="SLZ1.…"></textarea>
+  <div class="sync-row"><button type="button" class="sync-btn" id="sync-load">Add to this device</button></div>
+  <p class="sync-status" id="sync-status" aria-live="polite"></p>
+</div>
+
 <h2>Reference sheets</h2>
 <ul>
   <li><a href="reference/glossary.html">Word list</a>: every term in plain language, with its AWS name</li>
@@ -98,9 +115,10 @@
   <span class="label">Learning with an AI tutor</span>
   <p>Stuck on something? Paste the lesson into an AI tutor and ask: “explain lesson 13 differently”, “quiz me on lessons 10–13 mixed”, “I don’t get wildcard masks”.</p>
 </div>
-<p class="small">Progress and XP are saved in this browser only. Clearing site data resets them.</p>
+<p class="small">Progress and XP are saved in this browser only. Clearing site data resets them. Use <a href="#move">Move my progress</a> to carry them to another device.</p>
 <p class="small">The real server’s public and Tailscale addresses are replaced with example addresses (203.0.113.84 and 100.64.0.10), and the server’s name is changed to Palhaven. Passwords in the compose file are hidden.</p>
 </main>
 <script src="assets/progress.js"></script>
+<script src="assets/sync.js"></script>
 </body>
 </html>
