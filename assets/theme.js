@@ -13,7 +13,7 @@
   // margin drawings (margins.js): only fetched once the window is wide enough to show them
   const here = document.currentScript && document.currentScript.src;
   const wide = window.matchMedia ? window.matchMedia("(min-width: 1280px)") : null;
-  const loadMargins = () => { if (!here || document.getElementById("ma-js")) return; const sc = document.createElement("script"); sc.id = "ma-js"; sc.src = here.replace(/theme\.js(\?.*)?$/, "margins.js"); document.body.append(sc); };
+  const loadMargins = () => { if (!here || document.getElementById("ma-js")) return; const sc = document.createElement("script"); sc.id = "ma-js"; sc.src = here.replace(/theme\.js(\?.*)?$/, "margins.js?v=8f7125ce"); document.body.append(sc); };
   if (wide) document.addEventListener("DOMContentLoaded", () => { if (wide.matches) loadMargins(); else if (wide.addEventListener) wide.addEventListener("change", e => { if (e.matches) loadMargins(); }); });
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -31,7 +31,7 @@
     paint();
 
     // lab.js builds the lesson rail in a setTimeout (and removes nav.top), so on lessons wait for the rail before placing
-    const usesLab = !!document.querySelector('script[src$="lab.js"]');
+    const usesLab = !!document.querySelector('script[src*="lab.js"]');
     let tries = 0;
     const place = () => {
       const rail = document.querySelector(".rail-in, .rail .wrap");
