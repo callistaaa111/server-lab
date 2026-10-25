@@ -205,13 +205,10 @@ tcp 100.64.0.10 : 8797         python         <span class="c"># the monitor, on 
 
 <h2>Practice 2 · See the listeners yourself (10 min)</h2>
 <ul class="steps">
-  <li><input type="checkbox" aria-label="done"><span><code>ssh gameserver</code></span></li>
-  <li><input type="checkbox" aria-label="done"><span>Type <code>sudo ss -tulpn</code> and press Enter. (<b>ss</b> = socket statistics. The letters mean: <b>t</b>cp, <b>u</b>dp,
-    <b>l</b>istening, show the <b>p</b>rogram, <b>n</b>umbers instead of names. <b>sudo</b> runs it as administrator: Lesson 04.)</span></li>
-  <li><input type="checkbox" aria-label="done"><span>Find these four lines: <code>tcp … 0.0.0.0:22</code> (sshd), <code>udp … 0.0.0.0:8211</code> (docker-proxy),
-    <code>udp … 0.0.0.0:41641</code> (tailscaled) and <code>tcp … 127.0.0.1:8797</code> (python, the monitor).</span></li>
-  <li><input type="checkbox" aria-label="done"><span>Notice other <code>127.0.0.x</code> lines too: helper programs that only talk inside the server. Lots of listeners
-    are normal. What matters is which ones the firewall lets visitors reach. Type <code>exit</code>.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>Your laptop's listeners.</b> In PowerShell, type <code>netstat -an | findstr LISTENING</code>. Every line is a TCP program waiting for visitors. <code>0.0.0.0:…</code> means “on every address”; <code>127.0.0.1:…</code> means “only from inside this computer”.</span></li>
+  <li><input type="checkbox" aria-label="done"><span>Now the UDP side: <code>netstat -an -p UDP</code>. UDP has no handshake, so there’s no LISTENING word: the program just waits.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>A server's listeners.</b> In the <b>practice terminal</b> above (a safe copy of a real server), type <code>sudo ss -tulpn</code>. (ss = socket statistics. The letters mean: tcp, udp, listening, show the program, numbers instead of names.)</span></li>
+  <li><input type="checkbox" aria-label="done"><span>Find these four lines: <code>tcp … 0.0.0.0:22</code> (sshd), <code>udp … 0.0.0.0:8211</code> (the game, through docker-proxy), <code>udp … 0.0.0.0:41641</code> (tailscaled) and <code>tcp … 127.0.0.1:8797</code> (the monitor, inside only). Lots of listeners are normal. What matters is which ones the firewall lets visitors reach.</span></li>
   <li><input type="checkbox" aria-label="done"><span><b>Explain it.</b> Out loud: why the game uses UDP and SSH uses TCP, using the courier and the shouting comparisons.</span></li>
 </ul>
 

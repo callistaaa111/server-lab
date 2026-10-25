@@ -204,14 +204,14 @@ know it works before they need it.</p>
 }
 </script></div>
 
-<h2>Practice 2 · Read your own monitoring (15 min)</h2>
+<h2>Practice 2 · Read real monitoring (15 min)</h2>
 <ul class="steps">
-  <li><input type="checkbox" aria-label="done"><span>Open the monitor dashboard (on your phone through Tailscale, or with a desktop shortcut on your laptop). Find one chart for each golden signal: traffic, saturation, errors.</span></li>
-  <li><input type="checkbox" aria-label="done"><span>In the History tab, find the restarts list. Can you tell the daily 4:00 AM restarts from any unexpected ones?</span></li>
-  <li><input type="checkbox" aria-label="done"><span><code>ssh gameserver</code>, then <code>systemctl status palworld-monitor</code>: find <code>enabled</code> (starts at boot) and <code>active (running)</code>. Press <kbd>q</kbd>.</span></li>
-  <li><input type="checkbox" aria-label="done"><span><code>sudo ls -lh /opt/palworld/data/backups</code>: count the backups and check the dates. That’s your retention. <code>exit</code>.</span></li>
-  <li><input type="checkbox" aria-label="done"><span><b>Off-site copy (optional, safe):</b> on your laptop, run the <code>scp</code> line from the server cheat sheet (section 6) to copy the backups to your Desktop. Now you follow 3-2-1.</span></li>
-  <li><input type="checkbox" aria-label="done"><span><b>Explain it.</b> Out loud: how you would know the server is in trouble, and how you would recover the world if it got corrupted.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>Your laptop is monitored too.</b> Press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Esc</kbd> → <b>Performance</b>. Find a chart for each golden signal you can: <b>saturation</b> (CPU, Memory), <b>traffic</b> (Wi-Fi or Ethernet).</span></li>
+  <li><input type="checkbox" aria-label="done"><span>Leave it open and start a big download or a video. Watch traffic and saturation move. That’s what a dashboard alert would watch.</span></li>
+  <li><input type="checkbox" aria-label="done"><span>In the <b>practice terminal</b> above (a safe copy of a real server): <code>systemctl status palworld-monitor</code>: find <b>enabled</b> (starts at boot) and <b>active (running)</b>.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><code>sudo ls -l /opt/palworld/data/backups</code>: count the backups and check the dates. That’s the retention.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>3-2-1 for your own files</b> (optional): copy one folder you care about to a USB drive and to a cloud drive. Now that folder follows 3-2-1.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>Explain it.</b> Out loud: how you would know a server is in trouble, and how you would recover the world if it got corrupted.</span></li>
 </ul>
 
 <h2>New words from this lesson</h2>

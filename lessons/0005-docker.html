@@ -270,15 +270,15 @@ or a settings change, the world stays put.</p>
 </script></div>
 
 <h2>Practice 2 · Look inside Docker (10 min)</h2>
-<p>All of these only <em>look</em>. Don’t run <code>docker compose up</code> or <code>restart</code> here: real players may be online.</p>
+<p>All of these only look. Do them in the <b>practice terminal</b> above, a safe copy of a real server running a game in Docker.</p>
 <ul class="steps">
-  <li><input type="checkbox" aria-label="done"><span><code>ssh gameserver</code></span></li>
   <li><input type="checkbox" aria-label="done"><span><code>sudo docker ps</code>: running containers. Find <code>palworld</code>, its STATUS (<code>Up … (healthy)</code>) and PORTS.</span></li>
   <li><input type="checkbox" aria-label="done"><span><code>sudo docker images</code>: the kits downloaded onto the server, and their size.</span></li>
   <li><input type="checkbox" aria-label="done"><span><code>sudo docker port palworld</code>: the port mapping, straight from Docker.</span></li>
   <li><input type="checkbox" aria-label="done"><span><code>sudo docker stats --no-stream</code>: how much CPU and memory the room is using right now.</span></li>
-  <li><input type="checkbox" aria-label="done"><span><code>sudo docker logs --tail 20 palworld</code>: the last 20 lines of the game’s diary. Lines with <code>BOX64</code> are normal noise.</span></li>
-  <li><input type="checkbox" aria-label="done"><span><code>sudo ls /opt/palworld/data</code>: the storage room (volume). Then <code>sudo ls /opt/palworld/data/backups</code> to see the daily backups. <code>exit</code>.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><code>sudo docker logs --tail 20 palworld</code>: the last 20 lines of the game’s diary.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><code>sudo ls /opt/palworld/data/backups</code>: the backups kept in the storage room (volume).</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>Try a real container.</b> Optional, and it <i>changes your laptop</i>: install Docker Desktop, then run <code>docker run --rm hello-world</code>. Docker downloads an image, starts a container from it, prints a message and removes it.</span></li>
   <li><input type="checkbox" aria-label="done"><span><b>Explain it.</b> Out loud: image vs container, and what the <code>ports:</code> and <code>volumes:</code> lines do.</span></li>
 </ul>
 

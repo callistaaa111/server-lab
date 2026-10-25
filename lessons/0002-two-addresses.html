@@ -195,17 +195,13 @@ numbers <code>10.0.0.0</code> to <code>10.0.0.255</code>. The server is house nu
 </script></div>
 
 <h2>Practice 2 · Find both patterns yourself (10 min)</h2>
-<p>All of these only <em>look</em>. Tick each one off.</p>
+<p>All of these only look. Tick each one off.</p>
 <ul class="steps">
-  <li><input type="checkbox" aria-label="done"><span><b>Your laptop.</b> In PowerShell, type <code>ipconfig</code>. Find your Wi-Fi section. Write down the
-    <code>IPv4 Address</code> (probably <code>192.168.…</code>: private!) and the <code>Default Gateway</code> (your router, the receptionist).</span></li>
-  <li><input type="checkbox" aria-label="done"><span><b>The server.</b> <code>ssh gameserver</code>, then <code>ip -4 -br a</code>. (It means: show IP version 4 addresses, brief.)
-    Find <code>10.0.0.84</code> next to <code>enp0s6</code>, the server’s network card. Notice that <code>203.0.113.84</code> isn’t there.</span></li>
-  <li><input type="checkbox" aria-label="done"><span>In the same list, spot <code>172.18.0.1</code> (Docker’s private network, Lesson 05) and <code>100.64.0.10</code> next to
-    <code>tailscale0</code>: the private link your phone uses to open the monitor (Lesson 07).</span></li>
-  <li><input type="checkbox" aria-label="done"><span><b>Find the receptionist.</b> Still on the server, type <code>ip route</code>. The first line says <code>default via 10.0.0.1</code>:
-    that’s the server’s default gateway inside Oracle’s network, the same idea as your home router. Then type <code>exit</code>.</span></li>
-  <li><input type="checkbox" aria-label="done"><span><b>Explain it.</b> Out loud, in under a minute: why the server has two addresses, and what NAT does. Use the receptionist comparison.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>Your laptop.</b> In PowerShell, type <code>ipconfig</code>. Find your Wi-Fi section. Write down the <b>IPv4 Address</b> (probably 192.168.…: private!) and the <b>Default Gateway</b> (your router, the receptionist).</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>Your public address.</b> Type <code>curl.exe -s https://ifconfig.me</code>. It prints the address the internet sees. It's different from the one in <code>ipconfig</code>: your router swaps it, just like the receptionist (NAT).</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>A server's two addresses.</b> In the <b>practice terminal</b> above (a safe copy of a real server), type <code>ssh gameserver</code>, then <code>ip -4 -br a</code>. Find <code>10.0.0.84</code> next to <code>enp0s6</code>, the server’s network card. Its public address isn’t there: the cloud’s gateway swaps it, the same trick as your router.</span></li>
+  <li><input type="checkbox" aria-label="done"><span>Still in the practice terminal, type <code>ip route</code>. The first line says <code>default via 10.0.0.1</code>: the server’s receptionist, the same idea as your router’s Default Gateway. Then type <code>exit</code>.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>Explain it.</b> Out loud, in under a minute: why a computer can have two addresses, and what NAT does. Use the receptionist comparison.</span></li>
 </ul>
 
 <h2>New words from this lesson</h2>

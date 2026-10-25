@@ -212,13 +212,13 @@ is and can stop searching. It’s like tracing a dead outlet: you check the main
 }
 </script></div>
 
-<h2>Practice 2 · Walk the checkpoints on the server (15 min)</h2>
+<h2>Practice 2 · Walk the checkpoints (15 min)</h2>
 <ul class="steps">
-  <li><input type="checkbox" aria-label="done"><span><b>1:</b> from PowerShell, <code>Test-NetConnection 203.0.113.84 -Port 22 -InformationLevel Quiet</code> → <code>True</code>.</span></li>
-  <li><input type="checkbox" aria-label="done"><span><b>2:</b> open the Oracle Console in your browser and find the UDP 8211 rule in the Default Security List. Look only, don’t change anything.</span></li>
-  <li><input type="checkbox" aria-label="done"><span><b>3:</b> <code>ssh gameserver</code>, then <code>sudo iptables -L INPUT -n --line-numbers</code>. Find the 8211 ACCEPT and the final REJECT.</span></li>
-  <li><input type="checkbox" aria-label="done"><span><b>4:</b> <code>sudo docker port palworld</code></span></li>
-  <li><input type="checkbox" aria-label="done"><span><b>5:</b> <code>sudo docker ps</code>, then <code>exit</code>.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>1 · The road.</b> From PowerShell: <code>Test-NetConnection github.com -Port 22 -InformationLevel Quiet</code> → <code>True</code>: the server is on, and the road to it works.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>2 · A lobby guard you own.</b> <code>Get-NetFirewallProfile | Select-Object Name, Enabled</code>: <code>True</code> means your laptop’s own firewall is on. If you have a cloud account, open its firewall page (Oracle: security list, AWS: security group) and find one inbound rule. Look only.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>3 · The server’s lobby guard.</b> In the <b>practice terminal</b> above (a safe copy of a real server): <code>ssh gameserver</code>, then <code>sudo iptables -L INPUT -n --line-numbers</code>. Find the 8211 ACCEPT and the final REJECT.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>4 · The forwarding desk.</b> <code>sudo docker port palworld</code></span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>5 · Someone home.</b> <code>sudo docker ps</code>, then <code>exit</code>.</span></li>
   <li><input type="checkbox" aria-label="done"><span><b>Interview drill:</b> set a 90-second timer and give the answer above out loud, without reading. Record it on your phone and listen back. Where you hesitate is what to review.</span></li>
 </ul>
 <p class="small">Print the <a href="../reference/connectivity-checklist.html">“Can’t connect” checklist</a>: it’s this lesson on one page.</p>

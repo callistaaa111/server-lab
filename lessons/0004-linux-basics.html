@@ -243,19 +243,18 @@ storage: the world save, backups and programs live there.</p>
 }
 </script></div>
 
-<h2>Practice 2 · Walk around the server (15 min)</h2>
-<p>Every command here only <em>reads</em>. Tick each one off.</p>
+<h2>Practice 2 · Walk around a server (15 min)</h2>
+<p>Every command here only reads. Do them in the <b>practice terminal</b> above, a safe copy of a real server. Tick each one off.</p>
 <ul class="steps">
-  <li><input type="checkbox" aria-label="done"><span><code>ssh gameserver</code>, then read your prompt aloud: who, where, which folder.</span></li>
+  <li><input type="checkbox" aria-label="done"><span>Read the prompt aloud: who, where, which folder.</span></li>
   <li><input type="checkbox" aria-label="done"><span><code>pwd</code>: you should see <code>/home/ubuntu</code>.</span></li>
-  <li><input type="checkbox" aria-label="done"><span><code>cat /etc/os-release</code>: the server describes itself. Find <code>Ubuntu 24.04</code>.</span></li>
-  <li><input type="checkbox" aria-label="done"><span><code>cd /opt</code> then <code>ls</code>. Spot <code>palworld</code> and <code>palworld-monitor</code>. Try the Tab key while typing.</span></li>
-  <li><input type="checkbox" aria-label="done"><span><code>cd palworld</code> then <code>ls -l</code>. Find <code>docker-compose.yml</code>, owned by root with <code>rw-------</code>.</span></li>
-  <li><input type="checkbox" aria-label="done"><span><code>cat docker-compose.yml</code> → “Permission denied”. That’s the lock working. Now read just the server name with the key card:
-    <code>sudo grep SERVER_NAME docker-compose.yml</code> (<b>grep</b> = show only the lines that contain a word).</span></li>
+  <li><input type="checkbox" aria-label="done"><span><code>cat /etc/os-release</code>: the server describes itself. Find <b>Ubuntu 24.04</b>.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><code>cd /opt</code> then <code>ls</code>. Spot <code>palworld</code> and <code>palworld-monitor</code>.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><code>cd palworld</code> then <code>ls -l</code>. Find <code>docker-compose.yml</code>, owned by <b>root</b> with <code>rw-------</code>.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><code>cat docker-compose.yml</code> → “Permission denied”. That’s the lock working. Now read just the server name with the key card: <code>sudo grep SERVER_NAME docker-compose.yml</code> (grep = show only the lines that contain a word).</span></li>
   <li><input type="checkbox" aria-label="done"><span>Health check: <code>uptime -p</code>, <code>free -h</code>, <code>df -h /</code>. Write the three answers down.</span></li>
-  <li><input type="checkbox" aria-label="done"><span><code>top</code>: watch it for 10 seconds, find the busiest program, then press <kbd>q</kbd>.</span></li>
-  <li><input type="checkbox" aria-label="done"><span><code>systemctl status palworld-monitor</code>: look for <code>active (running)</code>. That’s the monitor running as a background <b>service</b> (Lesson 07). Press <kbd>q</kbd>, then <code>exit</code>.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><code>top</code>: find the busiest program. <code>systemctl status palworld-monitor</code>: look for <b>active (running)</b>, a background service (Lesson 07).</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>Want a real Linux of your own?</b> Optional, and it <i>changes your laptop</i>: in PowerShell as administrator, <code>wsl --install</code> installs Ubuntu inside Windows. Then <code>pwd</code>, <code>cat /etc/os-release</code>, <code>free -h</code> and <code>df -h /</code> all work for real.</span></li>
 </ul>
 <p class="small">Tip: study week 5 has you practise these on a practice virtual machine too. Doing them on both is how they become automatic.</p>
 
