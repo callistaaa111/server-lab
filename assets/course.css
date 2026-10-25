@@ -334,15 +334,30 @@ nav.top.with-theme { display: flex; align-items: center; gap: 10px; flex-wrap: w
 /* ---- diagrams sit centred in their sheet ---- */
 figure svg { margin-inline: auto; }
 
-/* ---- margin drawings on wide screens: a rack elevation (left) and the packet path (right), drawn in the wire colour ---- */
+/* ---- margin drawings on wide screens (assets/margins.js): rack elevation left, packet path right ---- */
+.ma { display: none; }
 @media (min-width: 1280px) {
-  main::before, main::after { --m: calc((100vw - 980px) / 2); content: ""; position: fixed; z-index: -1; top: 96px; bottom: 32px;
-    width: min(calc(var(--m) - 56px), 250px); background: var(--wire); opacity: .8; pointer-events: none; }
-  main::before { left: calc((var(--m) - min(calc(var(--m) - 56px), 250px)) / 2);
-    -webkit-mask: url("margin-rack.svg") center / contain no-repeat; mask: url("margin-rack.svg") center / contain no-repeat; }
-  main::after { right: calc((var(--m) - min(calc(var(--m) - 56px), 250px)) / 2);
-    -webkit-mask: url("margin-path.svg") center / contain no-repeat; mask: url("margin-path.svg") center / contain no-repeat; }
+  .ma { display: flex; align-items: center; justify-content: center; position: fixed; z-index: -1; top: 84px; bottom: 20px;
+    width: calc((100vw - 980px) / 2); padding: 0 16px; pointer-events: none; color: var(--wire); }
+  .ma-left { left: 0; } .ma-right { right: 0; }
+  .ma svg { width: 100%; max-width: 360px; height: 100%; overflow: visible; }
 }
-@media (min-width: 1280px) and (prefers-color-scheme: dark) { :root:not([data-theme="light"]) main::before, :root:not([data-theme="light"]) main::after { opacity: .9; } }
-@media (min-width: 1280px) { :root[data-theme="dark"] main::before, :root[data-theme="dark"] main::after { opacity: .9; } }
-@media print { main::before, main::after { display: none; } }
+.ma .ma-line, .ma .ma-frame, .ma .ma-dev { fill: none; stroke: currentColor; stroke-width: 1.4; }
+.ma .ma-frame { stroke-width: 1.8; }
+.ma .ma-dev { fill: var(--paper); fill-opacity: .55; }
+.ma .ma-d { fill: none; stroke: currentColor; stroke-width: .9; stroke-opacity: .7; }
+.ma .ma-blank { fill: none; stroke: currentColor; stroke-width: .9; stroke-dasharray: 4 3; stroke-opacity: .6; }
+.ma .ma-lead { fill: none; stroke: currentColor; stroke-width: .9; }
+.ma .ma-zone { fill: none; stroke: currentColor; stroke-width: 1.2; stroke-dasharray: 6 4; }
+.ma .ma-wire { fill: none; stroke: currentColor; stroke-width: 2.4; }
+.ma .ma-led { fill: currentColor; }
+.ma .acc { stroke: var(--amber); } .ma .ma-led.acc { fill: var(--amber); stroke: none; }
+.ma .ma-cp { fill: var(--amber); stroke: none; }
+.ma .ma-pkt { fill: var(--amber); stroke: var(--paper); stroke-width: 1.5; }
+.ma .ma-t { font: 500 10px var(--mono); fill: var(--muted); letter-spacing: .01em; }
+.ma .ma-t.acc { fill: var(--accent); stroke: none; font-weight: 600; }
+.ma .ma-h { font: 700 19px var(--display); fill: var(--ink); fill-opacity: .7; }
+.ma .ma-small { font-size: 8.5px; }
+.ma .ma-faint { fill-opacity: .75; font-weight: 400; }
+.ma .ma-cpn { fill: #1b1300; font-weight: 600; }
+@media print { .ma { display: none !important; } }

@@ -1,4 +1,4 @@
-/* Dark mode switch: shared by every page. Load in <head> (not deferred) so the saved choice applies before the page paints.
+/* Dark mode switch (and the loader for the wide-screen margin drawings in margins.js): shared by every page. Load in <head> (not deferred) so the saved choice applies before the page paints.
    Saves "light" or "dark" in localStorage under serverlab.theme; with nothing saved the page follows the device setting.
    The switch goes in the XP rail on lessons (lab.js, or lesson 21's own rail), next to nav.top on reference sheets,
    or at the top of main on the home page. */
@@ -9,6 +9,12 @@
   const saved = () => { try { const v = JSON.parse(localStorage.getItem(KEY)); return v === "dark" || v === "light" ? v : null; } catch (e) { return null; } };
   const isDark = () => (saved() || root.dataset.theme || (sys && sys.matches ? "dark" : "light")) === "dark";
   const s = saved(); if (s) root.dataset.theme = s;
+
+  // margin drawings (margins.js): only fetched once the window is wide enough to show them
+  const here = document.currentScript && document.currentScript.src;
+  const wide = window.matchMedia ? window.matchMedia("(min-width: 1280px)") : null;
+  const loadMargins = () => { if (!here || document.getElementById("ma-js")) return; const sc = document.createElement("script"); sc.id = "ma-js"; sc.src = here.replace(/theme\.js(\?.*)?$/, "margins.js"); document.body.append(sc); };
+  if (wide) document.addEventListener("DOMContentLoaded", () => { if (wide.matches) loadMargins(); else if (wide.addEventListener) wide.addEventListener("change", e => { if (e.matches) loadMargins(); }); });
 
   document.addEventListener("DOMContentLoaded", () => {
     const btn = document.createElement("button");
