@@ -241,21 +241,22 @@ port 8211”: we were adding the game to the guard’s list.</p>
 }
 </script></div>
 
-<h2>Practice 3 · Try it on the real server (10 min)</h2>
+<h2>Practice 3 · Try it on a real server (10 min)</h2>
 <p>These only <em>look</em>; none of them change anything. Open <b>PowerShell</b> on your laptop (Start menu → type
-“PowerShell”) and tick each step off.</p>
+“PowerShell”) and tick each step off. You'll knock on GitHub's servers, which anyone may test.</p>
 <ul class="steps">
   <li><input type="checkbox" aria-label="done"><span><b>Knock on unit 22.</b> Type this and press Enter:<br>
-    <code>Test-NetConnection 203.0.113.84 -Port 22 -InformationLevel Quiet</code><br>
-    It should print <code>True</code>: port 22 is on the guard’s list, and SSH answered.</span></li>
-  <li><input type="checkbox" aria-label="done"><span><b>Knock on unit 80.</b> Same command, but <code>-Port 80</code>. Wait about 20 seconds.
-    It prints <code>False</code>: port 80 isn’t on the list, so the guard ignores you.
-    <span class="small">(Why not test 8211? The game talks in a different “style” that this command can’t test. That’s a later lesson.)</span></span></li>
-  <li><input type="checkbox" aria-label="done"><span><b>Step inside.</b> Type <code>ssh gameserver</code>. When the start of the line changes to
-    <code>ubuntu@…</code>, you’re typing on the computer in Singapore.</span></li>
-  <li><input type="checkbox" aria-label="done"><span><b>Look around.</b> Type <code>nproc</code>: how many processor cores (the computer’s “brains”) you rent. Then
-    <code>free -h</code>: how much memory (RAM) it has. Look at the <code>total</code> column.</span></li>
-  <li><input type="checkbox" aria-label="done"><span>Type <code>exit</code> to leave. You’re back on your laptop.</span></li>
+    <code>Test-NetConnection github.com -Port 22 -InformationLevel Quiet</code><br>
+    It should print <code>True</code>: port 22 is on GitHub's guard list (GitHub uses SSH for code uploads), and it answered.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>Knock on unit 8211.</b> Same command, but <code>-Port 8211</code>. Wait about 20 seconds.
+    It prints <code>False</code>: GitHub has nothing behind unit 8211, so the guard ignores you.
+    <span class="small">(A game server would have 8211 open, but in a different “style” that this command can’t test. That’s Lesson 03.)</span></span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>Ring the SSH doorbell.</b> Type <code>ssh -T git@github.com</code>. If it asks “Are you sure you want to
+    continue connecting”, type <code>yes</code>. It answers <code>Permission denied (publickey)</code>: SSH answered the door, but you have no key
+    for that building. On a server of your own, the same kind of command with your key logs you in, and the start of the line changes to <code>ubuntu@…</code>.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>Look around</b> (your own laptop this time). Type <code>$env:NUMBER_OF_PROCESSORS</code>: how many processor cores (the
+    computer’s “brains”) it has. Then <code>[math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory/1GB)</code>: how much memory (RAM) in GB.
+    A cloud server answers the same questions with <code>nproc</code> and <code>free -h</code>: try them in the practice terminal above.</span></li>
   <li><input type="checkbox" aria-label="done"><span><b>Explain it.</b> Without looking, explain <code>203.0.113.84:8211</code> out loud to someone (or your phone camera) in under a minute: cloud, IP address, port, firewall.</span></li>
 </ul>
 
