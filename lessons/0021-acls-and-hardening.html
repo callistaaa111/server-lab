@@ -878,7 +878,7 @@ function topoSVG() {
     <text class="sub" x="300" y="52">g0/1</text>
     <text class="sub" x="355" y="80">172.16.0.0/30</text>
     ${node('PC1', 'PC1', 'staff .10')}${node('PC3', 'PC3', 'CCTV .200')}${node('PC5', 'PC5', 'guest .140', 78, 'guest')}${node('PC6', 'PC6', 'guest .141', 78, 'guest')}
-    ${node('SW', 'SW1', '2960', 90)}${node('R1', 'R1', '2911 · gw .1/.129/.193', 150)}${node('R2', 'R2', '“internet” .2')}${node('SRV', 'Server', '10.30.0.10', 84)}
+    ${node('SW', 'SW1', '2960', 90)}${node('R1', 'R1', '2911 · gw .1/.129/.193', 150)}${node('R2', 'R2', '“internet” .2', 96)}${node('SRV', 'Server', '10.30.0.10', 84)}
     <g class="acltag" id="aclTag"></g>
     <g id="fx"></g>
   </svg>`;

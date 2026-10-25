@@ -250,7 +250,7 @@
         ${W(170, 144, 170, 180, upsA)}${W(450, 144, 450, 180, upsB)}
         ${W(170, 214, 90, 270, feedA)}${W(170, 214, 250, 270, feedA)}${W(170, 214, 410, 270, feedA)}${W(170, 214, 560, 270, feedA)}
         ${W(450, 214, 110, 270, feedB)}${W(450, 214, 270, 270, feedB)}${W(450, 214, 430, 270, feedB)}
-        ${N(20, 27, 90, "Utility", "Meralco", !st.util)}${N(230, 27, 80, "ATS", "transfer switch")}${N(390, 27, 100, "Generator", st.util ? (st.gen ? "won't start" : "running") : "standby", st.util ? !st.gen : undefined)}
+        ${N(20, 27, 90, "Utility", "Meralco", !st.util)}${N(218, 27, 104, "ATS", "transfer switch")}${N(390, 27, 100, "Generator", st.util ? (st.gen ? "won't start" : "running") : "standby", st.util ? !st.gen : undefined)}
         ${N(115, 110, 110, "UPS-A", battery && upsA ? "on battery!" : "A side", upsA)}${N(395, 110, 110, "UPS-B", battery ? "on battery!" : "B side", upsB)}
         ${N(115, 180, 110, "PDU-A", "", feedA)}${N(395, 180, 110, "PDU-B", st.pduB ? "tripped" : "", feedB)}
         ${N(50, 270, 100, "Rack R01", "A + B", feedA || feedB)}${N(210, 270, 100, "Rack R02", "A + B", feedA || feedB)}${N(370, 270, 100, "Rack R03", "A + B", feedA || feedB)}
