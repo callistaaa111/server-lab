@@ -11,25 +11,25 @@
 <main>
 <nav class="top"><a href="../index.html">Course home</a> · <a href="../reference/glossary.html">Word list</a></nav>
 
-<div class="eyebrow">Server Lab · Lesson 03 · pairs with Tracker Week 4, “TCP, UDP and ports”</div>
+<div class="eyebrow">Server Lab · Lesson 03</div>
 <h1>Two ways to send data: TCP and UDP</h1>
 <p class="lede">In Lesson 01 you could knock on port 22 from your laptop, but the same test can’t check
-Palworld’s port 8211. That’s because data travels in two different styles. Once you know them, you can read the
-list of every program waiting for visitors on your server.</p>
+the game’s port 8211. That’s because data travels in two different styles. Once you know them, you can read the
+list of every program waiting for visitors on the server.</p>
 <div class="meta"><span>≈ 25 min</span><span>Builds on Lessons 01–02</span><span>Nothing here can break the server</span></div>
 
 <h2>Warm-up · from Lessons 01–02</h2>
 <div class="quiz" data-quiz="03-warm"><script type="application/json">
 [
- {"q": "Your server's PRIVATE address is…", "options": ["203.0.113.84", "10.0.0.84", "8211", "192.168.1.1"], "answer": 1, "why": "10.0.0.84 is private: it only works inside Oracle's network. 203.0.113.84 is the public address. 8211 is a port, not an address."},
- {"q": "Who swaps your server's public and private addresses?", "options": ["Your laptop's Wi-Fi card", "The Palworld game itself", "Oracle's internet gateway (NAT)", "The SSH remote control"], "answer": 2, "why": "The internet gateway acts as the receptionist. Swapping addresses is called NAT."},
- {"q": "What does port 22 lead to on your server?", "options": ["SSH, the remote control", "The Palworld game world", "The daily backup files", "Oracle's monthly billing website"], "answer": 0, "why": "Port 22 = SSH, the remote control you use with `ssh gameserver`. Port 8211 = Palworld."}
+ {"q": "The server's PRIVATE address is…", "options": ["203.0.113.84", "10.0.0.84", "8211", "192.168.1.1"], "answer": 1, "why": "10.0.0.84 is private: it only works inside Oracle's network. 203.0.113.84 is the public address. 8211 is a port, not an address."},
+ {"q": "Who swaps the server's public and private addresses?", "options": ["Your laptop's Wi-Fi card", "The game itself", "Oracle's internet gateway (NAT)", "The SSH remote control"], "answer": 2, "why": "The internet gateway acts as the receptionist. Swapping addresses is called NAT."},
+ {"q": "What does port 22 lead to on the server?", "options": ["SSH, the remote control", "The game world", "The daily backup files", "Oracle's monthly billing website"], "answer": 0, "why": "Port 22 = SSH, the remote control you use with `ssh gameserver`. Port 8211 = the game."}
 ]
 </script></div>
 
 <h2>Part 1 · Data travels in small pieces</h2>
 <p>Data doesn’t travel as one big lump. It’s cut into small pieces called <b>packets</b>, and each one carries the
-address and port it’s going to. When you move in Palworld, your laptop sends a stream of small packets saying
+address and port it’s going to. When you move in the game, your laptop sends a stream of small packets saying
 “I’m here now… now here… now here.”</p>
 <p>How those packets are sent follows a set of rules called a <b>protocol</b>. Two protocols handle almost
 everything: <b>TCP</b> and <b>UDP</b>. The port number is written inside the TCP or UDP part of each packet. That’s
@@ -52,7 +52,7 @@ could turn into something else entirely.</p>
 calling out the score during a basketball game: if someone misses one shout, it doesn’t matter, because the next one is
 coming a second later and is more up to date anyway.</p>
 <p>That’s exactly what a game needs. If a packet saying “a player is at spot A” arrives late, it’s useless, because you’re
-already at spot B. Waiting to resend it would only cause lag. So <b>Palworld uses UDP</b>, as do voice calls and live video.</p>
+already at spot B. Waiting to resend it would only cause lag. So <b>the game uses UDP</b>, as do voice calls and live video.</p>
 
 <div class="table-wrap"><table>
   <thead><tr><th></th><th>TCP</th><th>UDP</th></tr></thead>
@@ -61,14 +61,14 @@ already at spot B. Waiting to resend it would only cause lag. So <b>Palworld use
     <tr><td>Says hello first?</td><td>Yes (handshake)</td><td>No</td></tr>
     <tr><td>Confirms and resends?</td><td>Yes</td><td>No</td></tr>
     <tr><td>Speed</td><td>A little slower</td><td>Faster</td></tr>
-    <tr><td>On your server</td><td>SSH on port 22</td><td>Palworld on port 8211</td></tr>
+    <tr><td>On the server</td><td>SSH on port 22</td><td>The game on port 8211</td></tr>
   </tbody>
 </table></div>
 
 <div class="sim" data-sim="protocol"></div>
 
 <h3>So that’s why the knock test failed on 8211</h3>
-<p><code>Test-NetConnection</code> knocks the TCP way: it tries a handshake. Palworld listens for UDP, and UDP never
+<p><code>Test-NetConnection</code> knocks the TCP way: it tries a handshake. The game listens for UDP, and UDP never
 answers a handshake, so the test can’t tell whether 8211 is working. It’s like ringing a doorbell at a door that only
 takes notes slipped under it.</p>
 <p>It also explains the firewall rules in Oracle’s settings. Each rule names a protocol <em>and</em> a port: “TCP 22” and
@@ -76,13 +76,13 @@ takes notes slipped under it.</p>
 
 <h2>Part 4 · Who is listening? And what is “localhost”?</h2>
 <p>A program that waits for packets on a port is <b>listening</b>. On Linux you can list every listener with one
-command. Here is part of what your server showed one day, tidied up:</p>
+command. Here is part of what the server showed one day, tidied up:</p>
 <pre>Protocol  Address : port          Program
 tcp       0.0.0.0 : 22            sshd           <span class="c"># SSH, open to everyone</span>
-udp       0.0.0.0 : 8211          docker-proxy   <span class="c"># Palworld (through Docker, Lesson 05)</span>
+udp       0.0.0.0 : 8211          docker-proxy   <span class="c"># the game (through Docker, Lesson 05)</span>
 udp       0.0.0.0 : 41641         tailscaled     <span class="c"># Tailscale, your private phone link</span>
-tcp     127.0.0.1 : 8797          python         <span class="c"># your monitor, inside only</span>
-tcp 100.64.0.10 : 8797         python         <span class="c"># your monitor, on your private Tailscale network</span></pre>
+tcp     127.0.0.1 : 8797          python         <span class="c"># the monitor, inside only</span>
+tcp 100.64.0.10 : 8797         python         <span class="c"># the monitor, on your private Tailscale network</span></pre>
 <p>Two special addresses show up here:</p>
 <ul>
   <li><code>0.0.0.0</code> means “listen on every address this computer has”: open to visitors (if the firewall allows).</li>
@@ -95,7 +95,7 @@ tcp 100.64.0.10 : 8797         python         <span class="c"># your monitor, on
 <div class="sim" data-sim="explain"><script type="application/json">
 {
  "title": "Explorer · read the listener list",
- "intro": "Click each line of your server’s listener list (from sudo ss -tulpn, tidied up).",
+ "intro": "Click each line of the server’s listener list (from sudo ss -tulpn, tidied up).",
  "lines": [
   {
    "code": "Netid State   Local Address:Port       Process",
@@ -103,7 +103,7 @@ tcp 100.64.0.10 : 8797         python         <span class="c"># your monitor, on
   },
   {
    "code": "udp   UNCONN  0.0.0.0:8211             docker-proxy",
-   "note": "Palworld, through Docker. UDP, so the state is UNCONN (unconnected): UDP never makes connections. 0.0.0.0 = open on every address."
+   "note": "The game, through Docker. UDP, so the state is UNCONN (unconnected): UDP never makes connections. 0.0.0.0 = open on every address."
   },
   {
    "code": "udp   UNCONN  0.0.0.0:41641            tailscaled",
@@ -115,7 +115,7 @@ tcp 100.64.0.10 : 8797         python         <span class="c"># your monitor, on
   },
   {
    "code": "tcp   LISTEN  127.0.0.1:8797           python",
-   "note": "Your monitor on localhost: only reachable from inside the server."
+   "note": "The monitor on localhost: only reachable from inside the server."
   },
   {
    "code": "tcp   LISTEN  100.64.0.10:8797      python",
@@ -136,7 +136,7 @@ tcp 100.64.0.10 : 8797         python         <span class="c"># your monitor, on
 <details class="recall">
   <summary>Say it yourself first, then open this</summary>
   <p>“Data travels in packets. TCP is like a registered courier: handshake first, every packet confirmed and resent if
-  lost. SSH uses it because every character matters. UDP just sends, with no confirmations, which makes it faster. Palworld
+  lost. SSH uses it because every character matters. UDP just sends, with no confirmations, which makes it faster. The game
   uses it because a late position update is useless. Firewall rules name both the protocol and the port, like UDP 8211.
   Localhost, 127.0.0.1, means the computer itself, so my monitor can only be reached from inside.”</p>
 </details>
@@ -146,17 +146,17 @@ tcp 100.64.0.10 : 8797         python         <span class="c"># your monitor, on
 <h2>Practice 1 · Check yourself</h2>
 <div class="quiz" data-quiz="03-check"><script type="application/json">
 [
- {"q": "Why does Palworld use UDP instead of TCP?", "options": ["UDP packets are encrypted and safer", "A late position update is useless", "UDP works without any IP address", "TCP only works on home Wi-Fi"], "answer": 1, "why": "Games care about the newest update. Waiting to resend an old one would only add lag, so the extra checking TCP does gets in the way."},
+ {"q": "Why does the game use UDP instead of TCP?", "options": ["UDP packets are encrypted and safer", "A late position update is useless", "UDP works without any IP address", "TCP only works on home Wi-Fi"], "answer": 1, "why": "Games care about the newest update. Waiting to resend an old one would only add lag, so the extra checking TCP does gets in the way."},
  {"q": "Why does SSH use TCP?", "options": ["Every character of a command must arrive", "It must be as fast as possible", "UDP is blocked on every Linux server", "TCP needs no port number at all"], "answer": 0, "why": "A missing or reordered character could change your command. TCP confirms, resends and orders everything."},
  {"q": "What is a TCP 'handshake'?", "options": ["A password typed before every command", "A rule in Oracle's firewall settings", "Both sides saying hello before sending", "A lost packet that gets resent"], "answer": 2, "why": "TCP sets up a connection first: both sides agree to talk before the real data flows. UDP skips this."},
- {"q": "You add a firewall rule for 'TCP 8211'. Can players join Palworld now?", "options": ["Yes, only the port number really matters", "Yes, but only after a server restart", "No, the rule needs port 22 too", "No, Palworld needs UDP 8211, not TCP"], "answer": 3, "why": "Firewall rules match the protocol AND the port. Palworld's packets are UDP, so a TCP rule doesn't let them in."},
+ {"q": "You add a firewall rule for 'TCP 8211'. Can players join the game now?", "options": ["Yes, only the port number really matters", "Yes, but only after a server restart", "No, the rule needs port 22 too", "No, the game needs UDP 8211, not TCP"], "answer": 3, "why": "Firewall rules match the protocol AND the port. The game's packets are UDP, so a TCP rule doesn't let them in."},
  {"q": "A program listens on `127.0.0.1:8797`. Who can reach it?", "options": ["Anyone on the internet at all", "Only programs on that same server", "Only people in the same city", "Only phones using their mobile data"], "answer": 1, "why": "127.0.0.1 (localhost) means 'this computer itself', so only things running on the server can reach it."},
  {"q": "What does `0.0.0.0:22` mean in the listener list?", "options": ["SSH is switched off for everyone", "SSH only accepts its own server", "SSH listens on every server address", "SSH has no address assigned yet"], "answer": 2, "why": "0.0.0.0 means 'every address this machine has', so visitors can reach it (if the firewall allows)."}
 ]
 </script></div>
 
 <h2>Practise · safe terminal</h2>
-<p class="small">Practise in this safe copy first: it behaves like your server, using real output captured from it. Then do the real thing below.</p>
+<p class="small">Practise in this safe copy first: it behaves like the server, using real output captured from it. Then do the real thing below.</p>
 <div class="terminal" data-term="03"><script type="application/json">
 {
  "start": "server",
@@ -196,7 +196,7 @@ tcp 100.64.0.10 : 8797         python         <span class="c"># your monitor, on
   {
    "text": "Go back to your laptop (exit) and try Test-NetConnection 203.0.113.84 -Port 8211 -InformationLevel Quiet",
    "cmd": "test-netconnection 203\\.0\\.113\\.84 -port 8211",
-   "note": "False, even though Palworld is fine! The test knocks the TCP way, and Palworld only speaks UDP."
+   "note": "False, even though the game is fine! The test knocks the TCP way, and the game only speaks UDP."
   }
  ]
 }
@@ -208,10 +208,10 @@ tcp 100.64.0.10 : 8797         python         <span class="c"># your monitor, on
   <li><input type="checkbox" aria-label="done"><span>Type <code>sudo ss -tulpn</code> and press Enter. (<b>ss</b> = socket statistics. The letters mean: <b>t</b>cp, <b>u</b>dp,
     <b>l</b>istening, show the <b>p</b>rogram, <b>n</b>umbers instead of names. <b>sudo</b> runs it as administrator: Lesson 04.)</span></li>
   <li><input type="checkbox" aria-label="done"><span>Find these four lines: <code>tcp … 0.0.0.0:22</code> (sshd), <code>udp … 0.0.0.0:8211</code> (docker-proxy),
-    <code>udp … 0.0.0.0:41641</code> (tailscaled) and <code>tcp … 127.0.0.1:8797</code> (python, your monitor).</span></li>
+    <code>udp … 0.0.0.0:41641</code> (tailscaled) and <code>tcp … 127.0.0.1:8797</code> (python, the monitor).</span></li>
   <li><input type="checkbox" aria-label="done"><span>Notice other <code>127.0.0.x</code> lines too: helper programs that only talk inside the server. Lots of listeners
     are normal. What matters is which ones the firewall lets visitors reach. Type <code>exit</code>.</span></li>
-  <li><input type="checkbox" aria-label="done"><span><b>Explain it.</b> Out loud: why Palworld uses UDP and SSH uses TCP, using the courier and the shouting comparisons.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>Explain it.</b> Out loud: why the game uses UDP and SSH uses TCP, using the courier and the shouting comparisons.</span></li>
 </ul>
 
 <h2>New words from this lesson</h2>

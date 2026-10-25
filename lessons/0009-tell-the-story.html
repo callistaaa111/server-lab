@@ -11,7 +11,7 @@
 <main>
 <nav class="top"><a href="../index.html">Course home</a> · <a href="../reference/glossary.html">Word list</a></nav>
 
-<div class="eyebrow">Server Lab · Lesson 09 · pairs with Tracker Week 11, “Write it up”</div>
+<div class="eyebrow">Server Lab · Lesson 09</div>
 <h1>Tell the story: portfolio &amp; interview</h1>
 <p class="lede">For a beginner, a real project you can explain counts for a lot. You have one: a live server with
 real users, two firewalls, containers, automated backups and your own monitoring. This lesson turns it into a
@@ -21,7 +21,7 @@ one-line pitch, a GitHub write-up and interview answers you can give with confid
 <h2>Warm-up · mixed, from the whole course</h2>
 <div class="quiz" data-quiz="09-warm"><script type="application/json">
 [
- {"q": "Why does Palworld use UDP?", "options": ["Late game updates are useless anyway", "UDP is the only encrypted protocol", "Oracle blocks every single TCP port", "UDP gives the server an address"], "answer": 0, "why": "Games want the newest update fast; TCP's confirm-and-resend adds lag for no benefit."},
+ {"q": "Why does the game use UDP?", "options": ["Late game updates are useless anyway", "UDP is the only encrypted protocol", "Oracle blocks every single TCP port", "UDP gives the server an address"], "answer": 0, "why": "Games want the newest update fast; TCP's confirm-and-resend adds lag for no benefit."},
  {"q": "Players can't connect, but everything inside the server is healthy. Which layer is likely at fault?", "options": ["The Docker image", "The save volume", "Oracle's security list", "The cron schedule"], "answer": 2, "why": "When the inside is healthy, look at what's outside: Oracle's firewall (the security list) in front of the server."},
  {"q": "What is the AWS name for a rented virtual server?", "options": ["VPC", "IAM", "EBS", "EC2"], "answer": 3, "why": "EC2 instance. VPC = private network, IAM = access control, EBS = disk."},
  {"q": "In Docker, what keeps data safe when the container is replaced?", "options": ["A health check", "A storage volume", "A port mapping", "An image tag"], "answer": 1, "why": "Volumes live outside the container, so the world save survives updates."}
@@ -32,7 +32,7 @@ one-line pitch, a GitHub write-up and interview answers you can give with confid
 <p>When someone asks “what have you built?”, you need one or two sentences that make them want to hear more. Here’s a
 starting point. Change the words until it sounds like you:</p>
 <div class="callout">
-  <p>“I run a Palworld game server for a group of friends (up to 16 players) on Oracle Cloud: an Ubuntu virtual machine running the game in
+  <p>“I run a game server for a group of friends (up to 16 players) on Oracle Cloud: an Ubuntu virtual machine running the game in
   Docker, behind two layers of firewall, with automated daily backups and restarts, and a monitoring dashboard I built that
   alerts my phone and restarts the server by itself when memory runs low.”</p>
 </div>
@@ -48,13 +48,13 @@ pretending.</p>
 <h2>Part 2 · The GitHub write-up (README)</h2>
 <p>A <b>README</b> is the front page of a project on GitHub, the site where developers share code. A good one is often
 the first thing a recruiter or engineer reads about you. Copy this outline into a file called <code>README.md</code> and fill it in:</p>
-<pre># Palhaven: a self-hosted game server on Oracle Cloud
+<pre># My game server: a self-hosted game server on Oracle Cloud
 
 ## What it is
 One paragraph: what, for whom, how many players, since when.
 
 ## Architecture
-(Your diagram: internet → security list → Ubuntu VM → iptables → Docker → Palworld,
+(Your diagram: internet → security list → Ubuntu VM → iptables → Docker → the game,
  plus the monitor and backups. Draw it at app.diagrams.net and export a PNG.)
 
 ## How it works
@@ -90,7 +90,7 @@ One paragraph: what, for whom, how many players, since when.
    "id": "what",
    "label": "What it is (one paragraph)",
    "rows": 3,
-   "placeholder": "A Palworld server for a group of friends, running since…"
+   "placeholder": "A game server for a group of friends, running since…"
   },
   {
    "id": "how",
@@ -114,7 +114,7 @@ One paragraph: what, for whom, how many players, since when.
    "value": "- Off-site backup copies (3-2-1 rule)\n- Rebuild it on AWS (EC2, VPC, security group)\n- Describe the infrastructure as code (Terraform)"
   }
  ],
- "template": "# Palhaven: a self-hosted game server on Oracle Cloud\n\n## What it is\n{what}\n\n## Architecture\n(diagram.png: internet → security list → Ubuntu VM → iptables → Docker → Palworld)\n\n## How it works\n{how}\n\n## Operations\n{ops}\n\n## Security\n- SSH login with a key file, not a password\n- Monitor is never on the public internet: localhost + my private Tailscale network only\n- Passwords kept out of this repository\n\n## Problems I solved\n{problems}\n\n## What I'd improve next\n{next}\n"
+ "template": "# My game server: a self-hosted game server on Oracle Cloud\n\n## What it is\n{what}\n\n## Architecture\n(diagram.png: internet → security list → Ubuntu VM → iptables → Docker → the game)\n\n## How it works\n{how}\n\n## Operations\n{ops}\n\n## Security\n- SSH login with a key file, not a password\n- Monitor is never on the public internet: localhost + my private Tailscale network only\n- Passwords kept out of this repository\n\n## Problems I solved\n{problems}\n\n## What I'd improve next\n{next}\n"
 }
 </script></div>
 
@@ -226,7 +226,7 @@ monitor that samples memory every 5 seconds, alerts my phone, and restarts the s
 <h2>Get real-world feedback</h2>
 <p>Lessons build skill; people who do the job give you judgement. When your write-up is ready, share it for feedback:</p>
 <ul>
-  <li><a href="https://www.reddit.com/r/homelab/">r/homelab</a> and <a href="https://www.reddit.com/r/selfhosted/">r/selfhosted</a>: people who run servers like Palhaven for fun; friendly to beginners.</li>
+  <li><a href="https://www.reddit.com/r/homelab/">r/homelab</a> and <a href="https://www.reddit.com/r/selfhosted/">r/selfhosted</a>: people who run servers like the game server for fun; friendly to beginners.</li>
   <li><a href="https://www.reddit.com/r/devops/">r/devops</a> and <a href="https://www.reddit.com/r/sysadmin/">r/sysadmin</a>: working professionals; good for “is this how it’s done at work?” and career questions.</li>
   <li><a href="https://www.reddit.com/r/AWSCertifications/">r/AWSCertifications</a>: exam tips from people who just passed Cloud Practitioner.</li>
 </ul>

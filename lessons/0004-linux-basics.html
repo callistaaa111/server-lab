@@ -11,7 +11,7 @@
 <main>
 <nav class="top"><a href="../index.html">Course home</a> · <a href="../reference/commands.html">Command cheat sheet</a></nav>
 
-<div class="eyebrow">Server Lab · Lesson 04 · pairs with Tracker Week 5, “Linux basics”</div>
+<div class="eyebrow">Server Lab · Lesson 04</div>
 <h1>Finding your way around Linux</h1>
 <p class="lede">When you type <code>ssh gameserver</code>, you land in front of a black screen with a blinking
 cursor. That’s where most cloud work happens. By the end of this lesson you can move around the server, look
@@ -21,7 +21,7 @@ inside files, check its health, and you’ll know why some commands need <code>s
 <h2>Warm-up · from Lessons 01–03</h2>
 <div class="quiz" data-quiz="04-warm"><script type="application/json">
 [
- {"q": "Palworld's packets use which protocol?", "options": ["TCP", "UDP", "SSH", "NAT"], "answer": 1, "why": "UDP: fast, no confirmations, because a late game update is useless. SSH rides on TCP."},
+ {"q": "The game's packets use which protocol?", "options": ["TCP", "UDP", "SSH", "NAT"], "answer": 1, "why": "UDP: fast, no confirmations, because a late game update is useless. SSH rides on TCP."},
  {"q": "Which address means 'this computer itself'?", "options": ["0.0.0.0", "10.0.0.1", "203.0.113.84", "127.0.0.1"], "answer": 3, "why": "127.0.0.1 is localhost. A program listening there can only be reached from inside the same machine."},
  {"q": "Which one is a private address range?", "options": ["Addresses starting with 192.168.", "Addresses ending with .84", "Addresses that include ports", "Addresses starting with 203."], "answer": 0, "why": "192.168.x.x, 10.x.x.x and 172.16–31.x.x are the private ranges."}
 ]
@@ -30,7 +30,7 @@ inside files, check its health, and you’ll know why some commands need <code>s
 <h2>Part 1 · What Linux is</h2>
 <p>Every computer needs an <b>operating system</b> (OS): the base software that runs everything else. Your laptop
 runs Windows. Most servers in the world run <b>Linux</b>, which is free and very stable. Linux comes in different
-flavours called <b>distributions</b>. Your server runs <b>Ubuntu 24.04 LTS</b> (LTS = Long Term Support, so it gets
+flavours called <b>distributions</b>. The server runs <b>Ubuntu 24.04 LTS</b> (LTS = Long Term Support, so it gets
 security updates for years).</p>
 <p>Servers usually have no desktop, mouse or icons. You control them by typing commands into a <b>terminal</b>
 (the text window), and a program called the <b>shell</b> reads and runs what you type. That’s why learning the
@@ -41,7 +41,7 @@ command line is the single most useful skill for cloud jobs.<sup class="cite"><a
 <pre>ubuntu@en:~$</pre>
 <div class="table-wrap"><table><tbody>
   <tr><td><code>ubuntu</code></td><td>who you are (your username)</td></tr>
-  <tr><td><code>en</code></td><td>which computer you’re on (the server’s name, left over from the Enshrouded days)</td></tr>
+  <tr><td><code>en</code></td><td>which computer you’re on (the server’s name, left over from an older setup)</td></tr>
   <tr><td><code>~</code></td><td>which folder you’re in. <code>~</code> is short for your <b>home folder</b>, <code>/home/ubuntu</code></td></tr>
   <tr><td><code>$</code></td><td>“ready, type a command”</td></tr>
 </tbody></table></div>
@@ -52,7 +52,7 @@ command line is the single most useful skill for cloud jobs.<sup class="cite"><a
 branches off it. Folders are called <b>directories</b>, and a location like <code>/opt/palworld</code> is a
 <b>path</b>: “start at /, go into opt, then into palworld”. Linux uses <code>/</code> where Windows uses <code>\</code>.</p>
 <div class="table-wrap"><table>
-  <thead><tr><th>Path</th><th>What lives there</th><th>On your server</th></tr></thead>
+  <thead><tr><th>Path</th><th>What lives there</th><th>On the server</th></tr></thead>
   <tbody>
     <tr><td><code>/home/ubuntu</code></td><td>your personal folder</td><td>where you land after <code>ssh</code></td></tr>
     <tr><td><code>/opt</code></td><td>extra software you installed</td><td><code>palworld</code>, <code>palworld-monitor</code></td></tr>
@@ -77,7 +77,7 @@ branches off it. Folders are called <b>directories</b>, and a location like <cod
 You’ve already used options: the <code>-4 -br</code> in <code>ip -4 -br a</code>.</p>
 
 <h2>Part 4 · Permissions and <code>sudo</code></h2>
-<p>Linux protects files by owner. Here’s the <code>ls -l</code> line for your Palworld settings file:</p>
+<p>Linux protects files by owner. Here’s the <code>ls -l</code> line for the game's settings file:</p>
 <pre>-rw-------  1 root root  1051 Mar  7 03:16 docker-compose.yml</pre>
 <p><code>root</code> is the owner: the all-powerful administrator account. <code>rw-------</code> means only the owner
 can <b>r</b>ead and <b>w</b>rite it; everyone else gets nothing. That’s deliberate, because this file holds the server
@@ -89,7 +89,7 @@ Docker and firewall commands.</p>
 
 <h2>Part 5 · Checking the server’s health</h2>
 <div class="table-wrap"><table>
-  <thead><tr><th>Command</th><th>Shows</th><th>Yours, 17 Oct</th></tr></thead>
+  <thead><tr><th>Command</th><th>Shows</th><th>Example output</th></tr></thead>
   <tbody>
     <tr><td><code>uptime -p</code></td><td>how long since the last reboot</td><td>up 1 day, 2 hours</td></tr>
     <tr><td><code>free -h</code></td><td>memory (RAM): total, used, available. <code>-h</code> = human-readable (GB not bytes)</td><td>23 GB total, ~3 GB used</td></tr>
@@ -176,7 +176,7 @@ storage: the world save, backups and programs live there.</p>
 </script></div>
 
 <h2>Practise · safe terminal</h2>
-<p class="small">Practise in this safe copy first: it behaves like your server, using real output captured from it. Then do the real thing below.</p>
+<p class="small">Practise in this safe copy first: it behaves like the server, using real output captured from it. Then do the real thing below.</p>
 <div class="terminal" data-term="04"><script type="application/json">
 {
  "start": "server",
@@ -242,7 +242,7 @@ storage: the world save, backups and programs live there.</p>
 }
 </script></div>
 
-<h2>Practice 2 · Walk around your server (15 min)</h2>
+<h2>Practice 2 · Walk around the server (15 min)</h2>
 <p>Every command here only <em>reads</em>. Tick each one off.</p>
 <ul class="steps">
   <li><input type="checkbox" aria-label="done"><span><code>ssh gameserver</code>, then read your prompt aloud: who, where, which folder.</span></li>
@@ -254,27 +254,27 @@ storage: the world save, backups and programs live there.</p>
     <code>sudo grep SERVER_NAME docker-compose.yml</code> (<b>grep</b> = show only the lines that contain a word).</span></li>
   <li><input type="checkbox" aria-label="done"><span>Health check: <code>uptime -p</code>, <code>free -h</code>, <code>df -h /</code>. Write the three answers down.</span></li>
   <li><input type="checkbox" aria-label="done"><span><code>top</code>: watch it for 10 seconds, find the busiest program, then press <kbd>q</kbd>.</span></li>
-  <li><input type="checkbox" aria-label="done"><span><code>systemctl status palworld-monitor</code>: look for <code>active (running)</code>. That’s your monitor running as a background <b>service</b> (Lesson 07). Press <kbd>q</kbd>, then <code>exit</code>.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><code>systemctl status palworld-monitor</code>: look for <code>active (running)</code>. That’s the monitor running as a background <b>service</b> (Lesson 07). Press <kbd>q</kbd>, then <code>exit</code>.</span></li>
 </ul>
 <p class="small">Tip: study week 5 has you practise these on a practice virtual machine too. Doing them on both is how they become automatic.</p>
 
 <h2>New words from this lesson</h2>
 <div class="table-wrap"><table><tbody>
   <tr><td><b>Operating system (OS)</b></td><td>The base software that runs everything else (Windows, Linux).</td></tr>
-  <tr><td><b>Linux / Ubuntu</b></td><td>The free OS most servers run / the Linux distribution your server uses.</td></tr>
+  <tr><td><b>Linux / Ubuntu</b></td><td>The free OS most servers run / the Linux distribution the server uses.</td></tr>
   <tr><td><b>Terminal / shell</b></td><td>The text window / the program that runs what you type.</td></tr>
   <tr><td><b>Prompt</b></td><td><code>user@machine:folder$</code>: who and where you are.</td></tr>
   <tr><td><b>Directory / path</b></td><td>A folder / its location, like <code>/opt/palworld</code>.</td></tr>
   <tr><td><b>root / sudo</b></td><td>The administrator account / run one command as administrator.</td></tr>
   <tr><td><b>Permissions</b></td><td>Who may read (r), write (w) or run (x) a file.</td></tr>
   <tr><td><b>RAM / disk</b></td><td>Short-term working memory / long-term storage.</td></tr>
-  <tr><td><b>Service</b></td><td>A program that runs in the background all the time (your monitor).</td></tr>
+  <tr><td><b>Service</b></td><td>A program that runs in the background all the time (the monitor).</td></tr>
 </tbody></table></div>
 
 <h2>Read next (20 min, hands-on)</h2>
 <p><a href="https://ubuntu.com/tutorials/command-line-for-beginners"><b>Ubuntu: The Linux command line for beginners</b></a>.
 The official tutorial from the company that makes Ubuntu. It covers the same commands with more practice. Do it on
-your server (it only creates practice files in your home folder) or on the practice VM from study week 5.</p>
+the server (it only creates practice files in your home folder) or on the practice VM from study week 5.</p>
 
 <div class="callout good">
   <span class="label">Ask an AI tutor</span>

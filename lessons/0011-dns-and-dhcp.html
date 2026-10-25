@@ -69,7 +69,7 @@
  ],
  "items": [
   {
-   "t": "palhaven.example → 203.0.113.84",
+   "t": "gameserver.example → 203.0.113.84",
    "a": 0,
    "why": "A = name to IPv4 address."
   },
@@ -239,7 +239,7 @@
   <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>PowerShell: <code>ipconfig /all</code>. Find your IPv4 address, subnet mask, default gateway, DHCP server, “Lease Obtained”, and DNS servers. Which device is your DHCP server? (Usually your router.)</div></li>
   <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span><code>Resolve-DnsName google.com</code>. Note the IP address(es) and the record type (A).</div></li>
   <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span><code>Resolve-DnsName google.com -Type MX</code>. Which servers receive Gmail's email?</div></li>
-  <li><input type="checkbox" aria-label="done"><div><span class="tag look">look only</span>Server: <code>ssh gameserver</code>, then <code>resolvectl status</code>. Find “DNS Servers”: that's who answers your server's questions.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">look only</span>Server: <code>ssh gameserver</code>, then <code>resolvectl status</code>. Find “DNS Servers”: that's who answers the server's questions.</div></li>
   <li><input type="checkbox" aria-label="done"><div><span class="tag look">look only</span>Server: <code>resolvectl query github.com</code>. It answers with GitHub's IP address.</div></li>
 </ul>
 

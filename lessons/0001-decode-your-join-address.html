@@ -13,7 +13,7 @@
 
 <div class="eyebrow">Server Lab · Lesson 01 · start here, no experience needed</div>
 <h1>What does <code>203.0.113.84:8211</code> mean?</h1>
-<p class="lede">You’ve typed this into Palworld to join Palhaven. It looks like random numbers, but every part
+<p class="lede">You’ve typed this into the game to join the game server. It looks like random numbers, but every part
 has a meaning. By the end of this page you’ll be able to explain all of it to a friend, and you’ll know what
 people mean by “the cloud”.</p>
 <div class="meta"><span>≈ 25 min</span><span>No experience needed</span><span>Nothing you do here can break the server</span></div>
@@ -27,13 +27,13 @@ people mean by “the cloud”.</p>
 <h2>Part 1 · What is a server?</h2>
 <p>A <b>server</b> is just a computer that stays switched on and waits for other computers to ask it for something.
 The computer doing the asking is called the <b>client</b>.</p>
-<p>When you play on Palhaven, your laptop is the <b>client</b>. It keeps asking things like “where is my character?”
-and “did that Pal hatch?”. The <b>server</b> holds the Palworld world and answers everyone who is playing. That’s
+<p>When you play an online game, your laptop is the <b>client</b>. It keeps asking things like “where is my character?”
+and “did that egg hatch?”. The <b>server</b> holds the game world and answers everyone who is playing. That’s
 why the world keeps existing even after you log off: the server is still on.</p>
 <p class="small">Same idea elsewhere: when you open Facebook, your phone is the client and Facebook’s computers are the servers.</p>
 
 <h2>Part 2 · What is “the cloud”?</h2>
-<p>Your server isn’t in your house. It’s a computer in a huge building full of computers in <b>Singapore</b>, owned by
+<p>The server isn’t in your house. It’s a computer in a huge building full of computers in <b>Singapore</b>, owned by
 Oracle. A building like that is called a <b>data center</b>.</p>
 <p>You never touch that computer. You <em>rent</em> it, and control it over the internet from your laptop. That is all
 “the cloud” really means: <b>renting computers in someone else’s building and using them over the internet</b>.
@@ -48,21 +48,21 @@ type commands on that computer in Singapore as if you were sitting in front of i
 <h2>Part 3 · The IP address: <code>203.0.113.84</code></h2>
 <p>For data to reach a computer, the computer needs an address, like a building needs a street address so the
 delivery rider can find it. On the internet, that address is called an <b>IP address</b>.</p>
-<p>Your server’s IP address is <code>203.0.113.84</code>. This kind of address is always <b>four numbers separated by
+<p>The server’s IP address is <code>203.0.113.84</code>. This kind of address is always <b>four numbers separated by
 dots</b>, and each number is between <b>0 and 255</b>. So <code>203.0.113.84</code> is a real address, but
 <code>203.0.113.300</code> can’t be (300 is too big).</p>
 <p class="small">Your own laptop and phone have IP addresses too. Every device that uses the internet needs one.</p>
 
 <h2>Part 4 · The port: <code>:8211</code></h2>
-<p>One computer can run many programs at the same time. Your server runs Palworld, but it also runs the SSH
-remote control and your monitor. So once data reaches the right computer, it still needs to know <em>which program</em>
+<p>One computer can run many programs at the same time. The server runs the game, but it also runs the SSH
+remote control and the monitor. So once data reaches the right computer, it still needs to know <em>which program</em>
 it is for.</p>
 <p>That’s what the <b>port</b> is: a number that picks the program. If the IP address is the condo building’s
 address, the port is the <b>unit number</b>.<sup class="cite"><a href="https://www.cloudflare.com/learning/network-layer/what-is-a-computer-port/">2</a></sup></p>
 <div class="table-wrap"><table>
-  <thead><tr><th>Port (unit number)</th><th>Program behind it on your server</th></tr></thead>
+  <thead><tr><th>Port (unit number)</th><th>Program behind it on the server</th></tr></thead>
   <tbody>
-    <tr><td><code>8211</code></td><td>Palworld: where players join</td></tr>
+    <tr><td><code>8211</code></td><td>The game: where players join</td></tr>
     <tr><td><code>22</code></td><td>SSH: your remote control</td></tr>
   </tbody>
 </table></div>
@@ -74,15 +74,15 @@ address, the port is the <b>unit number</b>.<sup class="cite"><a href="https://w
 doors in a parking lot.<sup class="cite"><a href="https://www.cloudflare.com/learning/network-layer/what-is-a-computer-port/">2</a></sup>
 So servers have a <b>firewall</b>: a set of rules saying which ports visitors are allowed to reach. Everything
 else is turned away.</p>
-<p>Think of it as the guard in the condo lobby with a list. Your server’s guard list currently allows only unit
-<code>22</code> (SSH) and unit <code>8211</code> (Palworld). That’s why, when we set the server up, we had to “open
-port 8211”: we were adding Palworld to the guard’s list.</p>
+<p>Think of it as the guard in the condo lobby with a list. The server’s guard list currently allows only unit
+<code>22</code> (SSH) and unit <code>8211</code> (the game). That’s why, when we set the server up, we had to “open
+port 8211”: we were adding the game to the guard’s list.</p>
 
 <h2>All together</h2>
 <figure>
 <svg viewBox="0 0 500 470" role="img" aria-labelledby="bTitle bDesc">
-  <title id="bTitle">A player reaching the Palworld server, drawn as a condo building</title>
-  <desc id="bDesc">A friend's laptop sends data over the internet to the building at 203.0.113.84. A guard (the firewall) lets visitors through only to unit 22 (SSH) and unit 8211 (Palworld). Unit 80 is turned away.</desc>
+  <title id="bTitle">A player reaching the game server, drawn as a condo building</title>
+  <desc id="bDesc">A friend's laptop sends data over the internet to the building at 203.0.113.84. A guard (the firewall) lets visitors through only to unit 22 (SSH) and unit 8211 (the game). Unit 80 is turned away.</desc>
   <rect class="box" x="120" y="10" width="260" height="56" rx="6"/>
   <text x="250" y="34" font-size="15" font-weight="600" text-anchor="middle">Your friend’s laptop (client)</text>
   <text class="muted" x="250" y="54" font-size="12.5" text-anchor="middle">wants 203.0.113.84 : 8211</text>
@@ -110,7 +110,7 @@ port 8211”: we were adding Palworld to the guard’s list.</p>
   <rect class="box" x="190" y="330" width="120" height="96" rx="6" stroke-width="2.5" style="stroke:var(--accent)"/>
   <text x="250" y="358" font-size="13" class="muted" text-anchor="middle">Unit (port)</text>
   <text x="250" y="384" font-size="22" font-weight="600" text-anchor="middle" class="accent">8211</text>
-  <text x="250" y="410" font-size="13" text-anchor="middle">Palworld</text>
+  <text x="250" y="410" font-size="13" text-anchor="middle">The game</text>
 
   <rect x="330" y="330" width="120" height="96" rx="6" fill="none" stroke="currentColor" stroke-opacity=".35" stroke-dasharray="4 4"/>
   <text x="390" y="358" font-size="13" class="muted" text-anchor="middle">Unit (port)</text>
@@ -118,15 +118,15 @@ port 8211”: we were adding Palworld to the guard’s list.</p>
   <text x="390" y="410" font-size="13" class="muted" text-anchor="middle">turned away</text>
 </svg>
 <figcaption>The whole lesson in one picture. Your friend asks for 203.0.113.84 (the building), port 8211
-(the unit). The guard checks the list, lets them in, and Palworld answers.</figcaption>
+(the unit). The guard checks the list, lets them in, and the game answers.</figcaption>
 </figure>
 
 <details class="recall">
   <summary>Say it yourself first, then open this</summary>
-  <p>“Palhaven runs on a computer we rent from Oracle in Singapore. That’s the cloud. Its IP address,
-  203.0.113.84, is like the building’s address. The port, 8211, is like the unit number, and it picks the Palworld
+  <p>“The game server runs on a computer we rent from Oracle in Singapore. That’s the cloud. Its IP address,
+  203.0.113.84, is like the building’s address. The port, 8211, is like the unit number, and it picks the game
   program. A firewall acts like a lobby guard and only lets visitors through to the ports on its list: 8211 for
-  Palworld and 22 for SSH, my remote control.”</p>
+  the game and 22 for SSH, my remote control.”</p>
 </details>
 
 <h2>Try it · be the guard, decode addresses</h2>
@@ -177,16 +177,16 @@ port 8211”: we were adding Palworld to the guard’s list.</p>
 <div class="quiz" data-quiz="0001b-check"><script type="application/json">
 [
  {"q": "In plain words, what is “the cloud”?", "options": ["A wireless network that covers everything", "Storage that floats on the internet", "Renting computers in someone else's building", "Software installed only on your phone"], "answer": 2, "why": "The cloud is renting computers (like your Oracle server in Singapore) and using them over the internet."},
- {"q": "You join Palhaven from your laptop. Which one is the server?", "options": ["Your laptop running the game", "The Oracle computer in Singapore", "Your home Wi-Fi router box", "The Steam store's download page"], "answer": 1, "why": "Your laptop asks, so it's the client. The computer in Singapore holds the world and answers, so it's the server."},
- {"q": "In `203.0.113.84:8211`, what is `8211`?", "options": ["The address of the server's building", "The password needed to join it", "The maximum number of allowed players", "The port: which program to reach"], "answer": 3, "why": "The port is like the unit number. It tells the server computer which program the data is for: 8211 means Palworld."},
+ {"q": "You join the game server from your laptop. Which one is the server?", "options": ["Your laptop running the game", "The Oracle computer in Singapore", "Your home Wi-Fi router box", "The Steam store's download page"], "answer": 1, "why": "Your laptop asks, so it's the client. The computer in Singapore holds the world and answers, so it's the server."},
+ {"q": "In `203.0.113.84:8211`, what is `8211`?", "options": ["The address of the server's building", "The password needed to join it", "The maximum number of allowed players", "The port: which program to reach"], "answer": 3, "why": "The port is like the unit number. It tells the server computer which program the data is for: 8211 means the game."},
  {"q": "What does a firewall do?", "options": ["Decides which ports visitors are allowed through", "Makes the internet connection run much faster", "Saves a backup copy of the world", "Gives each computer its own IP address"], "answer": 0, "why": "Like a lobby guard with a list: ports on the list (22 and 8211) are allowed, and everything else is turned away."},
- {"q": "What does typing `ssh gameserver` on your laptop do?", "options": ["Downloads Palworld onto your own laptop", "Restarts the Palworld server right away", "Remote-controls the server from your laptop", "Checks how fast your internet is"], "answer": 2, "why": "SSH is a remote control. After it connects, the commands you type run on the computer in Singapore."},
+ {"q": "What does typing `ssh gameserver` on your laptop do?", "options": ["Downloads the game onto your own laptop", "Restarts the game server right away", "Remote-controls the server from your laptop", "Checks how fast your internet is"], "answer": 2, "why": "SSH is a remote control. After it connects, the commands you type run on the computer in Singapore."},
  {"q": "Why does a computer need port numbers at all?", "options": ["To make the internet cheaper for everyone", "To hide the computer's address from strangers", "To count how many players are online", "Ports tell programs apart on one address"], "answer": 3, "why": "One computer, one address, many programs. The port number says which program gets the data."}
 ]
 </script></div>
 
 <h2>Practice 2 · Decode a new address</h2>
-<p class="small">These use a different server, to check that you can apply the idea, not just remember Palhaven.</p>
+<p class="small">These use a different server, to check that you can apply the idea, not just remember the game server.</p>
 <div class="quiz" data-quiz="0001b-decode"><script type="application/json">
 [
  {"q": "A friend shares a Minecraft server: `203.0.113.7:25565`. Which part is the IP address?", "options": ["203.0.113.7", "25565", "113.7:25565", "203.0"], "answer": 0, "why": "Everything before the `:` is the IP address (four numbers with dots). After the `:` comes the port."},
@@ -197,7 +197,7 @@ port 8211”: we were adding Palworld to the guard’s list.</p>
 </script></div>
 
 <h2>Practise · safe terminal</h2>
-<p class="small">Practise in this safe copy first: it behaves like your server, using real output captured from it. Then do the real thing below.</p>
+<p class="small">Practise in this safe copy first: it behaves like the server, using real output captured from it. Then do the real thing below.</p>
 <div class="terminal" data-term="01"><script type="application/json">
 {
  "start": "laptop",
@@ -249,7 +249,7 @@ port 8211”: we were adding Palworld to the guard’s list.</p>
     It should print <code>True</code>: port 22 is on the guard’s list, and SSH answered.</span></li>
   <li><input type="checkbox" aria-label="done"><span><b>Knock on unit 80.</b> Same command, but <code>-Port 80</code>. Wait about 20 seconds.
     It prints <code>False</code>: port 80 isn’t on the list, so the guard ignores you.
-    <span class="small">(Why not test 8211? Palworld talks in a different “style” that this command can’t test. That’s a later lesson.)</span></span></li>
+    <span class="small">(Why not test 8211? The game talks in a different “style” that this command can’t test. That’s a later lesson.)</span></span></li>
   <li><input type="checkbox" aria-label="done"><span><b>Step inside.</b> Type <code>ssh gameserver</code>. When the start of the line changes to
     <code>ubuntu@…</code>, you’re typing on the computer in Singapore.</span></li>
   <li><input type="checkbox" aria-label="done"><span><b>Look around.</b> Type <code>nproc</code>: how many processor cores (the computer’s “brains”) you rent. Then
@@ -288,7 +288,7 @@ ports and firewalls from this lesson. Skip the part about the “OSI model” fo
 
 <nav class="course">
   <span>Reference: <a href="../reference/glossary.html">Word list</a></span>
-  <span>Next: <a href="0002-two-addresses.html">02 · Your server has two addresses</a> →</span>
+  <span>Next: <a href="0002-two-addresses.html">02 · The server has two addresses</a> →</span>
 </nav>
 
 <ol class="small" style="margin-top:32px">

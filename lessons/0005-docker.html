@@ -12,16 +12,16 @@
 <nav class="top"><a href="../index.html">Course home</a> · <a href="../reference/commands.html">Command cheat sheet</a></nav>
 
 <div class="eyebrow">Server Lab · Lesson 05 · the tool almost every DevOps job ad mentions</div>
-<h1>Docker: the sealed room Palworld lives in</h1>
-<p class="lede">Palworld doesn’t run loose on your server. It runs inside a <b>container</b>, a sealed room with
-everything it needs. By the end you’ll be able to read your Palworld settings file line by line, and explain why
+<h1>Docker: the sealed room the game lives in</h1>
+<p class="lede">The game doesn’t run loose on the server. It runs inside a <b>container</b>, a sealed room with
+everything it needs. By the end you’ll be able to read the game's settings file line by line, and explain why
 companies package nearly all their software this way.</p>
 <div class="meta"><span>≈ 30 min</span><span>Builds on Lessons 01–04</span><span>Every command here only looks</span></div>
 
 <h2>Warm-up · from Lessons 01–04</h2>
 <div class="quiz" data-quiz="05-warm"><script type="application/json">
 [
- {"q": "Why do some commands on your server need `sudo` in front?", "options": ["They change the server's public address", "They run faster with administrator rights", "They need root, the administrator account", "They only work over UDP traffic"], "answer": 2, "why": "`sudo` runs one command as root. Docker and firewall commands need it, and so do root-only files like docker-compose.yml."},
+ {"q": "Why do some commands on the server need `sudo` in front?", "options": ["They change the server's public address", "They run faster with administrator rights", "They need root, the administrator account", "They only work over UDP traffic"], "answer": 2, "why": "`sudo` runs one command as root. Docker and firewall commands need it, and so do root-only files like docker-compose.yml."},
  {"q": "Which command lists the contents of the current folder?", "options": ["ls", "pwd", "top", "cat"], "answer": 0, "why": "`ls` lists. `pwd` = where am I, `top` = busy programs, `cat` = show a file's contents."},
  {"q": "`tcp 127.0.0.1:8797` in the listener list means…", "options": ["Anyone online can open the monitor directly", "The monitor only accepts SSH connections now", "Port 8797 is blocked by Oracle's firewall", "Only the server itself can reach it"], "answer": 3, "why": "127.0.0.1 is localhost: only programs on the server itself can reach it."}
 ]
@@ -36,8 +36,8 @@ Docker’s own definition of a container: “an isolated process with all of the
 (A <b>process</b> is just a running program.) The same package runs the same way on your laptop, on Oracle, or on Amazon.</p>
 
 <h3>In the condo comparison</h3>
-<p>Your server is the building. A <b>container</b> is a sealed, self-contained room inside it, with its own furniture
-(software), its own private address, and only the doors you choose to connect to the outside. Palworld lives in a
+<p>The server is the building. A <b>container</b> is a sealed, self-contained room inside it, with its own furniture
+(software), its own private address, and only the doors you choose to connect to the outside. The game lives in a
 room called <code>palworld</code>, and its private address inside the server is <code>172.18.0.2</code>. Remember the
 <code>172.</code> private range from Lesson 02? This is it.</p>
 
@@ -70,8 +70,8 @@ Writing setup down in files instead of clicking or typing it each time is a core
     restart: unless-stopped                             <span class="c"># if it crashes or the server reboots, start it again</span>
     ports:
       - 8211:8211/udp                                   <span class="c"># building door 8211 → room door 8211, UDP</span>
-    environment:                                        <span class="c"># settings handed to Palworld</span>
-      SERVER_NAME: "Palhaven"
+    environment:                                        <span class="c"># settings handed to the game</span>
+      SERVER_NAME: "The game server"
       PLAYERS: 16
       SERVER_PASSWORD: "********"
       BACKUP_CRON_EXPRESSION: "45 3 * * *"              <span class="c"># back up at 3:45 every day</span>
@@ -106,7 +106,7 @@ whole file, and that’s a classic real-world mistake.</p>
   },
   {
    "code": "    restart: unless-stopped",
-   "note": "Restart rule: if Palworld crashes or the server reboots, Docker starts it again, unless you stopped it on purpose."
+   "note": "Restart rule: if the game crashes or the server reboots, Docker starts it again, unless you stopped it on purpose."
   },
   {
    "code": "    ports:",
@@ -114,14 +114,14 @@ whole file, and that’s a classic real-world mistake.</p>
   },
   {
    "code": "      - 8211:8211/udp",
-   "note": "Server port 8211 → container port 8211, UDP only (Palworld’s protocol, Lesson 03). Left = server side, right = container side."
+   "note": "Server port 8211 → container port 8211, UDP only (the game’s protocol, Lesson 03). Left = server side, right = container side."
   },
   {
    "code": "    environment:",
-   "note": "Settings handed to Palworld when it starts. Change one, run docker compose up -d, and the container is rebuilt with it."
+   "note": "Settings handed to the game when it starts. Change one, run docker compose up -d, and the container is rebuilt with it."
   },
   {
-   "code": "      SERVER_NAME: \"Palhaven\"",
+   "code": "      SERVER_NAME: \"The game server\"",
    "note": "The name players see in the server list."
   },
   {
@@ -165,10 +165,10 @@ or a settings change, the world stays put.</p>
 
 <figure>
 <svg viewBox="0 0 500 300" role="img" aria-labelledby="t5 d5">
-  <title id="t5">The Palworld container inside the server</title>
+  <title id="t5">The game container inside the server</title>
   <desc id="d5">The server at 10.0.0.84 forwards port 8211 to the container at 172.18.0.2. The container's /palworld folder is connected to /opt/palworld/data on the server.</desc>
   <rect x="10" y="10" width="480" height="280" rx="10" fill="none" stroke="currentColor" stroke-opacity=".5" stroke-width="1.4"/>
-  <text x="26" y="34" font-size="14" font-weight="600">Your server (the building) · 10.0.0.84</text>
+  <text x="26" y="34" font-size="14" font-weight="600">The server (the building) · 10.0.0.84</text>
   <rect class="box" x="26" y="56" width="150" height="50" rx="6" stroke-width="2.5" style="stroke:var(--accent)"/>
   <text x="101" y="78" font-size="13" font-weight="600" text-anchor="middle">server door</text>
   <text x="101" y="96" font-size="13" text-anchor="middle" class="accent">UDP 8211</text>
@@ -190,7 +190,7 @@ or a settings change, the world stays put.</p>
 
 <details class="recall">
   <summary>Say it yourself first, then open this</summary>
-  <p>“Palworld runs in a Docker container: a sealed room with everything it needs, sharing the server’s operating system.
+  <p>“The game runs in a Docker container: a sealed room with everything it needs, sharing the server’s operating system.
   It’s built from an image, the packed kit. The compose file is the written order form: which image, the restart rule,
   the settings, the port mapping that forwards server port 8211 UDP to the container, and a volume that keeps the world
   save outside the container so it survives updates.”</p>
@@ -211,7 +211,7 @@ or a settings change, the world stays put.</p>
 </script></div>
 
 <h2>Practise · safe terminal</h2>
-<p class="small">Practise in this safe copy first: it behaves like your server, using real output captured from it. Then do the real thing below.</p>
+<p class="small">Practise in this safe copy first: it behaves like the server, using real output captured from it. Then do the real thing below.</p>
 <div class="terminal" data-term="05"><script type="application/json">
 {
  "start": "server",
@@ -221,7 +221,7 @@ or a settings change, the world stays put.</p>
    "cmd": "^(sudo )?docker ps"
   },
   {
-   "text": "What word in brackets shows Palworld passed its health check?",
+   "text": "What word in brackets shows the game passed its health check?",
    "ask": true,
    "answers": [
     "healthy",
@@ -233,7 +233,7 @@ or a settings change, the world stays put.</p>
    "cmd": "^(sudo )?docker images$"
   },
   {
-   "text": "How big is the Palworld image?",
+   "text": "How big is the game image?",
    "ask": true,
    "answers": [
     "1.98GB",
@@ -252,7 +252,7 @@ or a settings change, the world stays put.</p>
    "cmd": "^(sudo )?docker stats"
   },
   {
-   "text": "Read Palworld's log: sudo docker logs --tail 20 palworld",
+   "text": "Read the game's log: sudo docker logs --tail 20 palworld",
    "cmd": "^(sudo )?docker logs"
   },
   {
@@ -276,7 +276,7 @@ or a settings change, the world stays put.</p>
   <li><input type="checkbox" aria-label="done"><span><code>sudo docker images</code>: the kits downloaded onto the server, and their size.</span></li>
   <li><input type="checkbox" aria-label="done"><span><code>sudo docker port palworld</code>: the port mapping, straight from Docker.</span></li>
   <li><input type="checkbox" aria-label="done"><span><code>sudo docker stats --no-stream</code>: how much CPU and memory the room is using right now.</span></li>
-  <li><input type="checkbox" aria-label="done"><span><code>sudo docker logs --tail 20 palworld</code>: the last 20 lines of Palworld’s diary. Lines with <code>BOX64</code> are normal noise.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><code>sudo docker logs --tail 20 palworld</code>: the last 20 lines of the game’s diary. Lines with <code>BOX64</code> are normal noise.</span></li>
   <li><input type="checkbox" aria-label="done"><span><code>sudo ls /opt/palworld/data</code>: the storage room (volume). Then <code>sudo ls /opt/palworld/data/backups</code> to see the daily backups. <code>exit</code>.</span></li>
   <li><input type="checkbox" aria-label="done"><span><b>Explain it.</b> Out loud: image vs container, and what the <code>ports:</code> and <code>volumes:</code> lines do.</span></li>
 </ul>

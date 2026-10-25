@@ -13,7 +13,7 @@
 
 <div class="eyebrow">Server Lab · Lesson 16 · Part 2 · Cloud</div>
 <h1>Hands-on AWS: safety first, then off-site backups</h1>
-<p class="lede">Lesson 08 taught AWS names on paper. Now you lock the account down, then fix Palhaven's biggest weakness from Lesson 07: backups that sit on the same disk as the world.</p>
+<p class="lede">Lesson 08 taught AWS names on paper. Now you lock the account down, then fix the game server’s biggest weakness from Lesson 07: backups that sit on the same disk as the world.</p>
 <div class="meta"><span data-k="Time">≈ 90 min, can be split</span><span data-k="Needs">AWS account (card required)</span><span data-k="Exam">CLF Domains 2, 3, 4</span><span data-k="Real server">Part 4 installs one program</span></div>
 
 
@@ -103,13 +103,13 @@
   <li><b>Create an everyday admin login</b> for yourself (IAM Identity Center is AWS's recommended way; an IAM user with MFA is fine for learning). Stop using root for daily work.</li>
 </ol>
 <h2>Part 2 · The backup design</h2>
-<p>Palhaven (Oracle, Singapore) → every morning after the 3:45 backup → copy new backup files → S3 bucket in ap-southeast-1 → a <b>lifecycle rule</b> deletes copies older than 30 days.</p>
-<p><b>Least privilege:</b> the server gets its own IAM user that can ONLY list, upload and download in this ONE bucket. If its key ever leaks, the damage is one bucket of game saves, not your whole account. (Inside AWS you'd use an IAM role instead of keys. Your server is on Oracle, so a tightly limited key is the practical choice here. Say this in interviews: it shows you know the difference.)</p>
+<p>The game server (Oracle, Singapore) → every morning after the 3:45 backup → copy new backup files → S3 bucket in ap-southeast-1 → a <b>lifecycle rule</b> deletes copies older than 30 days.</p>
+<p><b>Least privilege:</b> the server gets its own IAM user that can ONLY list, upload and download in this ONE bucket. If its key ever leaks, the damage is one bucket of game saves, not your whole account. (Inside AWS you'd use an IAM role instead of keys. The server is on Oracle, so a tightly limited key is the practical choice here. Say this in interviews: it shows you know the difference.)</p>
 <h2>Part 3 · Build it (console)</h2>
 <ul class="steps">
-  <li><input type="checkbox" aria-label="done"><div>S3 → Create bucket. Name: <code>palhaven-backups-&lt;6 random digits&gt;</code> (names are global). Region: ap-southeast-1. Keep “Block all public access” ON.</div></li>
+  <li><input type="checkbox" aria-label="done"><div>S3 → Create bucket. Name: <code>gameserver-backups-&lt;6 random digits&gt;</code> (names are global). Region: ap-southeast-1. Keep “Block all public access” ON.</div></li>
   <li><input type="checkbox" aria-label="done"><div>Bucket → Management → Create lifecycle rule: apply to all objects, “Expire current versions” after 30 days.</div></li>
-  <li><input type="checkbox" aria-label="done"><div>IAM → Users → Create user “palhaven-backup” (no console access). Attach an inline policy (JSON tab), replacing BUCKET with your bucket name. Read it line by line in the explorer below first.</div></li>
+  <li><input type="checkbox" aria-label="done"><div>IAM → Users → Create user “gameserver-backup” (no console access). Attach an inline policy (JSON tab), replacing BUCKET with your bucket name. Read it line by line in the explorer below first.</div></li>
   <li><input type="checkbox" aria-label="done"><div>That user → Security credentials → Create access key → “Command Line Interface”. Save the two values in your password manager. Never paste them into chats, GitHub or screenshots.</div></li>
 </ul>
 
@@ -173,7 +173,7 @@
   {
    "t": "The access key ID and secret access key",
    "a": 1,
-   "why": "Anyone with both can act as palhaven-backup."
+   "why": "Anyone with both can act as gameserver-backup."
   },
   {
    "t": "The region name ap-southeast-1",
@@ -208,7 +208,7 @@ curl &quot;https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip&quot; -o aws
 </div></li>
   <li><input type="checkbox" aria-label="done"><div><span class="tag change">changes the server</span><code>unzip awscliv2.zip</code> (if unzip is missing: <code>sudo apt install unzip</code>), then <code>sudo ./aws/install</code>, then <code>aws --version</code>.</div></li>
   <li><input type="checkbox" aria-label="done"><div><span class="tag change">changes the server</span><code>aws configure</code>: paste the key and secret, region ap-southeast-1, output json.</div></li>
-  <li><input type="checkbox" aria-label="done"><div><span class="tag look">look only</span><code>aws sts get-caller-identity</code>: it must show the palhaven-backup user, NOT root.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">look only</span><code>aws sts get-caller-identity</code>: it must show the gameserver-backup user, NOT root.</div></li>
   <li><input type="checkbox" aria-label="done"><div><span class="tag change">changes the server</span>First upload: <code>aws s3 sync /opt/palworld/data/backups s3://BUCKET/backups/</code>. If you see “Permission denied” on the backup files, stop and ask for help. Don't change permissions blindly.</div></li>
   <li><input type="checkbox" aria-label="done"><div><span class="tag change">changes the server</span>Schedule it: <code>crontab -e</code> and add this line (4:15 AM, after the 3:45 backup and 4:00 restart):<pre>15 4 * * * /usr/local/bin/aws s3 sync /opt/palworld/data/backups s3://BUCKET/backups/ &gt;&gt; /home/ubuntu/s3sync.log 2&gt;&amp;1</pre>
 </div></li>
@@ -217,7 +217,7 @@ curl &quot;https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip&quot; -o aws
 <h2>PASS/FAIL CHECK</h2>
 <ul class="steps">
   <li><input type="checkbox" aria-label="done"><div>The zero-spend budget exists (screenshot).</div></li>
-  <li><input type="checkbox" aria-label="done"><div><span class="tag look">look only</span><code>aws sts get-caller-identity</code> shows palhaven-backup.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">look only</span><code>aws sts get-caller-identity</code> shows gameserver-backup.</div></li>
   <li><input type="checkbox" aria-label="done"><div><span class="tag look">look only</span>Restore test: download one file and compare fingerprints. “A backup you've never restored is just a hope.”<pre>mkdir -p /tmp/restore-test
 aws s3 cp s3://BUCKET/backups/&lt;FILE&gt; /tmp/restore-test/
 sha256sum /opt/palworld/data/backups/&lt;FILE&gt; /tmp/restore-test/&lt;FILE&gt;</pre>
@@ -241,8 +241,8 @@ The two long codes must be identical. Then <code>rm -r /tmp/restore-test</code>.
    ],
    "a": 1,
    "steps": [
-    "<code>aws sts get-caller-identity<\/code>: is it still the palhaven-backup user?",
-    "IAM → Users → palhaven-backup: is the inline policy still attached?",
+    "<code>aws sts get-caller-identity<\/code>: is it still the gameserver-backup user?",
+    "IAM → Users → gameserver-backup: is the inline policy still attached?",
     "Compare the policy's Resource ARNs with the real bucket name, character by character.",
     "Fix the policy, then run the sync by hand and check the log."
    ]

@@ -13,7 +13,7 @@
 
 <div class="eyebrow">Server Lab · Lesson 10 · Part 2 · Networking core</div>
 <h1>Subnetting: cutting a village into streets</h1>
-<p class="lede">The single most-tested networking skill. You'll learn what the /24 on your server means, find the street any address lives on, and plan the addresses for a real office: the same plan Lessons 12, 13, 19 and 21 build on.</p>
+<p class="lede">The single most-tested networking skill. You'll learn what the /24 on the server means, find the street any address lives on, and plan the addresses for a real office: the same plan Lessons 12, 13, 19 and 21 build on.</p>
 <div class="meta"><span data-k="Time">≈ 45 min</span><span data-k="Builds on">Lesson 02</span><span data-k="Exam">CCNA 1.6 · Network+ 1.0 · SAA 1</span><span data-k="Real server">look only</span></div>
 
 
@@ -59,13 +59,13 @@
 </script></div>
 
 <h2>Part 1 · What the /24 means</h2>
-<p>On your server, <code>ip -4 addr</code> shows <code>10.0.0.84/24</code>. You know the first part. The /24 is new.</p>
+<p>On the server, <code>ip -4 addr</code> shows <code>10.0.0.84/24</code>. You know the first part. The /24 is new.</p>
 <p>An IPv4 address is <b>32 bits</b> (32 ones-and-zeros), written as four numbers of 8 bits each. The number after the slash says how many of those 32 bits are the <b>street name</b>. The rest are the <b>house number</b>.</p>
 <ul>
   <li>/24 → the first 24 bits (first three numbers, 10.0.0) are the street. The last 8 bits are house numbers.</li>
   <li>8 bits of house numbers = 2⁸ = 256 addresses: 10.0.0.0 to 10.0.0.255.</li>
 </ul>
-<p>In the village comparison: 10.0.0.0/24 is one street with 256 house numbers. Your server lives at house 84.</p>
+<p>In the village comparison: 10.0.0.0/24 is one street with 256 house numbers. The server lives at house 84.</p>
 <p>This “slash number” style is called <b>CIDR notation</b> (Classless Inter-Domain Routing). The same information can be written as a <b>subnet mask</b>: /24 = 255.255.255.0. Each 255 means “this whole number is street name”.</p>
 <div class="sim" data-sim2="subnet"></div>
 
@@ -220,7 +220,7 @@
   "why": "AWS reserves 5 per subnet: 256 − 5 = 251."
  },
  {
-  "q": "(Lesson 03 review) Palworld uses UDP on 8211. What does UDP NOT do that TCP does?",
+  "q": "(Lesson 03 review) the game uses UDP on 8211. What does UDP NOT do that TCP does?",
   "options": [
    "Use port numbers",
    "Confirm each piece arrived",
@@ -233,7 +233,7 @@
 ]
 </script></div>
 
-<h2>Practice 2 · On your real server</h2>
+<h2>Practice 2 · On a real server</h2>
 <p>10 minutes, read-only.</p>
 <ul class="steps">
   <li><input type="checkbox" aria-label="done"><div><span class="tag look">look only</span><code>ssh gameserver</code>, then <code>ip -4 addr</code>. Find the line with 10.0.0.84/24.</div></li>

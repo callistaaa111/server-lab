@@ -20,7 +20,7 @@
 <nav class="top"><a href="../index.html">Course home</a> · <a href="commands.html">Command cheat sheet</a></nav>
 <div class="eyebrow">Server Lab · Reference</div>
 <h1>Word list</h1>
-<p class="lede">Every word the course teaches, in plain language, with an example from your server. Grey tags give the
+<p class="lede">Every word the course teaches, in plain language, with an example from the server. Grey tags give the
 AWS name where it differs. Grouped by the lesson that teaches it.</p>
 
 <h2><a href="../lessons/0001-decode-your-join-address.html">01 · Decode your join address</a></h2>
@@ -29,12 +29,12 @@ AWS name where it differs. Grouped by the lesson that teaches it.</p>
   <dt>Cloud</dt><dd>Renting computers in someone else’s building and using them over the internet, paying for what you use.<span class="eg">Oracle, AWS (Amazon) and Azure (Microsoft) are cloud providers.</span></dd>
   <dt>Data center</dt><dd>A large building full of computers.<span class="eg">Oracle’s data center in Singapore.</span></dd>
   <dt>IP address</dt><dd>A computer’s address on a network: four numbers, 0–255 each.<span class="eg"><code>203.0.113.84</code>: the building’s street address.</span></dd>
-  <dt>Port</dt><dd>A number that picks which program on a computer the data is for.<span class="eg"><code>8211</code> = Palworld, <code>22</code> = SSH: the unit number.</span></dd>
+  <dt>Port</dt><dd>A number that picks which program on a computer the data is for.<span class="eg"><code>8211</code> = the game, <code>22</code> = SSH: the unit number.</span></dd>
   <dt>Firewall</dt><dd>Rules for which ports visitors may reach; everything else is blocked.<span class="eg">The lobby guard with a list.</span></dd>
   <dt>SSH</dt><dd>A secure remote control for typing commands on another computer (TCP port 22).<span class="eg"><code>ssh gameserver</code></span></dd>
 </dl>
 
-<h2><a href="../lessons/0002-two-addresses.html">02 · Your server has two addresses</a></h2>
+<h2><a href="../lessons/0002-two-addresses.html">02 · The server has two addresses</a></h2>
 <dl class="terms">
   <dt>Network</dt><dd>A group of connected devices that can talk to each other.</dd>
   <dt>Public / private IP address</dt><dd>Works across the whole internet / works only inside one network.<span class="eg"><code>203.0.113.84</code> / <code>10.0.0.84</code>. Private ranges start with 10., 172.16–31. or 192.168.</span></dd>
@@ -49,10 +49,10 @@ AWS name where it differs. Grouped by the lesson that teaches it.</p>
   <dt>Packet</dt><dd>A small piece of data carrying its destination address and port.</dd>
   <dt>Protocol</dt><dd>An agreed set of rules for communicating.</dd>
   <dt>TCP</dt><dd>The reliable protocol: handshake, confirms, resends, keeps order.<span class="eg">SSH, websites. The registered courier.</span></dd>
-  <dt>UDP</dt><dd>The fast protocol: just sends, with no confirmations.<span class="eg">Palworld, voice, video. Shouting updates.</span></dd>
+  <dt>UDP</dt><dd>The fast protocol: just sends, with no confirmations.<span class="eg">The game, voice, video. Shouting updates.</span></dd>
   <dt>Handshake</dt><dd>TCP’s hello exchange that sets up a connection.</dd>
   <dt>Listening</dt><dd>A program waiting for packets on a port.<span class="eg">See them with <code>sudo ss -tulpn</code>.</span></dd>
-  <dt>Localhost (127.0.0.1)</dt><dd>“This computer itself”: reachable only from inside.<span class="eg">Your monitor listens on <code>127.0.0.1:8797</code>.</span></dd>
+  <dt>Localhost (127.0.0.1)</dt><dd>“This computer itself”: reachable only from inside.<span class="eg">The monitor listens on <code>127.0.0.1:8797</code>.</span></dd>
 </dl>
 
 <h2><a href="../lessons/0004-linux-basics.html">04 · Linux basics</a></h2>

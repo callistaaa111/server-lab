@@ -308,7 +308,7 @@
     function paintAcct() {
       acct.replaceChildren(el("div", "sim-label", "AWS account (ap-southeast-1)"));
       if (!real.size) acct.append(el("p", "small", "Empty. Bill: $0.00"));
-      RES.forEach(r => { if (real.has(r)) { const d = el("div", "lab-row"); d.append(el("code", null, r.split(".")[0].replace("aws_", "")), document.createTextNode(" ")); if (r === "aws_security_group.game") { const x = btn("delete by hand", "sim-btn small"); x.onclick = () => { real.delete(r); drifted = true; paintAcct(); say("(You deleted palhaven-game in the AWS console. Terraform doesn't know yet.)"); }; d.append(x); } acct.append(d); } });
+      RES.forEach(r => { if (real.has(r)) { const d = el("div", "lab-row"); d.append(el("code", null, r.split(".")[0].replace("aws_", "")), document.createTextNode(" ")); if (r === "aws_security_group.game") { const x = btn("delete by hand", "sim-btn small"); x.onclick = () => { real.delete(r); drifted = true; paintAcct(); say("(You deleted gameserver-game in the AWS console. Terraform doesn't know yet.)"); }; d.append(x); } acct.append(d); } });
     }
     const cmds = {
       init: () => { inited = true; say("$ terraform init\nInitializing provider plugins...\n- Installing hashicorp/aws v5.x...\nTerraform has been successfully initialized!"); },

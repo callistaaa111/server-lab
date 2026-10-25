@@ -14,24 +14,24 @@
 <div class="eyebrow">Server Lab · Lesson 06 · ties Lessons 01–05 together</div>
 <h1>Follow a packet: the five checkpoints</h1>
 <p class="lede">“My friend can’t connect” is the most common problem you’ll ever be asked to fix, in games and at
-work. This lesson follows one Palworld packet from a friend’s laptop all the way to the game, through five
+work. This lesson follows one game packet from a friend’s laptop all the way to the game, through five
 checkpoints. Then you practise finding which one is broken, the way an engineer does.</p>
 <div class="meta"><span>≈ 35 min</span><span>Uses everything from Lessons 01–05</span><span>Interview question: “walk me through troubleshooting”</span></div>
 
 <h2>Warm-up · from Lessons 01–05</h2>
 <div class="quiz" data-quiz="06-warm"><script type="application/json">
 [
- {"q": "What does Oracle's internet gateway do for your server?", "options": ["Backs up the world every morning", "Runs the Palworld game program itself", "Swaps the public and private addresses", "Gives every player their own password"], "answer": 2, "why": "It's the receptionist: it swaps 203.0.113.84 (public) and 10.0.0.84 (private). That's NAT."},
+ {"q": "What does Oracle's internet gateway do for the server?", "options": ["Backs up the world every morning", "Runs the game program itself", "Swaps the public and private addresses", "Gives every player their own password"], "answer": 2, "why": "It's the receptionist: it swaps 203.0.113.84 (public) and 10.0.0.84 (private). That's NAT."},
  {"q": "Which compose file line forwards players into the container?", "options": ["The ports: section", "The volumes: section", "The restart: setting", "The SERVER_NAME setting"], "answer": 0, "why": "Port mapping (`ports:`) forwards the server's UDP 8211 into the container. The volume line is for the world save."},
- {"q": "Which command shows whether the Palworld container is running?", "options": ["sudo docker images", "sudo docker ps", "sudo free -h", "sudo ip route"], "answer": 1, "why": "`docker ps` lists running containers and their status. `docker images` lists the downloaded kits."}
+ {"q": "Which command shows whether the game container is running?", "options": ["sudo docker images", "sudo docker ps", "sudo free -h", "sudo ip route"], "answer": 1, "why": "`docker ps` lists running containers and their status. `docker images` lists the downloaded kits."}
 ]
 </script></div>
 
 <h2>Part 1 · A surprise: there are two guards</h2>
-<p>In Lesson 01 there was one guard, the firewall. The full truth: your server has <b>two firewalls</b>, and
+<p>In Lesson 01 there was one guard, the firewall. The full truth: the server has <b>two firewalls</b>, and
 <em>both</em> must let a packet through.</p>
 <ul>
-  <li><b>Oracle’s firewall</b>, called a <b>security list</b>. It lives in Oracle’s network, <em>outside</em> your server.
+  <li><b>Oracle’s firewall</b>, called a <b>security list</b>. It lives in Oracle’s network, <em>outside</em> the server.
   You change it on Oracle’s website, not with commands. It applies to the whole subnet, the “street” from Lesson 02.<sup class="cite"><a href="https://docs.oracle.com/en-us/iaas/Content/Network/Concepts/securitylists.htm">1</a></sup>
   Think of it as the <b>guard at the village gate</b>, who checks everyone entering the street.</li>
   <li><b>The server’s own firewall</b>, a Linux tool called <b>iptables</b>. It lives <em>inside</em> the server. Oracle’s
@@ -44,14 +44,14 @@ village guard said yes, but the lobby guard still said no. Almost everyone new t
 <h2>Part 2 · The five checkpoints</h2>
 <figure>
 <svg viewBox="0 0 500 560" role="img" aria-labelledby="t6 d6">
-  <title id="t6">Five checkpoints from the internet to Palworld</title>
-  <desc id="d6">1 the road and receptionist, 2 Oracle's security list at the village gate, 3 iptables lobby guard inside the server, 4 Docker forwarding desk, 5 Palworld running in the container.</desc>
+  <title id="t6">Five checkpoints from the internet to the game</title>
+  <desc id="d6">1 the road and receptionist, 2 Oracle's security list at the village gate, 3 iptables lobby guard inside the server, 4 Docker forwarding desk, 5 the game running in the container.</desc>
   <rect x="8" y="88" width="484" height="464" rx="10" fill="none" stroke="currentColor" stroke-opacity=".35" stroke-dasharray="5 4"/>
   <text class="muted" x="22" y="108" font-size="12.5">Oracle Cloud, Singapore</text>
   <rect x="22" y="196" width="456" height="344" rx="8" fill="none" stroke="currentColor" stroke-opacity=".35" stroke-dasharray="5 4"/>
   <text class="muted" x="36" y="216" font-size="12.5">your street (subnet 10.0.0.0/24)</text>
   <rect x="36" y="300" width="428" height="228" rx="8" fill="none" stroke="currentColor" stroke-opacity=".6" stroke-width="1.3"/>
-  <text class="muted" x="48" y="320" font-size="12.5">your server (the building) · 10.0.0.84</text>
+  <text class="muted" x="48" y="320" font-size="12.5">the server (the building) · 10.0.0.84</text>
   <line class="wire" x1="265" y1="58" x2="265" y2="472"/>
   <rect class="box" x="100" y="8" width="330" height="50" rx="6"/>
   <text x="265" y="30" font-size="14.5" font-weight="600" text-anchor="middle">Friend’s laptop</text>
@@ -69,7 +69,7 @@ village guard said yes, but the lobby guard still said no. Almost everyone new t
   <text x="265" y="420" font-size="14.5" font-weight="600" text-anchor="middle">Docker forwarding desk</text>
   <text class="muted" x="265" y="438" font-size="12" text-anchor="middle">port mapping 8211 → room 172.18.0.2</text>
   <rect class="box" x="100" y="462" width="330" height="50" rx="6" stroke-width="2.5" style="stroke:var(--accent)"/>
-  <text x="265" y="484" font-size="14.5" font-weight="600" text-anchor="middle">Someone home: Palworld</text>
+  <text x="265" y="484" font-size="14.5" font-weight="600" text-anchor="middle">Someone home: The game</text>
   <text class="muted" x="265" y="502" font-size="12" text-anchor="middle">container running and healthy</text>
   <g class="gate"><circle cx="66" cy="147" r="13"/><text x="66" y="152" font-size="13" text-anchor="middle">1</text></g>
   <g class="gate"><circle cx="66" cy="255" r="13"/><text x="66" y="260" font-size="13" text-anchor="middle">2</text></g>
@@ -77,7 +77,7 @@ village guard said yes, but the lobby guard still said no. Almost everyone new t
   <g class="gate"><circle cx="66" cy="423" r="13"/><text x="66" y="428" font-size="13" text-anchor="middle">4</text></g>
   <g class="gate"><circle cx="66" cy="487" r="13"/><text x="66" y="492" font-size="13" text-anchor="middle">5</text></g>
 </svg>
-<figcaption>Checkpoints 1–2 are in Oracle’s network, outside your server. Checkpoints 3–5 are inside it.</figcaption>
+<figcaption>Checkpoints 1–2 are in Oracle’s network, outside the server. Checkpoints 3–5 are inside it.</figcaption>
 </figure>
 
 <ol class="gates">
@@ -91,7 +91,7 @@ village guard said yes, but the lobby guard still said no. Almost everyone new t
   <br><span class="small">Check: <code>sudo iptables -L INPUT -n --line-numbers</code>. Find <code>udp dpt:8211</code> with ACCEPT, above the final <code>REJECT</code>. (dpt = destination port.)</span></li>
   <li><b>The forwarding desk (Docker): is port 8211 mapped into the container?</b><sup class="cite"><a href="https://docs.docker.com/engine/network/port-publishing/">3</a></sup>
   <br><span class="small">Check: <code>sudo docker port palworld</code> prints <code>8211/udp -&gt; 0.0.0.0:8211</code>.</span></li>
-  <li><b>Someone home: is Palworld running and healthy?</b> Every door can be open, but if nobody is inside, nobody answers.
+  <li><b>Someone home: is the game running and healthy?</b> Every door can be open, but if nobody is inside, nobody answers.
   <br><span class="small">Check: <code>sudo docker ps</code> shows <code>Up … (healthy)</code>. If not, read the diary: <code>sudo docker logs --tail 100 palworld</code>.</span></li>
 </ol>
 
@@ -100,7 +100,7 @@ village guard said yes, but the lobby guard still said no. Almost everyone new t
 <div class="sim" data-sim="explain"><script type="application/json">
 {
  "title": "Explorer · read the lobby guard’s list",
- "intro": "Your server’s real iptables INPUT rules. The guard reads them top to bottom and stops at the first rule that matches.",
+ "intro": "The server’s real iptables INPUT rules. The guard reads them top to bottom and stops at the first rule that matches.",
  "lines": [
   {
    "code": "Chain INPUT (policy ACCEPT)",
@@ -132,7 +132,7 @@ village guard said yes, but the lobby guard still said no. Almost everyone new t
   },
   {
    "code": "6    ACCEPT     17   --  0.0.0.0/0    0.0.0.0/0  udp dpt:8211",
-   "note": "Protocol 17 = UDP. Port 8211, so Palworld is allowed in. This is the rule that had to be added."
+   "note": "Protocol 17 = UDP. Port 8211, so the game is allowed in. This is the rule that had to be added."
   },
   {
    "code": "7    REJECT     0    --  0.0.0.0/0    0.0.0.0/0  reject-with icmp-host-prohibited",
@@ -168,14 +168,14 @@ is and can stop searching. It’s like tracing a dead outlet: you check the main
 [
  {"q": "Nobody can join. SSH works fine. Inside the server everything looks healthy. Yesterday someone 'tidied up' the rules on Oracle's website.", "pre": "$ sudo docker ps --format '{{.Names}} {{.Status}}'\npalworld Up 3 hours (healthy)\n$ sudo docker port palworld\n8211/udp -> 0.0.0.0:8211\n\nOracle website › Default Security List › Ingress rules:\n  TCP 22  from 0.0.0.0/0\n  ICMP    from 0.0.0.0/0", "options": ["1: the road", "2: gate guard", "3: lobby guard", "4: forwarding desk", "5: someone home"], "answer": 1, "why": "The rule for UDP 8211 is gone from Oracle's security list, so packets are stopped before they even reach the server."},
  {"q": "You test a small website running directly on the server (no Docker) on TCP 8080, and you added 8080 on Oracle's website. It works from inside the server, but your laptop can't connect.", "pre": "$ sudo iptables -L INPUT -n --line-numbers\n5  ACCEPT  tcp  0.0.0.0/0  0.0.0.0/0  state NEW tcp dpt:22\n6  ACCEPT  udp  0.0.0.0/0  0.0.0.0/0  udp dpt:8211\n7  REJECT  all  0.0.0.0/0  0.0.0.0/0  reject-with icmp-host-prohibited", "options": ["1: the road", "2: gate guard", "3: lobby guard", "4: forwarding desk", "5: someone home"], "answer": 2, "why": "Works inside but not from outside means a guard. The village guard allows 8080, but the lobby guard has no 8080 rule above line 7's REJECT."},
- {"q": "Players can't connect, and `ssh gameserver` just hangs.", "pre": "PS> Test-NetConnection 203.0.113.84 -Port 22 -InformationLevel Quiet\nFalse\n\nOracle website › Compute › Instances:\n  (your server)   State: STOPPED", "options": ["1: the road", "2: gate guard", "3: lobby guard", "4: forwarding desk", "5: someone home"], "answer": 0, "why": "The server is switched off, so nothing behind it exists. When even SSH fails, start at checkpoint 1."},
+ {"q": "Players can't connect, and `ssh gameserver` just hangs.", "pre": "PS> Test-NetConnection 203.0.113.84 -Port 22 -InformationLevel Quiet\nFalse\n\nOracle website › Compute › Instances:\n  (the server)   State: STOPPED", "options": ["1: the road", "2: gate guard", "3: lobby guard", "4: forwarding desk", "5: someone home"], "answer": 0, "why": "The server is switched off, so nothing behind it exists. When even SSH fails, start at checkpoint 1."},
  {"q": "Players can't join. Nothing on Oracle's website or the firewalls changed.", "pre": "$ sudo docker ps --format '{{.Names}} {{.Status}}'\npalworld Restarting (1) 12 seconds ago", "options": ["1: the road", "2: gate guard", "3: lobby guard", "4: forwarding desk", "5: someone home"], "answer": 4, "why": "The container keeps crashing and restarting, so nobody's home to answer. Next step: read `sudo docker logs --tail 100 palworld`."},
- {"q": "After someone edited docker-compose.yml and recreated the container, nobody can join. The container is healthy.", "pre": "$ sudo docker ps --format '{{.Names}} {{.Status}}'\npalworld Up 2 minutes (healthy)\n$ sudo docker port palworld\n$                     # (no output at all)", "options": ["1: the road", "2: gate guard", "3: lobby guard", "4: forwarding desk", "5: someone home"], "answer": 3, "why": "Palworld is running, but no port is mapped, so packets arriving at the server have no way into the room. The `ports:` lines were probably deleted or mis-indented."}
+ {"q": "After someone edited docker-compose.yml and recreated the container, nobody can join. The container is healthy.", "pre": "$ sudo docker ps --format '{{.Names}} {{.Status}}'\npalworld Up 2 minutes (healthy)\n$ sudo docker port palworld\n$                     # (no output at all)", "options": ["1: the road", "2: gate guard", "3: lobby guard", "4: forwarding desk", "5: someone home"], "answer": 3, "why": "The game is running, but no port is mapped, so packets arriving at the server have no way into the room. The `ports:` lines were probably deleted or mis-indented."}
 ]
 </script></div>
 
 <h2>Practise · safe terminal</h2>
-<p class="small">Practise in this safe copy first: it behaves like your server, using real output captured from it. Then do the real thing below. (Checkpoint 2 lives on Oracle’s website, so you can’t check it from a terminal.)</p>
+<p class="small">Practise in this safe copy first: it behaves like the server, using real output captured from it. Then do the real thing below. (Checkpoint 2 lives on Oracle’s website, so you can’t check it from a terminal.)</p>
 <div class="terminal" data-term="06"><script type="application/json">
 {
  "start": "laptop",
@@ -193,7 +193,7 @@ is and can stop searching. It’s like tracing a dead outlet: you check the main
    "cmd": "^sudo iptables -L"
   },
   {
-   "text": "Which rule number lets Palworld (udp 8211) in?",
+   "text": "Which rule number lets the game (udp 8211) in?",
    "ask": true,
    "answers": [
     "6"
@@ -211,7 +211,7 @@ is and can stop searching. It’s like tracing a dead outlet: you check the main
 }
 </script></div>
 
-<h2>Practice 2 · Walk the checkpoints on your server (15 min)</h2>
+<h2>Practice 2 · Walk the checkpoints on the server (15 min)</h2>
 <ul class="steps">
   <li><input type="checkbox" aria-label="done"><span><b>1:</b> from PowerShell, <code>Test-NetConnection 203.0.113.84 -Port 22 -InformationLevel Quiet</code> → <code>True</code>.</span></li>
   <li><input type="checkbox" aria-label="done"><span><b>2:</b> open the Oracle Console in your browser and find the UDP 8211 rule in the Default Security List. Look only, don’t change anything.</span></li>

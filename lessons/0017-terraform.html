@@ -54,12 +54,12 @@
 <div class="sim" data-sim2="terraform"></div>
 
 <h2>Part 2 · What we'll build</h2>
-<p>The AWS version of Palhaven's network. Oracle VCN = AWS VPC 10.40.0.0/16:</p>
+<p>The AWS version of the game server’s network. Oracle VCN = AWS VPC 10.40.0.0/16:</p>
 <ul>
   <li>public subnet 10.40.1.0/24 in ap-southeast-1a (where a game server would go)</li>
   <li>private subnet 10.40.2.0/24 in ap-southeast-1b (where a database would go; no internet route)</li>
   <li>internet gateway + route table with 0.0.0.0/0 → internet gateway, attached to the public subnet only</li>
-  <li>security group “palhaven-game” allowing UDP 8211 in</li>
+  <li>security group “gameserver-game” allowing UDP 8211 in</li>
 </ul>
 <div class="sim" data-sim="explain"><script type="application/json">
 {
@@ -122,7 +122,7 @@
    "note": "65,536 addresses to cut into subnets (Lesson 10)."
   },
   {
-   "code": "  tags       = { Name = \"palhaven-lab\" }"
+   "code": "  tags       = { Name = \"gameserver-lab\" }"
   },
   {
    "code": "}"
@@ -240,7 +240,7 @@
    "note": "Resource 7: the firewall for game servers. Oracle's security list = AWS security group."
   },
   {
-   "code": "  name   = \"palhaven-game\""
+   "code": "  name   = \"gameserver-game\""
   },
   {
    "code": "  vpc_id = aws_vpc.lab.id"
@@ -259,7 +259,7 @@
   },
   {
    "code": "    protocol    = \"udp\"",
-   "note": "Palworld uses UDP 8211 (Lesson 03)."
+   "note": "The game uses UDP 8211 (Lesson 03)."
   },
   {
    "code": "    cidr_blocks = [\"0.0.0.0/0\"]"
@@ -302,7 +302,7 @@
   <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span><code>winget install Hashicorp.Terraform</code> and <code>winget install Amazon.AWSCLI</code>. Close and reopen PowerShell.</div></li>
   <li><input type="checkbox" aria-label="done"><div>In IAM, create user “terraform-lab”, attach the AWS managed policy AmazonVPCFullAccess, create an access key.</div></li>
   <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span><code>aws configure --profile lab</code> (region ap-southeast-1).</div></li>
-  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>Make a folder <code>palhaven-tf</code> and a file <code>main.tf</code> with the code from the explorer above (type it; it's how it sticks).</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>Make a folder <code>gameserver-tf</code> and a file <code>main.tf</code> with the code from the explorer above (type it; it's how it sticks).</div></li>
   <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>Also create <code>.gitignore</code> containing three lines: <code>.terraform/</code>, <code>*.tfstate</code>, <code>*.tfstate.*</code> (state files can contain secrets: never put them on GitHub).</div></li>
 </ul>
 
@@ -368,7 +368,7 @@ terraform apply      (type yes)</pre>
 <ul class="steps">
   <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span><code>terraform plan</code> ends with “Plan: 7 to add, 0 to change, 0 to destroy.”</div></li>
   <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>The describe-subnets command returns 10.40.1.0/24 and 10.40.2.0/24.</div></li>
-  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>Drift drill: in the AWS console, delete the “palhaven-game” security group by hand. Run <code>terraform plan</code> again: it must show “1 to add”. Run <code>terraform apply</code> to repair it. (That's how teams detect manual changes.)</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>Drift drill: in the AWS console, delete the “gameserver-game” security group by hand. Run <code>terraform plan</code> again: it must show “1 to add”. Run <code>terraform apply</code> to repair it. (That's how teams detect manual changes.)</div></li>
   <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span><code>terraform destroy</code> ends with “Destroy complete! Resources: 7 destroyed.” and <code>terraform state list</code> prints nothing.</div></li>
   <li><input type="checkbox" aria-label="done"><div>Next day, Billing shows $0.00 for this lab.</div></li>
 </ul>

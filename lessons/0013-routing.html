@@ -59,7 +59,7 @@
 <h2>Part 1 · What a router does</h2>
 <p>A <b>router</b> connects different networks (different streets) and decides where to send each packet next. It keeps a <b>routing table</b>: a list of signposts like “to reach 10.30.0.0/24, go via 172.16.0.2”.</p>
 <p>Every device has a <b>default gateway</b>: the router address it uses for anything not on its own street. In the village comparison, the gateway is the junction at the end of your street. Anything leaving the street goes there first.</p>
-<p>Your server has one too. On the server, <code>ip route</code> shows something like <code>default via 10.0.0.1</code>: the first address on the server's street is Oracle's router.</p>
+<p>The server has one too. On the server, <code>ip route</code> shows something like <code>default via 10.0.0.1</code>: the first address on the server's street is Oracle's router.</p>
 <h2>Part 2 · How routes get into the table</h2>
 <ul>
   <li><b>Connected routes:</b> networks plugged directly into the router. It knows them automatically.</li>
@@ -161,7 +161,7 @@ ip route 10.20.0.0 255.255.255.0 172.16.0.1</pre></td></tr></tbody></table></div
 <ul class="steps">
   <li><input type="checkbox" aria-label="done"><div><span class="tag look">look only</span>Server: <code>ip route</code>. Find your default gateway.</div></li>
   <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>PowerShell: <code>tracert 8.8.8.8</code>. Count the hops. Lines with * * * are routers that don't answer traceroute. That's normal, not a fault.</div></li>
-  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span><code>tracert</code> to your server's public IP. Notice where the path leaves the Philippines (the delay usually jumps).</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span><code>tracert</code> to the server's public IP. Notice where the path leaves the Philippines (the delay usually jumps).</div></li>
 </ul>
 
 <h2>Break/fix drill</h2>

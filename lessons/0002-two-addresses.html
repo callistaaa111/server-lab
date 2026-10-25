@@ -11,9 +11,9 @@
 <main>
 <nav class="top"><a href="../index.html">Course home</a> · <a href="../reference/glossary.html">Word list</a></nav>
 
-<div class="eyebrow">Server Lab · Lesson 02 · pairs with Tracker Week 2, “Private IPs and NAT”</div>
-<h1>Your server has two addresses</h1>
-<p class="lede">Players reach your server at <code>203.0.113.84</code>. But ask the server its own address and it says
+<div class="eyebrow">Server Lab · Lesson 02</div>
+<h1>The server has two addresses</h1>
+<p class="lede">Players reach the server at <code>203.0.113.84</code>. But ask the server its own address and it says
 <code>10.0.0.84</code>. Both are right. By the end of this lesson you’ll know why, and you’ll find the same pattern
 in your own home Wi-Fi.</p>
 <div class="meta"><span>≈ 25 min</span><span>Builds on Lesson 01</span><span>Nothing here can break the server</span></div>
@@ -22,7 +22,7 @@ in your own home Wi-Fi.</p>
 <p class="small">Answer from memory. Don’t look back first: having to try is what makes it stick.</p>
 <div class="quiz" data-quiz="02-warm"><script type="application/json">
 [
- {"q": "In `203.0.113.84:8211`, which part picks the Palworld program?", "options": ["203", "113.84", "8211", "0.113"], "answer": 2, "why": "The port (after the `:`) picks the program, like a unit number. The four numbers before it are the IP address."},
+ {"q": "In `203.0.113.84:8211`, which part picks the game program?", "options": ["203", "113.84", "8211", "0.113"], "answer": 2, "why": "The port (after the `:`) picks the program, like a unit number. The four numbers before it are the IP address."},
  {"q": "What is a firewall, in the condo comparison?", "options": ["The street address of the building", "The lobby guard with a list", "The unit number on each door", "The elevator between all the floors"], "answer": 1, "why": "The firewall is the guard: only visitors going to ports on the list (22 and 8211) get through."}
 ]
 </script></div>
@@ -31,12 +31,12 @@ in your own home Wi-Fi.</p>
 <p>There are two kinds of IP address:</p>
 <ul>
   <li>A <b>public IP address</b> works on the whole internet. Anyone, anywhere, can send data to it.
-  Your server’s public address is <code>203.0.113.84</code>.</li>
+  The server’s public address is <code>203.0.113.84</code>.</li>
   <li>A <b>private IP address</b> only works <em>inside one network</em>, like your home Wi-Fi or Oracle’s network
-  for your server. Nobody outside can send to it directly. Your server’s private address is <code>10.0.0.84</code>.</li>
+  for the server. Nobody outside can send to it directly. The server’s private address is <code>10.0.0.84</code>.</li>
 </ul>
 <p>A <b>network</b> is just a group of devices connected so they can talk to each other: your home Wi-Fi is one,
-and Oracle gives your server one too.</p>
+and Oracle gives the server one too.</p>
 
 <h3>The office building comparison</h3>
 <p>Think of a company office. From outside, there’s one public phone number. Inside, every desk has its own short
@@ -45,7 +45,7 @@ extensions only work inside each office.</p>
 <p>When an outside call comes in, the <b>receptionist</b> answers on the public number and transfers it to the right
 extension. The caller never needs to know the extension.</p>
 <div class="table-wrap"><table>
-  <thead><tr><th>Office</th><th>Network</th><th>Your server</th></tr></thead>
+  <thead><tr><th>Office</th><th>Network</th><th>The server</th></tr></thead>
   <tbody>
     <tr><td>Public phone number</td><td>Public IP address</td><td><code>203.0.113.84</code></td></tr>
     <tr><td>Desk extension</td><td>Private IP address</td><td><code>10.0.0.84</code></td></tr>
@@ -79,7 +79,7 @@ cloud: “Your instance is only aware of the private (internal) IP address space
   <rect x="30" y="200" width="440" height="120" rx="10" fill="none" stroke="currentColor" stroke-opacity=".5" stroke-dasharray="5 4"/>
   <text class="muted" x="46" y="222" font-size="12.5">Oracle private network · only 10.0.0.x addresses here</text>
   <rect class="box" x="120" y="250" width="260" height="54" rx="6"/>
-  <text x="250" y="273" font-size="15" font-weight="600" text-anchor="middle">Your server</text>
+  <text x="250" y="273" font-size="15" font-weight="600" text-anchor="middle">The server</text>
   <text class="muted" x="250" y="293" font-size="12.5" text-anchor="middle">knows itself only as 10.0.0.84 (private)</text>
 </svg>
 <figcaption>The receptionist swaps addresses in both directions. The player and the server never need to know each other’s side.</figcaption>
@@ -92,7 +92,7 @@ RFC 1918:<sup class="cite"><a href="https://datatracker.ietf.org/doc/html/rfc191
   <thead><tr><th>Starts with…</th><th>Where you’ve seen it</th></tr></thead>
   <tbody>
     <tr><td><code>10.</code></td><td>Your Oracle server: <code>10.0.0.84</code></td></tr>
-    <tr><td><code>172.16.</code> up to <code>172.31.</code></td><td>Docker’s little network inside your server: <code>172.18.0.1</code> (Lesson 05)</td></tr>
+    <tr><td><code>172.16.</code> up to <code>172.31.</code></td><td>Docker’s little network inside the server: <code>172.18.0.1</code> (Lesson 05)</td></tr>
     <tr><td><code>192.168.</code></td><td>Almost every home Wi-Fi router</td></tr>
   </tbody>
 </table></div>
@@ -116,10 +116,9 @@ home’s receptionist: it does the NAT for everyone.</p>
 something is, I send it to the receptionist.”</p>
 
 <h3>Neighbourhoods: the subnet</h3>
-<p>In Oracle, your server sits in a <b>subnet</b>: a block of neighbouring addresses. Yours is written
+<p>In Oracle, the server sits in a <b>subnet</b>: a block of neighbouring addresses. Yours is written
 <code>10.0.0.0/24</code>, which means “every address that starts with <code>10.0.0.</code>”, a street with house
-numbers <code>10.0.0.0</code> to <code>10.0.0.255</code>. Your server is house number 84 on that street. Tracker Week 2
-teaches the <code>/24</code> part properly. For now, “/24 = the first three numbers are the street” is enough.</p>
+numbers <code>10.0.0.0</code> to <code>10.0.0.255</code>. The server is house number 84 on that street. Lesson 10 teaches the <code>/24</code> part properly. For now, “/24 = the first three numbers are the street” is enough.</p>
 
 <details class="recall">
   <summary>Say it yourself first, then open this</summary>
@@ -137,13 +136,13 @@ teaches the <code>/24</code> part properly. For now, “/24 = the first three nu
  {"q": "What does NAT do?", "options": ["Swaps public and private addresses as data passes", "Blocks every port that isn't on its list", "Gives your laptop a much faster internet connection", "Saves a copy of the world every morning"], "answer": 0, "why": "NAT (Network Address Translation) swaps addresses, like a receptionist transferring an outside call to an extension."},
  {"q": "On the server, the command that lists its addresses shows `10.0.0.84` but never `203.0.113.84`. Why?", "options": ["The public address was deleted last night", "Only Oracle's gateway knows the public address", "Ubuntu hides public addresses for extra speed", "The firewall removes it from the list"], "answer": 1, "why": "The internet gateway holds the public address and swaps it for the private one. The server only ever sees 10.0.0.84."},
  {"q": "Your friend's laptop at home has the address `192.168.1.20`. Can you send data straight to it from the internet?", "options": ["Yes, any address works from anywhere online", "Yes, but only from inside the Philippines", "No, only after you restart their router", "No, it only works inside their network"], "answer": 3, "why": "Private addresses only work inside their own network. From outside, you'd have to go through their router's public address."},
- {"q": "Your server's subnet is `10.0.0.0/24`. Which address is on the same street?", "options": ["10.0.1.84", "10.0.0.200", "10.1.0.84", "11.0.0.84"], "answer": 1, "why": "/24 means the first three numbers (10.0.0) are the street. 10.0.0.200 shares them; the others don't."},
+ {"q": "The server's subnet is `10.0.0.0/24`. Which address is on the same street?", "options": ["10.0.1.84", "10.0.0.200", "10.1.0.84", "11.0.0.84"], "answer": 1, "why": "/24 means the first three numbers (10.0.0) are the street. 10.0.0.200 shares them; the others don't."},
  {"q": "What is the 'default gateway' on your home laptop?", "options": ["Your router, where unknown traffic is sent", "The website you open the most often", "The first app that starts on boot", "The password for your home Wi-Fi network"], "answer": 0, "why": "The default gateway is the receptionist (your router): anything your laptop doesn't know how to reach goes there first."}
 ]
 </script></div>
 
 <h2>Practise · safe terminal</h2>
-<p class="small">Practise in this safe copy first: it behaves like your server, using real output captured from it. Then do the real thing below.</p>
+<p class="small">Practise in this safe copy first: it behaves like the server, using real output captured from it. Then do the real thing below.</p>
 <div class="terminal" data-term="02"><script type="application/json">
 {
  "start": "laptop",
@@ -199,13 +198,13 @@ teaches the <code>/24</code> part properly. For now, “/24 = the first three nu
 <ul class="steps">
   <li><input type="checkbox" aria-label="done"><span><b>Your laptop.</b> In PowerShell, type <code>ipconfig</code>. Find your Wi-Fi section. Write down the
     <code>IPv4 Address</code> (probably <code>192.168.…</code>: private!) and the <code>Default Gateway</code> (your router, the receptionist).</span></li>
-  <li><input type="checkbox" aria-label="done"><span><b>Your server.</b> <code>ssh gameserver</code>, then <code>ip -4 -br a</code>. (It means: show IP version 4 addresses, brief.)
+  <li><input type="checkbox" aria-label="done"><span><b>The server.</b> <code>ssh gameserver</code>, then <code>ip -4 -br a</code>. (It means: show IP version 4 addresses, brief.)
     Find <code>10.0.0.84</code> next to <code>enp0s6</code>, the server’s network card. Notice that <code>203.0.113.84</code> isn’t there.</span></li>
   <li><input type="checkbox" aria-label="done"><span>In the same list, spot <code>172.18.0.1</code> (Docker’s private network, Lesson 05) and <code>100.64.0.10</code> next to
     <code>tailscale0</code>: the private link your phone uses to open the monitor (Lesson 07).</span></li>
   <li><input type="checkbox" aria-label="done"><span><b>Find the receptionist.</b> Still on the server, type <code>ip route</code>. The first line says <code>default via 10.0.0.1</code>:
     that’s the server’s default gateway inside Oracle’s network, the same idea as your home router. Then type <code>exit</code>.</span></li>
-  <li><input type="checkbox" aria-label="done"><span><b>Explain it.</b> Out loud, in under a minute: why your server has two addresses, and what NAT does. Use the receptionist comparison.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>Explain it.</b> Out loud, in under a minute: why the server has two addresses, and what NAT does. Use the receptionist comparison.</span></li>
 </ul>
 
 <h2>New words from this lesson</h2>

@@ -13,7 +13,7 @@
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const wait = ms => new Promise(r => setTimeout(r, reduce ? 0 : ms));
   const PORTNAMES = { 22: "SSH (remote control)", 53: "DNS (name lookups)", 80: "website (http)", 443: "secure website (https)",
-    3389: "Windows Remote Desktop", 8211: "Palworld", 25565: "Minecraft", 25575: "game admin (RCON)", 8797: "your monitor" };
+    3389: "Windows Remote Desktop", 8211: "The game", 25565: "Minecraft", 25575: "game admin (RCON)", 8797: "the monitor" };
 
   /* ---------- guard: the lobby guard with a list ---------- */
   function guard(root) {
@@ -36,7 +36,7 @@
     const goals = el("ul", "sim-goals");
     const G = [
       ["Send a visitor to unit 22 (SSH)", r => r.port === 22 && r.ok],
-      ["Send a friend to unit 8211 (Palworld) while it’s NOT on the list", r => r.port === 8211 && !r.ok],
+      ["Send a friend to unit 8211 (the game) while it’s NOT on the list", r => r.port === 8211 && !r.ok],
       ["Fix it: put 8211 on the list and send your friend again", r => r.port === 8211 && r.ok],
     ];
     const gDone = G.map(() => false);
@@ -82,8 +82,8 @@
     const out = el("div", "addr-out"); out.setAttribute("aria-live", "polite");
     function kind(o) {
       const [a, b2] = o;
-      if (a === 10) return ["private", "Private: the 10.x range. Only works inside one network (like your server’s 10.0.0.84)."];
-      if (a === 172 && b2 >= 16 && b2 <= 31) return ["private", "Private: the 172.16–31.x range (Docker uses this inside your server)."];
+      if (a === 10) return ["private", "Private: the 10.x range. Only works inside one network (like the server’s 10.0.0.84)."];
+      if (a === 172 && b2 >= 16 && b2 <= 31) return ["private", "Private: the 172.16–31.x range (Docker uses this inside the server)."];
       if (a === 192 && b2 === 168) return ["private", "Private: the 192.168.x range, used by almost every home Wi-Fi router."];
       if (a === 127) return ["special", "Localhost: “this computer itself”. Only reachable from inside the same machine."];
       if (a === 0) return ["special", "0.0.0.0: in a listener list it means “every address this machine has”."];
@@ -197,12 +197,12 @@
       good: "5  ACCEPT tcp dpt:22\n6  ACCEPT udp dpt:8211\n7  REJECT all", bad: "5  ACCEPT tcp dpt:22\n6  REJECT all\n(no 8211 rule above the REJECT)", why: "The server’s own firewall rejects port 8211." },
     { name: "Forwarding desk", sub: "Docker port mapping", how: "sudo docker port palworld",
       good: "8211/udp -> 0.0.0.0:8211", bad: "(no output at all)", why: "No port is mapped into the container." },
-    { name: "Someone home", sub: "Palworld running", how: "sudo docker ps",
-      good: "palworld   Up 3 hours (healthy)", bad: "palworld   Restarting (1) 12 seconds ago", why: "Palworld keeps crashing, so nobody answers." },
+    { name: "Someone home", sub: "The game running", how: "sudo docker ps",
+      good: "palworld   Up 3 hours (healthy)", bad: "palworld   Restarting (1) 12 seconds ago", why: "The game keeps crashing, so nobody answers." },
   ];
   const TICKETS = [
     "“Nobody can get in since this morning!”, from a friend on Discord.",
-    "“The server list says Palhaven but joining just times out.”",
+    "“The game's server list shows the server, but joining just times out.”",
     "“Was playing fine, then got kicked and can’t rejoin.”",
     "“It worked yesterday. Did you change something?”",
   ];
@@ -235,7 +235,7 @@
       const states = CHECKS.map(() => true);
       area.append(el("p", "sim-p", "Untick a checkpoint to break it, then send a packet and watch where it stops."));
       const { ol, items } = track(states);
-      const go = btn("Send a Palworld packet"); const log = el("p", "sim-log"); log.setAttribute("aria-live", "polite");
+      const go = btn("Send a game packet"); const log = el("p", "sim-log"); log.setAttribute("aria-live", "polite");
       let busy = false;
       go.onclick = async () => {
         if (busy) return; busy = true; log.textContent = "";
@@ -245,7 +245,7 @@
           if (!states[i]) { items[i].classList.add("stop"); log.textContent = `Stopped at checkpoint ${i + 1} (${CHECKS[i].name}): ${CHECKS[i].why} Checkpoints after it never even see the packet.`; busy = false; return; }
           items[i].classList.add("pass");
         }
-        log.textContent = "The packet made it all the way: Palworld answered. Your friend is in!"; busy = false;
+        log.textContent = "The packet made it all the way: The game answered. Your friend is in!"; busy = false;
       };
       area.append(ol, go, log);
     }

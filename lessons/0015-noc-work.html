@@ -60,7 +60,7 @@
 
 <h2>Part 1 · What a NOC does</h2>
 <p>A <b>NOC</b> (network operations center) is a room (or a remote team) watching screens 24/7 for many customers' networks. When something breaks, the NOC is first to know, and their job is to restore service fast and get the right people involved. The data center equivalent watches power and cooling.</p>
-<p>You already run a mini-NOC: your Palhaven monitor collects metrics, alerts your phone, and auto-restarts on low memory.</p>
+<p>A small game server with a monitor is already a mini-NOC: the monitor collects metrics, sends phone alerts, and auto-restarts on low memory.</p>
 <h2>Part 2 · How monitoring tools see devices</h2>
 <ul>
   <li><b>Ping (ICMP):</b> “are you alive?” The simplest check.</li>
@@ -121,7 +121,7 @@
    "why": "A question or small request."
   },
   {
-   "t": "Palhaven crashed at peak time and won't restart",
+   "t": "The game server crashed at peak time and won't restart",
    "a": 0,
    "why": "Service down for every player."
   }
@@ -146,7 +146,7 @@
  ],
  "items": [
   {
-   "t": "The Palworld server crashed and auto-restarted at 21:40",
+   "t": "The game server crashed and auto-restarted at 21:40",
    "a": 0,
    "why": "Something broke; service was restored."
   },
@@ -196,7 +196,7 @@
 <ul class="steps">
   <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>Install PRTG. Add a ping sensor for your home router (your default gateway from <code>ipconfig</code>).</div></li>
   <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>Add a ping sensor for 8.8.8.8 (the internet).</div></li>
-  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>Add a port sensor: your server's public IP, TCP port 22 (is SSH answering?).</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>Add a port sensor: the server's public IP, TCP port 22 (is SSH answering?).</div></li>
   <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>Add a ping sensor for your phone's Wi-Fi IP address (find it in the phone's Wi-Fi settings).</div></li>
   <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>Watch them turn green. This is your “NOC screen”.</div></li>
 </ul>
@@ -207,7 +207,7 @@
   <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>When sensor 4 turns red, acknowledge it in PRTG. Note how many minutes it took to alert.</div></li>
   <li><input type="checkbox" aria-label="done"><div>Write a full ticket using the template (treat the phone as “the CCTV recorder”).</div></li>
   <li><input type="checkbox" aria-label="done"><div><span class="tag look">laptop</span>Turn Wi-Fi back on. Verify green. Close the ticket.</div></li>
-  <li><input type="checkbox" aria-label="done"><div>Write a one-page postmortem for a REAL Palhaven incident (a memory restart or crash from your monitor's history): summary, impact, timeline, root cause, what went well, what to improve, action items with dates. Keep it blameless: describe systems and decisions, not people's faults.</div></li>
+  <li><input type="checkbox" aria-label="done"><div>Write a one-page postmortem for a REAL game-server incident (a memory restart or crash from the monitor's history): summary, impact, timeline, root cause, what went well, what to improve, action items with dates. Keep it blameless: describe systems and decisions, not people's faults.</div></li>
 </ul>
 
 <div class="callout good"><span class="label">PASS</span><p>Ticket and postmortem done within 30 minutes of the alert, and every timeline line has a time and a fact.</p></div>
@@ -227,7 +227,7 @@
   "why": "SNMP polling on 161; traps arrive on 162."
  },
  {
-  "q": "The Palworld server crashed and auto-restarted. You find a memory leak in the game that causes it weekly. The crash is the ___; the leak is the ___.",
+  "q": "The game server crashed and auto-restarted. You find a memory leak in the game that causes it weekly. The crash is the ___; the leak is the ___.",
   "options": [
    "Problem; incident",
    "Change; problem",

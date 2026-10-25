@@ -13,7 +13,7 @@
 
 <div class="eyebrow">Server Lab · Lesson 18 · Part 2 · Cloud</div>
 <h1>Scripts and GitHub: prove you can automate</h1>
-<p class="lede">A small script you wrote and can explain beats a long list of buzzwords. You'll write a one-command health report for Palhaven, put it on GitHub, and add a robot that checks every change.</p>
+<p class="lede">A small script you wrote and can explain beats a long list of buzzwords. You'll write a one-command health report for the game server, put it on GitHub, and add a robot that checks every change.</p>
 <div class="meta"><span data-k="Time">≈ 75 min</span><span data-k="Builds on">Lessons 04, 07</span><span data-k="Exam">CCNA 6.0 (light)</span><span data-k="Needs">a free GitHub account</span></div>
 
 
@@ -48,7 +48,7 @@
 </script></div>
 
 <h2>Part 1 · The script: a one-command health report</h2>
-<p>On the server: <code>mkdir -p ~/palhaven-ops &amp;&amp; cd ~/palhaven-ops</code>, then <code>nano healthcheck.sh</code> and type it in (typing it yourself is the point). Read it line by line first:</p>
+<p>On the server: <code>mkdir -p ~/gameserver-ops &amp;&amp; cd ~/gameserver-ops</code>, then <code>nano healthcheck.sh</code> and type it in (typing it yourself is the point). Read it line by line first:</p>
 <div class="sim" data-sim="explain"><script type="application/json">
 {
  "title": "Explorer · healthcheck.sh, line by line",
@@ -59,7 +59,7 @@
    "note": "Run this file with Bash. The #! line is called a shebang."
   },
   {
-   "code": "# healthcheck.sh - quick health report for Palhaven",
+   "code": "# healthcheck.sh - quick health report for the game server",
    "note": "A comment: Bash ignores lines starting with #."
   },
   {
@@ -127,8 +127,8 @@
 <h2>Part 2 · Git and GitHub</h2>
 <p><b>Git</b> records every version of your files. <b>GitHub</b> stores them online, where employers can see them.</p>
 <ul class="steps">
-  <li><input type="checkbox" aria-label="done"><div>On GitHub, create a PUBLIC repo “palhaven-ops” with nothing in it.</div></li>
-  <li><input type="checkbox" aria-label="done"><div><span class="tag change">changes the server</span>On the server, make an SSH key for GitHub: <code>ssh-keygen -t ed25519 -C "palhaven-ops"</code> (press Enter for the defaults), then <code>cat ~/.ssh/id_ed25519.pub</code> and paste that ONE line into GitHub → Settings → SSH keys. (.pub is the public half. The other file is private and never leaves the server.)</div></li>
+  <li><input type="checkbox" aria-label="done"><div>On GitHub, create a PUBLIC repo “gameserver-ops” with nothing in it.</div></li>
+  <li><input type="checkbox" aria-label="done"><div><span class="tag change">changes the server</span>On the server, make an SSH key for GitHub: <code>ssh-keygen -t ed25519 -C "gameserver-ops"</code> (press Enter for the defaults), then <code>cat ~/.ssh/id_ed25519.pub</code> and paste that ONE line into GitHub → Settings → SSH keys. (.pub is the public half. The other file is private and never leaves the server.)</div></li>
   <li><input type="checkbox" aria-label="done"><div><span class="tag look">look only</span><code>ssh -T git@github.com</code> should greet you by username.</div></li>
   <li><input type="checkbox" aria-label="done"><div><span class="tag change">changes the server</span>Then:<pre>git config --global user.name &quot;Your Name&quot;
 git config --global user.email &quot;&lt;the email on your GitHub account&gt;&quot;
@@ -136,7 +136,7 @@ git init
 git add healthcheck.sh
 git commit -m &quot;Add health check script&quot;
 git branch -M main
-git remote add origin git@github.com:&lt;your-username&gt;/palhaven-ops.git
+git remote add origin git@github.com:&lt;your-username&gt;/gameserver-ops.git
 git push -u origin main</pre>
 </div></li>
 </ul>
@@ -150,7 +150,7 @@ git push -u origin main</pre>
   "git add healthcheck.sh",
   "git commit -m \"Add health check script\"",
   "git branch -M main",
-  "git remote add origin git@github.com:<you>/palhaven-ops.git",
+  "git remote add origin git@github.com:<you>/gameserver-ops.git",
   "git push -u origin main"
  ],
  "rules": [
@@ -211,7 +211,7 @@ git push -u origin main</pre>
   {
    "t": "docker-compose.yml with SERVER_PASSWORD and ADMIN_PASSWORD",
    "a": 1,
-   "why": "Passwords in public = anyone can admin your server."
+   "why": "Passwords in public = anyone can admin the server."
   },
   {
    "t": ".github/workflows/lint.yml",

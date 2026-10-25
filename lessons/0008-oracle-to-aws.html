@@ -11,11 +11,11 @@
 <main>
 <nav class="top"><a href="../index.html">Course home</a> · <a href="../reference/glossary.html">Word list</a></nav>
 
-<div class="eyebrow">Server Lab · Lesson 08 · bridge to Tracker Weeks 7–10 and the AWS Cloud Practitioner exam</div>
+<div class="eyebrow">Server Lab · Lesson 08 · bridge to the AWS Cloud Practitioner exam</div>
 <h1>Same ideas, AWS names</h1>
 <p class="lede">Most cloud job ads ask for AWS (Amazon Web Services), the biggest cloud provider, and your exam is
 AWS too. The good news: everything you’ve learned on Oracle carries over. The ideas are the same; only the names
-change. By the end you can describe Palhaven in AWS words, plus three ideas every AWS exam asks about: IAM, shared
+change. By the end you can describe the game server in AWS words, plus three ideas every AWS exam asks about: IAM, shared
 responsibility and pricing.</p>
 <div class="meta"><span>≈ 35 min</span><span>Builds on Lessons 01–07</span><span>No AWS account needed yet</span></div>
 
@@ -35,7 +35,7 @@ region, named <code>ap-southeast-1</code>.<sup class="cite"><a href="https://aws
 <p>Inside a region, AWS keeps several separate data centers called <b>Availability Zones</b> (AZs), far enough apart
 that a fire or flood in one doesn’t take down the others. Oracle calls them <b>availability domains</b>; yours is
 <code>AD-1</code>. Companies that can’t afford downtime run copies of their system in two or more zones. That’s called
-<b>high availability</b>. Palhaven runs in one zone, which is fine for a game server.</p>
+<b>high availability</b>. The game server runs in one zone, which is fine for a game server.</p>
 
 <h2>Part 2 · The translation table</h2>
 <div class="table-wrap"><table>
@@ -124,11 +124,11 @@ create servers, who may see the bills, who may delete things.<sup class="cite"><
 </ul>
 <p>Two rules every cloud engineer follows: give each person only the access their job needs (<b>least privilege</b>),
 and never use the <b>root user</b> (the account’s master key) day to day. Lock it with <b>MFA</b> (multi-factor
-authentication: a code from your phone on top of the password). Tracker Week 7 has you do exactly this on day one.</p>
+authentication: a code from your phone on top of the password). Do exactly this on day one of any new account.</p>
 
 <h2>Part 4 · Shared responsibility: who protects what</h2>
 <p>Amazon puts it in one line: AWS is responsible for security <em>of</em> the cloud; you are responsible for security
-<em>in</em> the cloud.<sup class="cite"><a href="https://aws.amazon.com/compliance/shared-responsibility-model/">4</a></sup> For your server:</p>
+<em>in</em> the cloud.<sup class="cite"><a href="https://aws.amazon.com/compliance/shared-responsibility-model/">4</a></sup> For the server:</p>
 <div class="table-wrap"><table>
   <thead><tr><th>The provider looks after…</th><th>You look after…</th></tr></thead>
   <tbody>
@@ -138,7 +138,7 @@ authentication: a code from your phone on top of the password). Tracker Week 7 h
     <tr><td>the virtual machine system itself</td><td>your apps, containers and backups</td></tr>
   </tbody>
 </table></div>
-<p>If your Palworld admin password leaked, that would be your responsibility, not Oracle’s or Amazon’s.</p>
+<p>If the game's admin password leaked, that would be your responsibility, not Oracle’s or Amazon’s.</p>
 
 <h2>Part 5 · How cloud pricing works</h2>
 <p>Cloud is <b>pay-as-you-go</b>: like an electricity meter, you pay for what you use, usually per second or hour.
@@ -200,9 +200,9 @@ The main things on the bill:</p>
 </script></div>
 
 <details class="recall">
-  <summary>Describe Palhaven in AWS words: say it yourself first, then open this</summary>
+  <summary>Describe the game server in AWS words: say it yourself first, then open this</summary>
   <p>“It’s like an EC2 instance in the Singapore region, ap-southeast-1, in one Availability Zone, in a public subnet of
-  a VPC with an internet gateway. A security group allows UDP 8211 for Palworld and TCP 22 for SSH. The OS is Ubuntu, and
+  a VPC with an internet gateway. A security group allows UDP 8211 for the game and TCP 22 for SSH. The OS is Ubuntu, and
   the game runs in a Docker container with a volume for the save on the EBS disk. Under shared responsibility, AWS secures
   the hardware, and I secure the OS, the firewall rules, access and backups.”</p>
 </details>
@@ -215,18 +215,18 @@ The main things on the bill:</p>
  {"q": "What is the AWS name for Oracle's VCN (your private network)?", "options": ["EC2", "S3", "VPC", "IAM"], "answer": 2, "why": "VCN ↔ VPC (Virtual Private Cloud). EC2 is the server, S3 is file storage, IAM is access control."},
  {"q": "Why does AWS have several Availability Zones in each region?", "options": ["So one disaster can't take everything down", "So each country gets its own prices", "So servers can use more UDP ports", "So the root user logs in faster"], "answer": 0, "why": "AZs are separate data centers. Running copies in two zones keeps a system up if one zone fails (high availability)."},
  {"q": "A security group allows inbound UDP 8211. Does it need a separate rule for the server's replies?", "options": ["Yes, every reply needs a rule", "Yes, but only for TCP replies", "No, replies are always blocked completely", "No, security groups are always stateful"], "answer": 3, "why": "Security groups remember conversations (stateful), so replies are allowed automatically. Network ACLs are stateless."},
- {"q": "Under the shared responsibility model, who must install Ubuntu security updates on your server?", "options": ["You, the customer", "The cloud provider", "Ubuntu's parent company", "The Palworld developers"], "answer": 0, "why": "The provider secures the cloud itself. The OS, apps, firewall rules and access on your server are yours."},
+ {"q": "Under the shared responsibility model, who must install Ubuntu security updates on the server?", "options": ["You, the customer", "The cloud provider", "Ubuntu's parent company", "The game developers"], "answer": 0, "why": "The provider secures the cloud itself. The OS, apps, firewall rules and access on the server are yours."},
  {"q": "What does 'least privilege' mean in IAM?", "options": ["Give new staff the root user", "Give everyone full access at first", "Give each person only what's needed", "Give access only during office hours"], "answer": 2, "why": "Least privilege: each user or program gets only the permissions its job needs, and nothing more."},
  {"q": "You 'stop' an EC2 server for the weekend. What are you still paying for?", "options": ["Nothing at all, everything is free", "Compute hours, at a lower rate", "Its disk storage (the EBS volume)", "Just the internet gateway, every hour"], "answer": 2, "why": "A stopped server doesn't charge compute, but its disk still exists and still costs. Terminate deletes it (and the cost)."}
 ]
 </script></div>
 
-<h2>Practice 2 · Translate your own server (10 min, on paper)</h2>
+<h2>Practice 2 · Translate a server of your own (10 min, on paper)</h2>
 <ul class="steps">
   <li><input type="checkbox" aria-label="done"><span>Without looking at the table, write the AWS name next to each: VCN, compute instance, shape, security list, availability domain, boot volume. Check against Part 2.</span></li>
-  <li><input type="checkbox" aria-label="done"><span>Draw Palhaven as if it ran on AWS: region box → VPC box → subnet box → EC2 box → Docker container. Add the internet gateway and a security group. Keep this drawing: you’ll use it in Lesson 09.</span></li>
-  <li><input type="checkbox" aria-label="done"><span>List three things that are <em>your</em> responsibility on Palhaven under the shared responsibility model.</span></li>
-  <li><input type="checkbox" aria-label="done"><span><b>Explain it.</b> Out loud, in under 90 seconds: describe Palhaven in AWS words (then compare with the box above).</span></li>
+  <li><input type="checkbox" aria-label="done"><span>Draw the game server as if it ran on AWS: region box → VPC box → subnet box → EC2 box → Docker container. Add the internet gateway and a security group. Keep this drawing: you’ll use it in Lesson 09.</span></li>
+  <li><input type="checkbox" aria-label="done"><span>List three things that are <em>your</em> responsibility on the game server under the shared responsibility model.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>Explain it.</b> Out loud, in under 90 seconds: describe the game server in AWS words (then compare with the box above).</span></li>
 </ul>
 
 <h2>New words from this lesson</h2>
@@ -250,7 +250,7 @@ Essentials</b> course on Skill Builder covers this whole lesson again from Amazo
 
 <div class="callout good">
   <span class="label">Ask an AI tutor</span>
-  <p>Ask an AI tutor: “what’s S3?”, “what would Palhaven cost per month on AWS?”, “give me 10 Cloud Practitioner-style questions on this lesson”.</p>
+  <p>Ask an AI tutor: “what’s S3?”, “what would the game server cost per month on AWS?”, “give me 10 Cloud Practitioner-style questions on this lesson”.</p>
 </div>
 
 <nav class="course">

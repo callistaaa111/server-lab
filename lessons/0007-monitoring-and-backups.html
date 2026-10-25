@@ -13,7 +13,7 @@
 
 <div class="eyebrow">Server Lab · Lesson 07 · what separates a hobby server from a professional one</div>
 <h1>How you know it’s healthy: monitoring &amp; backups</h1>
-<p class="lede">Your server tells you when something’s wrong before your friends do. It sends alerts to your
+<p class="lede">The server tells you when something’s wrong before other players do. It sends alerts to your
 phone, restarts itself when memory runs low, and backs up the world every morning. In the industry, this is called
 <b>monitoring</b> and <b>reliability</b>, and it’s a big part of what DevOps engineers are paid for. This lesson gives
 you the words for what you already built.</p>
@@ -22,8 +22,8 @@ you the words for what you already built.</p>
 <h2>Warm-up · from Lessons 01–06</h2>
 <div class="quiz" data-quiz="07-warm"><script type="application/json">
 [
- {"q": "Your server has two firewalls. Which one lives outside the server, on Oracle's website?", "options": ["The iptables rules", "The security list", "The Docker engine", "The compose file"], "answer": 1, "why": "The security list is Oracle's firewall (the village gate guard). iptables is the lobby guard inside the server."},
- {"q": "Even SSH fails. Which checkpoint do you check first?", "options": ["5: is Palworld running healthy", "4: the Docker port mapping", "3: the server's own iptables", "1: is the server on"], "answer": 3, "why": "If even SSH can't connect, start at the outside: is the server running and reachable?"},
+ {"q": "The server has two firewalls. Which one lives outside the server, on Oracle's website?", "options": ["The iptables rules", "The security list", "The Docker engine", "The compose file"], "answer": 1, "why": "The security list is Oracle's firewall (the village gate guard). iptables is the lobby guard inside the server."},
+ {"q": "Even SSH fails. Which checkpoint do you check first?", "options": ["5: is the game running healthy", "4: the Docker port mapping", "3: the server's own iptables", "1: is the server on"], "answer": 3, "why": "If even SSH can't connect, start at the outside: is the server running and reachable?"},
  {"q": "What keeps the world save safe when the container is replaced?", "options": ["The volume line", "The restart line", "The ports line", "The image line"], "answer": 0, "why": "The volume keeps the save outside the container, in /opt/palworld/data on the server."}
 ]
 </script></div>
@@ -35,7 +35,7 @@ history tells you the story, like a power meter compared month to month.</p>
 <p>Google’s engineers, who run some of the biggest systems in the world, suggest watching four kinds of metric first.
 They call them the <b>four golden signals</b>:<sup class="cite"><a href="https://sre.google/sre-book/monitoring-distributed-systems/">1</a></sup></p>
 <div class="table-wrap"><table>
-  <thead><tr><th>Signal</th><th>Plain meaning</th><th>On Palhaven</th></tr></thead>
+  <thead><tr><th>Signal</th><th>Plain meaning</th><th>On the game server</th></tr></thead>
   <tbody>
     <tr><td><b>Latency</b></td><td>How long a response takes</td><td>Lag, server frame rate</td></tr>
     <tr><td><b>Traffic</b></td><td>How much it’s being used</td><td>Players online</td></tr>
@@ -44,11 +44,11 @@ They call them the <b>four golden signals</b>:<sup class="cite"><a href="https:/
   </tbody>
 </table></div>
 
-<h2>Part 2 · What your monitor actually does</h2>
-<p>Your monitor is a small program running on the server. It checks things <b>every 5 seconds</b> and keeps
+<h2>Part 2 · What the monitor actually does</h2>
+<p>The monitor is a small program running on the server. It checks things <b>every 5 seconds</b> and keeps
 <b>180 days</b> of history in a small database. Here’s what it does, in industry words:</p>
 <div class="table-wrap"><table>
-  <thead><tr><th>Your monitor…</th><th>Industry word</th></tr></thead>
+  <thead><tr><th>The monitor…</th><th>Industry word</th></tr></thead>
   <tbody>
     <tr><td>Records players, memory, CPU and uptime every 5 seconds</td><td><b>Metrics</b> collection</td></tr>
     <tr><td>Draws charts for the last 24 hours to 90 days</td><td><b>Dashboard</b></td></tr>
@@ -67,7 +67,7 @@ That’s why it makes sense to keep “player joined” notices as laptop pop-up
 
 <h3>Health checks</h3>
 <p>Remember <code>Up 3 hours (healthy)</code> in <code>docker ps</code>? The image has a built-in <b>health check</b>: Docker
-regularly asks Palworld “are you OK?” and records the answer. “Running” only means the program exists; “healthy” means it
+regularly asks the game “are you OK?” and records the answer. “Running” only means the program exists; “healthy” means it
 answers. That difference catches the problems where the server looks fine but nobody can join.</p>
 
 <h2>Part 3 · Services and schedules: things that run by themselves</h2>
@@ -86,7 +86,7 @@ a corrupted save, a bad update, a wrong command. Three questions professionals a
 <ol>
   <li><b>How much could we lose?</b> With daily backups, up to about a day of progress. The industry name is
   <b>RPO</b> (Recovery Point Objective): the most data you can accept losing.</li>
-  <li><b>How fast can we be back?</b> Restoring a Palworld backup takes minutes. That’s the <b>RTO</b>
+  <li><b>How fast can we be back?</b> Restoring a game backup takes minutes. That’s the <b>RTO</b>
   (Recovery Time Objective): the most downtime you can accept.</li>
   <li><b>Where are the copies?</b> Your backups are in <code>/opt/palworld/data/backups</code>, on the <em>same</em> disk
   as the world. If that disk failed, both would be gone. A common rule of thumb, <b>3-2-1</b>, says: keep 3 copies, on 2
@@ -98,9 +98,9 @@ know it works before they need it.</p>
 
 <div class="match" data-match="07-terms"><script type="application/json">
 {
- "title": "monitoring words → Palhaven examples",
+ "title": "monitoring words → the game server examples",
  "left": "Term",
- "right": "On Palhaven",
+ "right": "On the game server",
  "pairs": [
   [
    "Traffic",
@@ -153,15 +153,15 @@ know it works before they need it.</p>
 [
  {"q": "Which of the four golden signals is 'memory 90% used'?", "options": ["Latency", "Traffic", "Errors", "Saturation"], "answer": 3, "why": "Saturation = how full the system is: memory, CPU, disk."},
  {"q": "Why shouldn't your phone get an alert every time a player joins?", "options": ["Too many alerts get ignored; real ones missed", "Phone alerts cost money for every message sent", "Players would see the alert and get annoyed", "The monitor can only send five daily alerts"], "answer": 0, "why": "Alerts should mean 'act now'. Noisy alerts train you to ignore them."},
- {"q": "The monitor restarts Palworld by itself when memory runs low. What is that called?", "options": ["A backup", "Self-healing (auto-remediation)", "A healthcheck", "Port mapping"], "answer": 1, "why": "Auto-remediation (self-healing): the system fixes a known problem without waiting for a human."},
+ {"q": "The monitor restarts the game by itself when memory runs low. What is that called?", "options": ["A backup", "Self-healing (auto-remediation)", "A healthcheck", "Port mapping"], "answer": 1, "why": "Auto-remediation (self-healing): the system fixes a known problem without waiting for a human."},
  {"q": "`docker ps` shows `Up 2 hours (healthy)`. What does 'healthy' add beyond 'Up'?", "options": ["The container uses under half the memory", "The backup ran successfully this morning, too", "The program actually answers its health check", "The firewall allows UDP port 8211 now"], "answer": 2, "why": "'Up' means the program exists; 'healthy' means it responded to Docker's regular 'are you OK?' check."},
  {"q": "Backups run once a day. What is your RPO, roughly?", "options": ["About five seconds of progress", "About one hour of progress", "About one day of progress", "About one week of progress"], "answer": 2, "why": "RPO = the most data you could lose. If disaster strikes just before 3:45 AM, you lose up to a day."},
- {"q": "All backups are on the same disk as the world save. What does the 3-2-1 rule say is missing?", "options": ["A third daily backup copy", "A copy kept somewhere else", "A faster disk for it", "A second Palworld container running"], "answer": 1, "why": "3-2-1: three copies, two kinds of storage, one off-site. A copy on your laptop fixes the off-site part."}
+ {"q": "All backups are on the same disk as the world save. What does the 3-2-1 rule say is missing?", "options": ["A third daily backup copy", "A copy kept somewhere else", "A faster disk for it", "A second game container running"], "answer": 1, "why": "3-2-1: three copies, two kinds of storage, one off-site. A copy on your laptop fixes the off-site part."}
 ]
 </script></div>
 
 <h2>Practise · safe terminal</h2>
-<p class="small">Practise in this safe copy first: it behaves like your server, using real output captured from it. Then do the real thing below.</p>
+<p class="small">Practise in this safe copy first: it behaves like the server, using real output captured from it. Then do the real thing below.</p>
 <div class="terminal" data-term="07"><script type="application/json">
 {
  "start": "server",
@@ -191,9 +191,9 @@ know it works before they need it.</p>
    ]
   },
   {
-   "text": "Read Palworld's log: sudo docker logs --tail 20 palworld",
+   "text": "Read the game's log: sudo docker logs --tail 20 palworld",
    "cmd": "^(sudo )?docker logs",
-   "note": "Those REST lines are your monitor asking Palworld who's online, every 5 seconds: metrics collection in action."
+   "note": "Those REST lines are the monitor asking the game who's online, every 5 seconds: metrics collection in action."
   },
   {
    "text": "Check saturation yourself: free -h",
@@ -205,11 +205,11 @@ know it works before they need it.</p>
 
 <h2>Practice 2 · Read your own monitoring (15 min)</h2>
 <ul class="steps">
-  <li><input type="checkbox" aria-label="done"><span>Open your monitor dashboard (on your phone through Tailscale, or with <code>Palworld Monitor.bat</code> on your laptop). Find one chart for each golden signal: traffic, saturation, errors.</span></li>
+  <li><input type="checkbox" aria-label="done"><span>Open the monitor dashboard (on your phone through Tailscale, or with a desktop shortcut on your laptop). Find one chart for each golden signal: traffic, saturation, errors.</span></li>
   <li><input type="checkbox" aria-label="done"><span>In the History tab, find the restarts list. Can you tell the daily 4:00 AM restarts from any unexpected ones?</span></li>
   <li><input type="checkbox" aria-label="done"><span><code>ssh gameserver</code>, then <code>systemctl status palworld-monitor</code>: find <code>enabled</code> (starts at boot) and <code>active (running)</code>. Press <kbd>q</kbd>.</span></li>
   <li><input type="checkbox" aria-label="done"><span><code>sudo ls -lh /opt/palworld/data/backups</code>: count the backups and check the dates. That’s your retention. <code>exit</code>.</span></li>
-  <li><input type="checkbox" aria-label="done"><span><b>Off-site copy (optional, safe):</b> on your laptop, run the <code>scp</code> line from your server cheat sheet (section 6) to copy the backups to your Desktop. Now you follow 3-2-1.</span></li>
+  <li><input type="checkbox" aria-label="done"><span><b>Off-site copy (optional, safe):</b> on your laptop, run the <code>scp</code> line from the server cheat sheet (section 6) to copy the backups to your Desktop. Now you follow 3-2-1.</span></li>
   <li><input type="checkbox" aria-label="done"><span><b>Explain it.</b> Out loud: how you would know the server is in trouble, and how you would recover the world if it got corrupted.</span></li>
 </ul>
 

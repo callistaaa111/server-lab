@@ -1,4 +1,4 @@
-/* Practice terminal: a safe, fake copy of the Palhaven server (and your laptop's PowerShell).
+/* Practice terminal: a safe, fake copy of the game server (and your laptop's PowerShell).
    Outputs are real ones captured from the server one day (secrets and player data removed).
    Usage:
      <div class="terminal" data-term="lesson-04"><script type="application/json">
@@ -23,7 +23,7 @@
       PORT: 8211
       PLAYERS: 16
       MULTITHREADING: "true"
-      SERVER_NAME: "Palhaven"
+      SERVER_NAME: "The game server"
       SERVER_DESCRIPTION: "Friends-only server"
       SERVER_PASSWORD: "********"
       ADMIN_PASSWORD: "********"
@@ -136,7 +136,7 @@ thijsvanloef/palworld-server-docker   latest    a308e2eaa494   1.98GB`,
 e8b09ee80643   palworld   43.36%    2.416GiB / 23.41GiB   10.32%    299kB / 519kB   56`,
     "docker exec palworld rest-cli players": `{"players": []}
 #(practice copy: on the real server this lists whoever is online right now)`,
-    "systemctl status palworld-monitor": `● palworld-monitor.service - Palworld server monitor (dashboard on 127.0.0.1:8797)
+    "systemctl status palworld-monitor": `● palworld-monitor.service - the game server monitor (dashboard on 127.0.0.1:8797)
      Loaded: loaded (/etc/systemd/system/palworld-monitor.service; enabled; preset: enabled)
      Active: active (running) since Sat 2025-03-08 10:14:38 UTC; 1h 39min ago
    Main PID: 1839 (python)
@@ -149,7 +149,7 @@ e8b09ee80643   palworld   43.36%    2.416GiB / 23.41GiB   10.32%    299kB / 519k
 [2025-03-08 19:54:04] [LOG] REST accessed endpoint /v1/api/players OK
 [2025-03-08 19:54:09] [LOG] REST accessed endpoint /v1/api/metrics OK
 [2025-03-08 19:54:09] [LOG] REST accessed endpoint /v1/api/players OK
-#(these lines are your monitor asking Palworld "who's online?" every 5 seconds)`;
+#(these lines are the monitor asking the game "who's online?" every 5 seconds)`;
   const SS_ROWS = [
     ["udp", "UNCONN", "0.0.0.0:8211", 'users:(("docker-proxy",pid=1805))'],
     ["udp", "UNCONN", "0.0.0.0:41641", 'users:(("tailscaled",pid=969))'],
@@ -197,7 +197,7 @@ Wireless LAN adapter Wi-Fi:
 
     const head = el("div", "term-head");
     head.append(el("span", "term-dot"), el("span", "term-dot"), el("span", "term-dot"),
-      el("span", "term-title", "Practice terminal · safe copy of your server · type help"));
+      el("span", "term-title", "Practice terminal · safe copy of the server · type help"));
     const screen = el("div", "term-screen"); screen.setAttribute("role", "log"); screen.setAttribute("aria-live", "polite");
     const line = el("div", "term-line"); const pr = el("span", "term-prompt");
     const input = el("input", "term-input"); input.type = "text"; input.autocomplete = "off"; input.spellcheck = false;
@@ -344,7 +344,7 @@ Put sudo in front when you need administrator rights. Up arrow = previous comman
       if (tnc) {
         const ok = tnc[1] === "203.0.113.84" && tnc[2] === "22";
         const quiet = !!tnc[3];
-        if (quiet) return ok ? "True" : "False" + (tnc[2] === "8211" ? "\n#(8211 is UDP. This test only knocks the TCP way, so it can't check Palworld. Lesson 03 explains)" : "\n#(not on the guards' list, so nothing answered. On the real laptop this takes ~20 seconds)");
+        if (quiet) return ok ? "True" : "False" + (tnc[2] === "8211" ? "\n#(8211 is UDP. This test only knocks the TCP way, so it can't check the game. Lesson 03 explains)" : "\n#(not on the guards' list, so nothing answered. On the real laptop this takes ~20 seconds)");
         return ok ? `ComputerName     : ${tnc[1]}\nRemoteAddress    : ${tnc[1]}\nRemotePort       : 22\nTcpTestSucceeded : True`
                   : `WARNING: TCP connect to (${tnc[1]} : ${tnc[2]}) failed\nComputerName     : ${tnc[1]}\nRemotePort       : ${tnc[2]}\nTcpTestSucceeded : False`;
       }
@@ -384,7 +384,7 @@ Put sudo in front when you need administrator rights. Up arrow = previous comman
       else if (e.key === "c" && e.ctrlKey && !window.getSelection().toString()) { print(prompt() + input.value + "^C", "term-echo"); input.value = ""; e.preventDefault(); }
     });
 
-    print(host === "laptop" ? "#(this is a practice copy of PowerShell on your laptop. Type help for commands)" : "#(you're logged in to a practice copy of your server. Nothing you type here changes the real one. Type help)");
+    print(host === "laptop" ? "#(this is a practice copy of PowerShell on your laptop. Type help for commands)" : "#(you're logged in to a practice copy of the server. Nothing you type here changes the real one. Type help)");
     pr.textContent = prompt(); paintTasks();
   }
   document.querySelectorAll(".terminal").forEach(mount);
