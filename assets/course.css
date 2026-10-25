@@ -330,3 +330,19 @@ nav.top.with-theme { display: flex; align-items: center; gap: 10px; flex-wrap: w
 @media print { .theme-btn, .theme-row { display: none !important; } }
 /* in the rail: beside the rank on phones (first row), at the end of the bar on wider screens */
 @media (min-width: 721px) { .rail-in .theme-btn { order: 1; } .rail-in .jump { order: 2; } }
+
+/* ---- diagrams sit centred in their sheet ---- */
+figure svg { margin-inline: auto; }
+
+/* ---- margin drawings on wide screens: a rack elevation (left) and the packet path (right), drawn in the wire colour ---- */
+@media (min-width: 1280px) {
+  main::before, main::after { --m: calc((100vw - 980px) / 2); content: ""; position: fixed; z-index: -1; top: 96px; bottom: 32px;
+    width: min(calc(var(--m) - 56px), 250px); background: var(--wire); opacity: .8; pointer-events: none; }
+  main::before { left: calc((var(--m) - min(calc(var(--m) - 56px), 250px)) / 2);
+    -webkit-mask: url("margin-rack.svg") center / contain no-repeat; mask: url("margin-rack.svg") center / contain no-repeat; }
+  main::after { right: calc((var(--m) - min(calc(var(--m) - 56px), 250px)) / 2);
+    -webkit-mask: url("margin-path.svg") center / contain no-repeat; mask: url("margin-path.svg") center / contain no-repeat; }
+}
+@media (min-width: 1280px) and (prefers-color-scheme: dark) { :root:not([data-theme="light"]) main::before, :root:not([data-theme="light"]) main::after { opacity: .9; } }
+@media (min-width: 1280px) { :root[data-theme="dark"] main::before, :root[data-theme="dark"] main::after { opacity: .9; } }
+@media print { main::before, main::after { display: none; } }

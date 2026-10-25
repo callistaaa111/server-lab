@@ -322,6 +322,18 @@ p code, li code { overflow-wrap: anywhere; }
 .theme-btn[aria-checked="true"] .theme-knob { transform: translateX(14px); background: #1b1300; }
 @media (prefers-reduced-motion: reduce) { .theme-track, .theme-knob { transition: none; } }
 @media (min-width: 721px) { .rail .wrap .theme-btn { order: 1; } .rail .wrap .jump { order: 2; } }
+/* Diagrams centred, margin drawings on wide screens: matches assets/course.css */
+@media (min-width: 1280px) {
+  main::before, main::after { --m: calc((100vw - 980px) / 2); content: ""; position: fixed; z-index: -1; top: 96px; bottom: 32px;
+    width: min(calc(var(--m) - 56px), 250px); background: var(--wire); opacity: .8; pointer-events: none; }
+  main::before { left: calc((var(--m) - min(calc(var(--m) - 56px), 250px)) / 2);
+    -webkit-mask: url("../assets/margin-rack.svg") center / contain no-repeat; mask: url("../assets/margin-rack.svg") center / contain no-repeat; }
+  main::after { right: calc((var(--m) - min(calc(var(--m) - 56px), 250px)) / 2);
+    -webkit-mask: url("../assets/margin-path.svg") center / contain no-repeat; mask: url("../assets/margin-path.svg") center / contain no-repeat; }
+}
+@media (min-width: 1280px) and (prefers-color-scheme: dark) { :root:not([data-theme="light"]) main::before, :root:not([data-theme="light"]) main::after { opacity: .9; } }
+@media (min-width: 1280px) { :root[data-theme="dark"] main::before, :root[data-theme="dark"] main::after { opacity: .9; } }
+@media print { main::before, main::after { display: none; } }
 </style>
 <script src="../assets/theme.js"></script>
 </head>
