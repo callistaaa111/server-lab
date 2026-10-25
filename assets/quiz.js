@@ -50,7 +50,7 @@
           b.classList.add(ok ? "right" : "wrong");
           opts.children[item.answer].classList.add("right");
           why.replaceChildren(el("b", null, ok ? "Correct. " : "Not quite. "), ...rich("span", null, item.why).childNodes);
-          why.hidden = false; answered++; if (ok) right++;
+          why.classList.toggle("miss", !ok); why.hidden = false; answered++; if (ok) right++;
           if (answered === data.length) saveScore(id, right, data.length);
           paintScore();
         };

@@ -222,3 +222,44 @@ ol.lab-steps { margin: 4px 0 0; padding-left: 1.3em; display: grid; gap: 4px; fo
 .s2-field { display: grid; gap: 3px; font: 500 13px var(--sans); color: var(--muted); }
 .s2-field input, .s2-field select { font: 15px var(--mono); padding: 6px 8px; border: 1.5px solid var(--ink); background: var(--paper); color: var(--ink); width: 100%; }
 .s2-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 10px; }
+
+/* ---- calm pass: soft panels, rounded controls, more breathing room ---- */
+.sim, .match, .lab-drill, .lab-sort, .lab-order, .lab-cases, .lab-cards { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius, 10px);
+  padding: 22px 24px; margin: 2em 0; box-shadow: var(--shadow, none); font-size: 16px; }
+.sim-h, .term-tasks-h { margin-bottom: 10px; }
+.sim-row { gap: 10px; margin: 14px 0; }
+.sim-btn, .sim-chip, .sim-tab, .sim-check, .sim-input, .sim select, .match-item, .lab-chip, .lab-flip, .term-ask input, .term-ask button,
+.bld-field textarea, .s2-field input, .s2-field select, .explain-code, .explain-note, .jr-step, .addr-kind, .addr-bad, .addr-num, .addr-port { border-radius: var(--radius-sm, 6px); }
+.sim-btn { border: 1px solid var(--amber); padding: 8px 14px; }
+.sim-chip, .sim-tab, .match-item, .sim-check, .sim-input, .sim select { border-width: 1px; }
+.sim-chip, .sim-tab { padding: 8px 13px; }
+.sim-tab.on { background: var(--accent-soft); border-color: var(--amber); color: var(--ink); }
+.match-item { padding: 11px 13px; font-size: 15px; }
+.guard-cell, .lab-card, .lab-case, .s2-panel, .term-tasks, .lab-pool, ol.lab-built { border-radius: var(--radius-sm, 6px); }
+.guard-cell { border-width: 1px; }
+.lab-card, .s2-panel, .s2-log { border-width: 1px; padding: 14px 16px; }
+.lab-case { border: 1px solid var(--line); overflow: hidden; }
+.lab-sym { border-bottom: 1px solid var(--line); }
+.lab-chip, .lab-flip { border: 1px solid var(--line); }
+.lab-chip:hover, .lab-flip:hover { border-color: var(--muted); }
+ol.lab-built { border: 1px solid var(--line); }
+.lab-pool { border-width: 1px; }
+.lab-pips i { border-radius: 99px; }
+.jr-num { border-radius: 50%; border: 0; }
+.s2-meter { border: 0; border-radius: 99px; background: var(--line); overflow: hidden; height: 10px; }
+.s2-field input, .s2-field select { border: 1px solid var(--line); }
+.term { border: 1px solid #2b2f36; border-radius: var(--radius, 10px); }
+.term-tasks { border: 1px solid var(--line); padding: 14px 16px; }
+@media (max-width: 520px) {
+  .sim, .match, .lab-drill, .lab-sort, .lab-order, .lab-cases, .lab-cards { padding: 18px 16px; }
+  .term-body { height: 300px; }
+}
+.s2-kv dd { min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 400px) { .s2-kv { grid-template-columns: minmax(0, 1fr); gap: 0; } .s2-kv dd { margin-bottom: 6px; } }
+
+/* ---- quiet chrome: games and sims are shaded trays inside the sheet; controls sit on paper ---- */
+.sim, .match, .lab-drill, .lab-sort, .lab-order, .lab-cases, .lab-cards { background: var(--bg); border: 0; box-shadow: none; }
+.sim-h, .term-tasks-h { font: 600 15.5px/1.35 var(--sans); letter-spacing: 0; text-transform: none; color: var(--ink); }
+.sim-chip, .sim-tab, .sim-check, .sim-input, .sim select, .match-item, .explain-note, .jr-step, .proto-cell, .bld-field textarea { background: var(--paper); }
+.sim-tab.on { background: var(--accent-soft); }
+.lab-sym b { font: 600 13.5px/1.3 var(--sans); letter-spacing: 0; text-transform: none; }
