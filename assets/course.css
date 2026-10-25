@@ -315,3 +315,18 @@ ol.lessons .st.done::before, ol.lessons .st.part::before { content: ""; display:
 :not(pre) > code { overflow-wrap: anywhere; }
 .q-why.miss { border-left-color: var(--amber); background: var(--accent-soft); }
 svg .halo { paint-order: stroke; stroke: var(--paper); stroke-width: 6px; stroke-linejoin: round; }
+
+/* ---- dark mode switch (assets/theme.js) ---- */
+.theme-btn { appearance: none; display: inline-flex; align-items: center; gap: 8px; flex: none; margin-left: auto; padding: 5px 8px; border: 0; border-radius: var(--radius-sm);
+  background: none; color: var(--muted); font: 500 13.5px/1 var(--sans); cursor: pointer; white-space: nowrap; }
+.theme-btn:hover { background: var(--bg); color: var(--ink); }
+.theme-track { position: relative; width: 32px; height: 18px; border-radius: 99px; background: var(--line); transition: background .2s ease; }
+.theme-knob { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--paper); box-shadow: 0 1px 2px rgba(0, 0, 0, .25); transition: transform .2s ease; }
+.theme-btn[aria-checked="true"] .theme-track { background: var(--amber); }
+.theme-btn[aria-checked="true"] .theme-knob { transform: translateX(14px); background: #1b1300; }
+.theme-row { display: flex; justify-content: flex-end; margin: -12px 0 10px; }
+nav.top.with-theme { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+@media (prefers-reduced-motion: reduce) { .theme-track, .theme-knob { transition: none; } }
+@media print { .theme-btn, .theme-row { display: none !important; } }
+/* in the rail: beside the rank on phones (first row), at the end of the bar on wider screens */
+@media (min-width: 721px) { .rail-in .theme-btn { order: 1; } .rail-in .jump { order: 2; } }

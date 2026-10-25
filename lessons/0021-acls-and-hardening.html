@@ -312,7 +312,18 @@ th, .editor label, .codebox .bar { font: 600 .84rem/1.35 var(--f-body); letter-s
 .forge input[type=text] { background: var(--sheet); }
 p code, li code { overflow-wrap: anywhere; }
 .why.miss { border-color: var(--accent); background: var(--accent-soft); }
+/* Dark mode switch (assets/theme.js): matches assets/course.css */
+.theme-btn { appearance: none; display: inline-flex; align-items: center; gap: 8px; flex: none; margin-left: auto; padding: 5px 8px; border: 0; border-radius: var(--r-sm);
+  background: none; color: var(--muted); font: 500 .84rem/1 var(--f-body); cursor: pointer; white-space: nowrap; }
+.theme-btn:hover { background: var(--paper); color: var(--ink); }
+.theme-track { position: relative; width: 32px; height: 18px; border-radius: 99px; background: var(--line); transition: background .2s ease; }
+.theme-knob { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--sheet); box-shadow: 0 1px 2px rgba(0, 0, 0, .25); transition: transform .2s ease; }
+.theme-btn[aria-checked="true"] .theme-track { background: var(--accent); }
+.theme-btn[aria-checked="true"] .theme-knob { transform: translateX(14px); background: #1b1300; }
+@media (prefers-reduced-motion: reduce) { .theme-track, .theme-knob { transition: none; } }
+@media (min-width: 721px) { .rail .wrap .theme-btn { order: 1; } .rail .wrap .jump { order: 2; } }
 </style>
+<script src="../assets/theme.js"></script>
 </head>
 <body>
 <header class="titleblock">
